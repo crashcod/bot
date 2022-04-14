@@ -154,6 +154,7 @@ export class Client {
         this.sfs = new SmartFox({
             host: HOST,
             port: PORT,
+            useBlueBox: true,
             zone: ZONE,
             debug: askAndParseEnv("DEBUG", parseBoolean, false),
             useSSL: true,
