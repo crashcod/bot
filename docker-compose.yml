@@ -8,6 +8,8 @@ services:
         environment:
             LOGIN: "CHANGE"
             TELEGRAM_KEY: "CHANGE"
+        volumes:
+            - ./csv:/bombcrypto-superbot/csv
     bomb2:
         image: vieceli/bombcrypto-superbot:latest
         restart: always
@@ -15,3 +17,5 @@ services:
         environment:
             LOGIN: "CHANGE"
             TELEGRAM_KEY: "CHANGE"
+        volumes:
+            - ./csv:/bombcrypto-superbot/csv

@@ -140,6 +140,8 @@ services:
     environment:
       LOGIN: "MUDAR"
       TELEGRAM_KEY: "MUDAR"
+    volumes:
+      - ./csv:/bombcrypto-superbot/csv
   bomb2:
     image: vieceli/bombcrypto-superbot:latest
     restart: always
@@ -147,6 +149,8 @@ services:
     environment:
       LOGIN: "MUDAR"
       TELEGRAM_KEY: "MUDAR"
+    volumes:
+      - ./csv:/bombcrypto-superbot/csv
 ```
 
 To start all accounts at once, run
