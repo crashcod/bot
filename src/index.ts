@@ -17,6 +17,7 @@ async function main() {
         ),
         modeAmazon: askAndParseEnv("MODE_AMAZON", parseBoolean, false),
         modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
+        adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
     });
 

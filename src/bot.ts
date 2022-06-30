@@ -59,6 +59,7 @@ interface IMoreOptions {
     modeAdventure?: boolean;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
+    adventureHeroes?: string;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -86,6 +87,7 @@ export class TreasureMapBot {
     private adventureBlocks: IGetBlockMapPayload[] = [];
     private adventureEnemies: IEnemies[] = [];
     private houseHeroes: string[] = [];
+    private adventureHeroes: string[] = [];
     private playing: "Adventure" | "Amazon" | "Treasure" | "sleep" | null =
         null;
 
@@ -96,6 +98,7 @@ export class TreasureMapBot {
             telegramKey,
             modeAmazon = false,
             houseHeroes = "",
+            adventureHeroes = "",
             modeAdventure = false,
         } = moreParams;
 
@@ -107,7 +110,10 @@ export class TreasureMapBot {
         this.squad = new Squad({ heroes: [] });
         this.houses = [];
         this.forceExit = forceExit || true;
-        this.houseHeroes = houseHeroes.split(":");
+        this.houseHeroes = houseHeroes ? houseHeroes.split(":") : [];
+        this.adventureHeroes = adventureHeroes
+            ? adventureHeroes.split(":")
+            : [];
         this.minHeroEnergyPercentage = minHeroEnergyPercentage;
 
         this.explosionByHero = new Map();
@@ -178,6 +184,7 @@ export class TreasureMapBot {
             .map(formatMsg)
             .join("\n");
         let msgEnemies = "\n";
+
         if (this.playing === "Adventure") {
             const enemies = this.adventureEnemies.filter(
                 (e) => e.hp > 0
@@ -186,7 +193,8 @@ export class TreasureMapBot {
             msgEnemies = `Total enemies adventure: ${enemies}/${AllEnemies}\n\n`;
         }
 
-        const houseHeroesIds = this.houseHeroes.join(",");
+        const heroesAdventureSelected = this.adventureHeroes.join(", ");
+        const houseHeroesIds = this.houseHeroes.join(", ");
         const heroesAtHome = this.squad
             .byState("Home")
             .map((hero) => hero.id)
@@ -196,6 +204,7 @@ export class TreasureMapBot {
             `Playing mode: ${this.getStatusPlaying()}\n\n` +
             `Adventure: \n` +
             `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
+            `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
@@ -544,7 +553,13 @@ export class TreasureMapBot {
     async getHeroAdventure(allHeroes: ISyncBombermanPayload[]) {
         const details = await this.client.getStoryDetails();
         const usedHeroes = details.played_bombers.map((hero) => hero.id);
-        const hero = allHeroes.find((hero) => !usedHeroes.includes(hero.id));
+        console.log(this.adventureHeroes.length);
+        const hero = allHeroes.find(
+            (hero) =>
+                !usedHeroes.includes(hero.id) &&
+                (this.adventureHeroes.length == 0 ||
+                    this.adventureHeroes.includes(hero.id.toString()))
+        );
 
         if (!hero) {
             return null;
@@ -615,7 +630,7 @@ export class TreasureMapBot {
         map: IStoryMap,
         enemy?: IEnemies
     ) {
-        const blockParse = block ? block : this.getRandomPosition(hero, map);
+        const blockParse = block ? block : this.getRandomPosition(hero, map, 0);
 
         logger.info(
             `[${hero.rarity}] damage: ${hero.damage} ${hero.id} will place bomb on (${blockParse.i}, ${blockParse.j})`
