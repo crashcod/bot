@@ -1,6 +1,7 @@
 const REWARD_MAP = {
     BOMBERMAN: "Bomberman",
     BCOIN: "BCoin",
+    BCOIN_DEPOSITED: "BCoin Deposited",
     SENSPARK: "Senspark",
     LUS: "Lus",
     LUS_NFT: "Lus NFT",

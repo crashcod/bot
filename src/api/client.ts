@@ -163,7 +163,7 @@ export class Client {
     private messageId!: number;
     private timeout: number;
     private sfs: SmartFox;
-    private loginParams: ILoginParams;
+    public loginParams: ILoginParams;
     private apiBaseHeaders;
     private modeAmazon = false;
 

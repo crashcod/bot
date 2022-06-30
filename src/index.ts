@@ -19,6 +19,7 @@ async function main() {
         modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
+        saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
     });
 
     process.once("SIGINT", async () => {

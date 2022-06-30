@@ -62,6 +62,7 @@ The envirement variables are explained below:
 -   `[MIN_HERO_ENERGY_PERCENTAGE]` (optional): Percentage that will put the heroes to work.
 -   `[ADVENTURE_HEROES]` (optional): If you have adventure mode enabled, here you can inform the ids of the heroes that will be used, if not informed, all heroes will be used, separated by ":", Example 151515881:51878184:16187755.
 -   `[HOUSE_HEROES]` (optional): If you have a house, here you can inform the ids of the heroes will use the house, separated by ":", Example 151515881:51878184:16187755.
+-   `[SAVE_REWARDS_CSV]` (optional): whenever the bot is started, it will write a csv file, the "csv" folder with the bombcrypto username, with the rewards data.
 
 ## Telegram integration
 

@@ -1,4 +1,8 @@
 import * as crypto from "crypto";
+import csvParser from "csv-parser";
+import { createObjectCsvWriter } from "csv-writer";
+import { ObjectStringifierHeader } from "csv-writer/src/lib/record";
+import { createReadStream, existsSync } from "fs";
 import { DATE_OFFSET } from "./constants";
 import { makeException } from "./err";
 import { ILoginParams } from "./parsers/login";
@@ -103,3 +107,39 @@ export function sleep(ms: number) {
 export function getRandomArbitrary(min: number, max: number) {
     return Math.random() * (max - min) + min;
 }
+
+type GetFromCsvResponse = Record<string, string>;
+export const getFromCsv = async (
+    name: string
+): Promise<GetFromCsvResponse[]> => {
+    return new Promise((resolve) => {
+        const items: GetFromCsvResponse[] = [];
+
+        if (!existsSync(name)) {
+            return resolve([]);
+        }
+
+        createReadStream(name)
+            .pipe(csvParser())
+            .on("data", (row) => {
+                console.log("aquiiii", row);
+                items.push(row);
+            })
+            .on("end", () => {
+                resolve(items);
+            });
+    });
+};
+
+export const writeCsv = async (
+    name: string,
+    data: GetFromCsvResponse[],
+    header: ObjectStringifierHeader
+) => {
+    const csvWriter = createObjectCsvWriter({
+        path: name,
+        header,
+    });
+
+    return csvWriter.writeRecords(data);
+};

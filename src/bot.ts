@@ -1,6 +1,7 @@
+import { ObjectHeaderItem } from "csv-writer/src/lib/record";
 import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
-import { getRandomArbitrary, sleep } from "./lib";
+import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import {
     buildBlock,
@@ -57,6 +58,7 @@ interface IMoreOptions {
     forceExit?: boolean;
     modeAmazon?: boolean;
     modeAdventure?: boolean;
+    saveRewardsCsv?: boolean;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
     adventureHeroes?: string;
@@ -84,6 +86,7 @@ export class TreasureMapBot {
     private minHeroEnergyPercentage;
     private modeAmazon = false;
     private modeAdventure = false;
+    private saveRewardsCsv = false;
     private adventureBlocks: IGetBlockMapPayload[] = [];
     private adventureEnemies: IEnemies[] = [];
     private houseHeroes: string[] = [];
@@ -100,10 +103,12 @@ export class TreasureMapBot {
             houseHeroes = "",
             adventureHeroes = "",
             modeAdventure = false,
+            saveRewardsCsv = false,
         } = moreParams;
 
         this.modeAdventure = modeAdventure;
         this.modeAmazon = modeAmazon;
+        this.saveRewardsCsv = saveRewardsCsv;
         this.playing = null;
         this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
         this.map = new TreasureMap({ blocks: [] });
@@ -310,6 +315,34 @@ export class TreasureMapBot {
         logger.info("Logging in...");
         await this.client.login();
         logger.info("Logged in successfully");
+        await this.saveRewards();
+    }
+
+    async saveRewards() {
+        if (!this.saveRewardsCsv) return;
+        logger.info("Save rewards in csv...");
+        let user = "nameuser";
+        if ("username" in this.client.loginParams) {
+            user = this.client.loginParams.username;
+        } else if ("wallet" in this.client.loginParams) {
+            user = this.client.loginParams.wallet;
+        }
+        const name = `./csv/${user}.csv`;
+        const rewards = await this.client.getReward();
+
+        const items = await getFromCsv(name);
+        const headers: ObjectHeaderItem[] = [];
+        const obj: Record<string, string> = {};
+
+        rewards.map((reward) => {
+            const type = reward.type as string;
+            obj[type] = reward.value.toString();
+            headers.push({ id: type, title: type });
+        });
+
+        items.push(obj);
+
+        await writeCsv(name, items, headers);
     }
 
     async refreshHeroAtHome() {
