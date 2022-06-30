@@ -6,6 +6,8 @@ This bot is a product of reverse engineering Bombcrypto game. It simulates the g
 
 moderated by Lucas Vieceli
 
+if you don't have a computer available to run the bot, you can use the service for free via telegram. https://t.me/bombcryptoFreeBot
+
 ## Features
 
 It does the following:
