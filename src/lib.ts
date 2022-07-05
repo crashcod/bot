@@ -122,7 +122,6 @@ export const getFromCsv = async (
         createReadStream(name)
             .pipe(csvParser())
             .on("data", (row) => {
-                console.log("aquiiii", row);
                 items.push(row);
             })
             .on("end", () => {

@@ -4,6 +4,7 @@ import { Client } from "./api";
 import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import {
+    BLOCK_TYPE_MAP,
     buildBlock,
     buildHero,
     buildHouse,
@@ -383,6 +384,12 @@ export class TreasureMapBot {
             const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
             if (percent < this.minHeroEnergyPercentage) continue;
 
+            if (
+                this.modeAmazon &&
+                (!hero.shields || hero.shields?.length === 0)
+            )
+                continue;
+
             logger.info(`Sending hero ${hero.id} to work`);
             await this.client.goWork(hero.id);
             this.selection.push(hero);
@@ -586,7 +593,6 @@ export class TreasureMapBot {
     async getHeroAdventure(allHeroes: ISyncBombermanPayload[]) {
         const details = await this.client.getStoryDetails();
         const usedHeroes = details.played_bombers.map((hero) => hero.id);
-        console.log(this.adventureHeroes.length);
         const hero = allHeroes.find(
             (hero) =>
                 !usedHeroes.includes(hero.id) &&
@@ -880,6 +886,7 @@ export class TreasureMapBot {
 
     private handleMapLoad(payload: IGetBlockMapPayload[]) {
         const blocks = payload.map(parseGetBlockMapPayload).map(buildBlock);
+
         this.map.update({ blocks });
     }
 
@@ -903,9 +910,22 @@ export class TreasureMapBot {
         this.squad.updateHeroState(params.id, "Work");
     }
 
+    notificationBlockCage() {
+        logger.info("you won a hero");
+    }
+
     private handleExplosion(payload: IStartExplodePayload) {
         const [mapParams, heroParams] = parseStartExplodePayload(payload);
         this.squad.updateHeroEnergy(heroParams);
+
+        for (const block of mapParams) {
+            const blockType = this.map.blocks.find(
+                (b) => b.i == block.i && b.j == block.j
+            );
+            if (blockType?.type === BLOCK_TYPE_MAP[1] && block.hp === 0) {
+                this.notificationBlockCage();
+            }
+        }
         mapParams.forEach((params) => this.map.updateBlock(params));
     }
     private handleStartStoryExplode(payload: IStartStoryExplodePayload) {
@@ -916,15 +936,6 @@ export class TreasureMapBot {
                     (b) => b.i !== block.i || b.j !== block.j
                 );
             });
-
-            // payload.blocks.forEach((block) => {
-            //     const blockExists = this.adventureBlocks.find(
-            //         (b) => block.i == b.i && block.j == b.j
-            //     );
-            //     if (blockExists) {
-            //         blockExists.hp = 0;
-            //     }
-            // });
         }
         if (payload.enemies && payload.enemies.length) {
             logger.info(`add enemies ${payload.enemies.length}`);
