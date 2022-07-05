@@ -922,7 +922,7 @@ export class TreasureMapBot {
             const blockType = this.map.blocks.find(
                 (b) => b.i == block.i && b.j == block.j
             );
-            if (blockType?.type === BLOCK_TYPE_MAP[1] && block.hp === 0) {
+            if (blockType?.type === BLOCK_TYPE_MAP[2] && block.hp === 0) {
                 this.notificationBlockCage();
             }
         }
