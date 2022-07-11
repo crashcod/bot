@@ -392,7 +392,9 @@ export class TreasureMapBot {
 
             if (
                 this.modeAmazon &&
-                (!hero.shields || this.getSumShield(hero) === 0)
+                (!hero.shields ||
+                    hero.shields.length === 0 ||
+                    this.getSumShield(hero) === 0)
             )
                 continue;
 
