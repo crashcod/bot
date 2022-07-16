@@ -353,6 +353,14 @@ export class TreasureMapBot {
                     this.houseHeroes.includes(hero.id.toString()) ||
                     this.houseHeroes.length == 0
             )
+            .filter(
+                (hero) =>
+                    !this.modeAmazon ||
+                    (this.modeAmazon &&
+                        hero.shields &&
+                        hero.shields.length &&
+                        this.getSumShield(hero))
+            )
             .sort((a, b) => b.rarityIndex - a.rarityIndex)
             .slice(0, this.homeSlots);
 
