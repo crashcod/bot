@@ -10,7 +10,7 @@ type SmartFoxExtended = SmartFox & {
 
 // A dummy server
 const SFS = new SmartFox({
-    host: "server.bombcrypto.io",
+    host: "server.polygon.bombcrypto.io",
     port: 443,
     zone: "BomberGameZone",
     debug: true,
@@ -30,6 +30,6 @@ function decodeMessage(base64: string): string {
 // CONNECT Request
 console.log(
     decodeMessage(
-        "gACMEgADAAFjAgEAAWEDAA0AAXASAAMAAWMIAAhHT19TTEVFUAABcgT/////AAFwEgAEAARkYXRhEgABAAJpZAUAAAAAATRkrQACaWQEAAAAGAAEaGFzaAgAIDllNmNlMjM2M2Y1YjdiNTNiNmQ4NWI0M2E2ZGJkODEwAAl0aW1lc3RhbXAFAAA6BK7HEpg="
+        "gACLEgADAAFjAgEAAWEDAA0AAXASAAMAAWMIAAdHT19XT1JLAAFyBP////8AAXASAAQABGRhdGESAAEAAmlkBQAAAAAAAEMLAAJpZAQAAAALAARoYXNoCAAgNjY5NzU3MGRmN2ZkZmNmN2E1M2U5OTlkMWU2MmIzMzQACXRpbWVzdGFtcAUAADoFEXnB+A=="
     )
 );

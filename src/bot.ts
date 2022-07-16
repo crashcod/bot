@@ -395,8 +395,10 @@ export class TreasureMapBot {
                 (!hero.shields ||
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) === 0)
-            )
+            ) {
+                logger.info(`Hero ${hero.id} needs shield repair`);
                 continue;
+            }
 
             logger.info(`Sending hero ${hero.id} to work`);
             await this.client.goWork(hero.id);
