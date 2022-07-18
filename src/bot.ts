@@ -214,8 +214,10 @@ export class TreasureMapBot {
             msgEnemies +
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
-            `Heroes selected for home: ${houseHeroesIds}\n` +
-            `Heroes at home: ${heroesAtHome}\n` +
+            `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
+            `Heroes at home (${
+                this.squad.byState("Home").length
+            }): ${heroesAtHome}\n` +
             `Remaining chest (Treasure/Amazon): ${blocks}\n\n` +
             `INFO: LIFE HERO | SHIELD HERO\n` +
             `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
@@ -350,11 +352,6 @@ export class TreasureMapBot {
         const homeSelection = this.squad.notWorking
             .filter(
                 (hero) =>
-                    this.houseHeroes.includes(hero.id.toString()) ||
-                    this.houseHeroes.length == 0
-            )
-            .filter(
-                (hero) =>
                     !this.modeAmazon ||
                     (this.modeAmazon &&
                         hero.shields &&
@@ -366,19 +363,30 @@ export class TreasureMapBot {
 
         logger.info(`Will send heroes home (${this.homeSlots} slots)`);
 
-        const atHome = this.squad.byState("Home");
-
-        for (const hero of atHome) {
-            if (homeSelection.some((hs) => hs.id === hero.id)) continue;
-
-            logger.info(`Removing hero ${hero.id} from home`);
-            await this.client.goSleep(hero.id);
-        }
         for (const hero of homeSelection) {
             if (hero.state === "Home") continue;
 
-            logger.info(`Sending hero ${hero.id} home`);
-            await this.client.goHome(hero.id);
+            const atHome = this.squad.byState("Home");
+            if (
+                this.houseHeroes.includes(hero.id.toString()) ||
+                atHome.length < this.homeSlots
+            ) {
+                if (atHome.length < this.homeSlots) {
+                    logger.info(`Sending hero ${hero.id} home`);
+                    await this.client.goHome(hero.id);
+                } else {
+                    const removeHero = atHome.find(
+                        (hero) => !this.houseHeroes.includes(hero.id.toString())
+                    );
+
+                    if (removeHero) {
+                        logger.info(`Removing hero ${removeHero.id} from home`);
+                        await this.client.goSleep(removeHero.id);
+                        logger.info(`Sending hero ${hero.id} home`);
+                        await this.client.goHome(hero.id);
+                    }
+                }
+            }
         }
     }
 
@@ -670,7 +678,6 @@ export class TreasureMapBot {
             ];
             for (const position of retryPositions) {
                 if (checkPosition(position.i, position.j)) {
-                    console.log("foi ", position);
                     return position;
                 }
             }
@@ -819,6 +826,7 @@ export class TreasureMapBot {
 
                 await this.placeBombs();
                 await this.sleepAllHeroes();
+                await this.refreshHeroAtHome();
                 logger.info("Closing map...");
                 await this.client.stopPVE();
             }
