@@ -60,6 +60,7 @@ interface IMoreOptions {
     modeAmazon?: boolean;
     modeAdventure?: boolean;
     saveRewardsCsv?: boolean;
+    isPolygon?: boolean;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
     adventureHeroes?: string;
@@ -87,6 +88,7 @@ export class TreasureMapBot {
     private minHeroEnergyPercentage;
     private modeAmazon = false;
     private modeAdventure = false;
+    private isPolygon = false;
     private saveRewardsCsv = false;
     private adventureBlocks: IGetBlockMapPayload[] = [];
     private adventureEnemies: IEnemies[] = [];
@@ -101,6 +103,7 @@ export class TreasureMapBot {
             minHeroEnergyPercentage = 90,
             telegramKey,
             modeAmazon = false,
+            isPolygon = false,
             houseHeroes = "",
             adventureHeroes = "",
             modeAdventure = false,
@@ -110,8 +113,14 @@ export class TreasureMapBot {
         this.modeAdventure = modeAdventure;
         this.modeAmazon = modeAmazon;
         this.saveRewardsCsv = saveRewardsCsv;
+        this.isPolygon = isPolygon;
         this.playing = null;
-        this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
+        this.client = new Client(
+            loginParams,
+            DEFAULT_TIMEOUT,
+            modeAmazon,
+            this.isPolygon
+        );
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
         this.houses = [];
@@ -130,6 +139,15 @@ export class TreasureMapBot {
         this.index = 0;
         this.shouldRun = false;
         this.lastAdventure = 0;
+
+        if (this.isPolygon) {
+            if (this.modeAdventure) {
+                throw new Error("Adventure mode in Polygon is disabled");
+            }
+            if (this.modeAmazon) {
+                throw new Error("Amazon mode in Polygon is disabled");
+            }
+        }
 
         if (telegramKey) this.initTelegraf(telegramKey);
         this.reset();

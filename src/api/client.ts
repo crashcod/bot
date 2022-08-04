@@ -8,7 +8,7 @@ import {
     SmartFox,
 } from "sfs2x-api";
 import UserAgent from "user-agents";
-import { HOST, PORT, ZONE } from "../constants";
+import { HOST, HOST_POLYGON, PORT, ZONE } from "../constants";
 import { makeException } from "../err";
 import { askAndParseEnv, parseBoolean } from "../lib";
 import { logger } from "../logger";
@@ -166,9 +166,16 @@ export class Client {
     public loginParams: ILoginParams;
     private apiBaseHeaders;
     private modeAmazon = false;
+    private isPolygon = false;
 
-    constructor(loginParams: ILoginParams, timeout = 0, modeAmazon = false) {
+    constructor(
+        loginParams: ILoginParams,
+        timeout = 0,
+        modeAmazon = false,
+        isPolygon = false
+    ) {
         this.modeAmazon = modeAmazon;
+        this.isPolygon = isPolygon;
         const userAgent = new UserAgent();
         this.apiBaseHeaders = {
             origin: "https://app.bombcrypto.io",
@@ -182,7 +189,14 @@ export class Client {
             "user-agent": userAgent.toString(),
         };
         this.sfs = new SmartFox({
-            host: HOST,
+            host: isPolygon ? HOST_POLYGON : HOST,
+            port: PORT,
+            zone: ZONE,
+            debug: askAndParseEnv("DEBUG", parseBoolean, false),
+            useSSL: true,
+        });
+        console.log({
+            host: isPolygon ? HOST_POLYGON : HOST,
             port: PORT,
             zone: ZONE,
             debug: askAndParseEnv("DEBUG", parseBoolean, false),
@@ -265,7 +279,10 @@ export class Client {
         await this.connect();
         return await makeUniquePromise(
             this.controller.login,
-            () => this.sfs.send(makeLoginRequest(this.loginParams, message)),
+            () =>
+                this.sfs.send(
+                    makeLoginRequest(this.loginParams, message, this.isPolygon)
+                ),
             timeout || this.timeout
         );
     }

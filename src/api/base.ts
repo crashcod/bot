@@ -5,7 +5,7 @@ import {
     SFSObject,
 } from "sfs2x-api";
 
-import { LC, SALT_KEY, VERSION_CODE } from "../constants";
+import { LC, SALT_KEY, VERSION_CODE, VERSION_CODE_POLYGON } from "../constants";
 import { currentTimeSinceAD, hashMD5 } from "../lib";
 
 export type EGameAction =
@@ -68,7 +68,8 @@ export function makeLoginMessage(
     pln: string,
     password: string,
     signature: string,
-    lt: number
+    lt: number,
+    isPolygon = false
 ) {
     const data = new SFSObject();
     const params = new SFSObject();
@@ -76,7 +77,11 @@ export function makeLoginMessage(
 
     data.put("pln", pln, SFSDataType.UTF_STRING);
     data.put("password", password, SFSDataType.UTF_STRING);
-    data.put("version_code", VERSION_CODE, SFSDataType.INT);
+    data.put(
+        "version_code",
+        isPolygon ? VERSION_CODE_POLYGON : VERSION_CODE,
+        SFSDataType.INT
+    );
     data.put("lt", lt, SFSDataType.INT);
     data.put("slogan", "senspark", SFSDataType.UTF_STRING);
     data.put("signature", signature, SFSDataType.UTF_STRING);
@@ -85,6 +90,6 @@ export function makeLoginMessage(
     params.put("data", data, SFSDataType.SFS_OBJECT);
     params.put("hash", hash, SFSDataType.UTF_STRING);
     params.put("timestamp", timestamp, SFSDataType.LONG);
-
+    console.log(data);
     return new LoginRequest(pln, "", params);
 }

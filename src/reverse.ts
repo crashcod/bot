@@ -30,6 +30,31 @@ function decodeMessage(base64: string): string {
 // CONNECT Request
 console.log(
     decodeMessage(
-        "gACLEgADAAFjAgEAAWEDAA0AAXASAAMAAWMIAAdHT19XT1JLAAFyBP////8AAXASAAQABGRhdGESAAEAAmlkBQAAAAAAAEMLAAJpZAQAAAALAARoYXNoCAAgNjY5NzU3MGRmN2ZkZmNmN2E1M2U5OTlkMWU2MmIzMzQACXRpbWVzdGFtcAUAADoFEXnB+A=="
+        "gAEGEgADAAFjAgAAAWEDAAEAAXASAAQAAnpuCAAOQm9tYmVyR2FtZVpvbmUAAnVuCAAIeW9rb3NvYmMAAnB3CAAAAAFwEgAEAAJsYwgAAAAEZGF0YRIABwADcGxuCAAIeW9rb3NvYmMACHBhc3N3b3JkCAAGOTIwNjI4AAx2ZXJzaW9uX2NvZGUEAAAAOQACbHQEAAAAAQAGc2xvZ2FuCAAIc2Vuc3BhcmsAD2FjdGl2YXRpb25fY29kZQgAAAAJc2lnbmF0dXJlCAAAAARoYXNoCAAgZjc1ZjZlMmMwMTFhNTBiNDYzNzYxYzAyOWRhOTNhN2QACXRpbWVzdGFtcAUAADoFa2jQkw=="
     )
 );
+
+/**
+ * 
+ function findInBuffer(buffer, bytes, except=[]) {
+    const array = new Uint8Array(buffer);
+    const first = bytes[0];
+    const size = bytes.length;
+    const results = [];
+    let offset = 0;
+    let index = array.indexOf(first, offset);
+    while (index !== -1 && index + size <= array.length) {
+        let isMatch = true;
+        for (let i = 0; i < size; i++) {
+            if (array[index + i] !== bytes[i]) {
+                isMatch = false;
+                break;
+            }
+        }
+        if (isMatch) results.push(index);
+        offset = index + 1;
+        index = array.indexOf(first, offset);
+    }
+    return results.filter(v => except.indexOf(v) === -1);
+}
+ */
