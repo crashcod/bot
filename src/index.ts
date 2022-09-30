@@ -15,7 +15,7 @@ async function main() {
         minHeroEnergyPercentage: parseInt(
             askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
         ),
-        modeAmazon: askAndParseEnv("MODE_AMAZON", parseBoolean, false),
+        modeAmazon: true,
         modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),

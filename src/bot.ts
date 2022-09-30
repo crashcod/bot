@@ -108,7 +108,7 @@ export class TreasureMapBot {
         } = moreParams;
 
         this.modeAdventure = modeAdventure;
-        this.modeAmazon = modeAmazon;
+        this.modeAmazon = true;
         this.saveRewardsCsv = saveRewardsCsv;
         this.playing = null;
         this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
@@ -819,30 +819,30 @@ export class TreasureMapBot {
             if (this.map.totalLife <= 0) await this.refreshMap();
             await this.refreshHeroSelection();
 
-            if (this.workingSelection.length > 0) {
-                logger.info("Opening map...");
-                this.playing = this.modeAmazon ? "Amazon" : "Treasure";
-                await this.client.startPVE(0, this.modeAmazon);
+            // if (this.workingSelection.length > 0) {
+            //     logger.info("Opening map...");
+            //     this.playing = this.modeAmazon ? "Amazon" : "Treasure";
+            //     await this.client.startPVE(0, this.modeAmazon);
 
-                await this.placeBombs();
-                await this.sleepAllHeroes();
-                await this.refreshHeroAtHome();
-                logger.info("Closing map...");
-                await this.client.stopPVE();
-            }
-            logger.info("There are no heroes to work now.");
+            //     await this.placeBombs();
+            //     await this.sleepAllHeroes();
+            //     await this.refreshHeroAtHome();
+            //     logger.info("Closing map...");
+            //     await this.client.stopPVE();
+            // }
+            // logger.info("There are no heroes to work now.");
 
-            if (
-                (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
-                    this.lastAdventure === 0) &&
-                this.modeAdventure
-            ) {
-                this.resetStateAdventure();
-                this.playing = "Adventure";
+            // if (
+            //     (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
+            //         this.lastAdventure === 0) &&
+            //     this.modeAdventure
+            // ) {
+            this.resetStateAdventure();
+            this.playing = "Adventure";
 
-                await this.adventure();
-                this.lastAdventure = Date.now();
-            }
+            await this.adventure();
+            this.lastAdventure = Date.now();
+            // }
             this.playing = "sleep";
             logger.info("Will sleep for 2 minutes");
             await sleep(120000);
