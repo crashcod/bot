@@ -111,7 +111,7 @@ export class TreasureMapBot {
         } = moreParams;
 
         this.modeAdventure = modeAdventure;
-        this.modeAmazon = true;
+        this.modeAmazon = modeAmazon;
         this.saveRewardsCsv = saveRewardsCsv;
         this.isPolygon = isPolygon;
         this.playing = null;

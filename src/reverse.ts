@@ -30,13 +30,15 @@ function decodeMessage(base64: string): string {
 // CONNECT Request
 console.log(
     decodeMessage(
-        "gAEGEgADAAFjAgAAAWEDAAEAAXASAAQAAnpuCAAOQm9tYmVyR2FtZVpvbmUAAnVuCAAIeW9rb3NvYmMAAnB3CAAAAAFwEgAEAAJsYwgAAAAEZGF0YRIABwADcGxuCAAIeW9rb3NvYmMACHBhc3N3b3JkCAAGOTIwNjI4AAx2ZXJzaW9uX2NvZGUEAAAAOQACbHQEAAAAAQAGc2xvZ2FuCAAIc2Vuc3BhcmsAD2FjdGl2YXRpb25fY29kZQgAAAAJc2lnbmF0dXJlCAAAAARoYXNoCAAgZjc1ZjZlMmMwMTFhNTBiNDYzNzYxYzAyOWRhOTNhN2QACXRpbWVzdGFtcAUAADoFa2jQkw=="
+        "gAEKEgADAAFjAgAAAWEDAAEAAXASAAQAAnpuCAAOQm9tYmVyR2FtZVpvbmUAAnVuCAAJbW9lbGxlcjM1AAJwdwgAAAABcBIABAACbGMIAAAABGRhdGESAAcAA3BsbggACW1vZWxsZXIzNQAIcGFzc3dvcmQIAAhwcmV0aW5obwAMdmVyc2lvbl9jb2RlBAAAAAkAAmx0BAAAAAEABnNsb2dhbggACHNlbnNwYXJrAA9hY3RpdmF0aW9uX2NvZGUIAAAACXNpZ25hdHVyZQgAAAAEaGFzaAgAIDMzN2QyNzIwOTMyOGFhNWU0NDhmM2FiYjEyOTdjMzJiAAl0aW1lc3RhbXAFAAA6Bs8YvBE="
     )
 );
 
 /**
  * 
- function findInBuffer(buffer, bytes, except=[]) {
+ function findInBuffer(buffer, bytesParam, except=[]) {
+
+    const bytes = bytesParam.split(' ').join(',0,').split(',').map(v => parseInt(v))
     const array = new Uint8Array(buffer);
     const first = bytes[0];
     const size = bytes.length;
