@@ -86,6 +86,7 @@ export function makeGoSleepRequest(
 ) {
     const data = new SFSObject();
     data.putLong("id", heroId);
+    data.putInt("account_type", 0);
     return makeGameMessage(wallet, "GO_SLEEP", messageId, data);
 }
 
@@ -96,6 +97,7 @@ export function makeGoHomeRequest(
 ) {
     const data = new SFSObject();
     data.putLong("id", heroId);
+    data.putInt("account_type", 0);
     return makeGameMessage(wallet, "GO_HOME", messageId, data);
 }
 
@@ -106,6 +108,7 @@ export function makeGoWorkRequest(
 ) {
     const data = new SFSObject();
     data.putLong("id", heroId);
+    data.putInt("account_type", 0);
     return makeGameMessage(wallet, "GO_WORK", messageId, data);
 }
 
@@ -147,7 +150,7 @@ export function makeStartExplodeV2Request(
     data.putInt("num", input.bombId);
     data.putInt("i", input.i);
     data.putInt("j", input.j);
-
+    data.putInt("account_type", 0);
     input.blocks.forEach((block) => {
         const encodedBlock = new SFSObject();
 
@@ -197,6 +200,7 @@ export function makeStartExplodeExplodeRequest(
     // data.putInt("j", input.j > 0 ? input.j - 1 : input.j);
     data.putInt("i", input.i);
     data.putInt("j", input.j);
+    data.putInt("account_type", 0);
 
     input.blocks.forEach((block) => {
         const encodedBlock = new SFSObject();
