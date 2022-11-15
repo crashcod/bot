@@ -61,7 +61,7 @@ export function parseLogin(value: string): ILoginParams {
     if (type === "user") {
         return {
             type: "user",
-            username: v1.toLowerCase(),
+            username: v1,
             password: v2,
         };
     } else if (type === "wallet") {
