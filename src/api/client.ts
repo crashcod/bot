@@ -8,7 +8,7 @@ import {
     SmartFox,
 } from "sfs2x-api";
 import UserAgent from "user-agents";
-import { HOST, PORT, SERVERS, ZONE } from "../constants";
+import { PORT, SERVERS, ZONE } from "../constants";
 import { makeException } from "../err";
 import {
     askAndParseEnv,
@@ -17,6 +17,7 @@ import {
 } from "../lib";
 import { logger } from "../logger";
 import {
+    Hero,
     IGetBlockMapPayload,
     IHeroUpdateParams,
     IStoryHeroParams,
@@ -191,26 +192,22 @@ export class Client {
             "content-type": "application/json",
             "user-agent": userAgent.toString(),
         };
-        this.sfs = new SmartFox({
-            host: HOST,
-            port: PORT,
-            zone: ZONE,
-            debug: askAndParseEnv("DEBUG", parseBoolean, false),
-            useSSL: true,
-        });
-        this.sfs.setClientDetails("Unity WebGL", "");
+        this.sfs = {} as SmartFox;
+        // this.sfs = new SmartFox({
+        //     host: HOST,
+        //     port: PORT,
+        //     zone: ZONE,
+        //     debug: askAndParseEnv("DEBUG", parseBoolean, false),
+        //     useSSL: true,
+        // });
+        // this.sfs.setClientDetails("Unity WebGL", "");
 
         this.timeout = timeout;
         this.loginParams = loginParams;
-        this.wipe();
-
-        this.connectEvents();
     }
 
     get walletId() {
-        return this.loginParams.type === "wallet"
-            ? this.loginParams.wallet
-            : this.loginParams.username;
+        return this.loginParams.wallet as string;
     }
 
     get isConnected() {
@@ -218,7 +215,7 @@ export class Client {
     }
 
     get isLoggedIn() {
-        return this.sfs == null || this.sfs.mySelf !== null;
+        return "mySelf" in this.sfs && this.sfs.mySelf !== null;
     }
 
     on<T extends keyof EventHandlerMap>({ event, handler }: IEventHandler<T>) {
@@ -255,7 +252,6 @@ export class Client {
     }
 
     async createServer(server: string) {
-        console.log(`server-${server}.bombcrypto.io`);
         this.sfs = new SmartFox({
             host: `server-${server}.bombcrypto.io`,
             port: PORT,
@@ -264,6 +260,8 @@ export class Client {
             useSSL: true,
         });
         this.sfs.setClientDetails("Unity WebGL", "");
+        this.wipe();
+        this.connectEvents();
     }
 
     async getJwtToken() {
@@ -290,6 +288,9 @@ export class Client {
                 })
                 .json<IVerifyTokenResponse>();
 
+            if (!resultVerify.message.address) {
+                throw makeException("LoginFailed", `Wallet not found`);
+            }
             logger.info(`Wallet: ${resultVerify.message.address}`);
             logger.info(`User Id: ${resultVerify.message.id}`);
 
@@ -310,6 +311,13 @@ export class Client {
         }
     }
 
+    async connectServer() {
+        const resultPing = await this.getServerByPing();
+        logger.info(
+            `Best server found '${resultPing.server}' ping: ${resultPing.ping}ms`
+        );
+        await this.createServer(resultPing.server);
+    }
     async login(timeout = 0) {
         if (this.isLoggedIn) return this.walletId;
 
@@ -329,13 +337,6 @@ export class Client {
         //     message = data.message;
         // }
         await this.getJwtToken();
-
-        const resultPing = await this.getServerByPing();
-        logger.info(
-            `Best server found '${resultPing.server}' ping: ${resultPing.ping}ms`
-        );
-        // await this.createServer(resultPing.server);
-
         await this.connect();
         return await makeUniquePromise(
             this.controller.login,
@@ -590,7 +591,7 @@ export class Client {
         );
     }
 
-    goWork(heroId: number, timeout = 0) {
+    goWork(hero: Hero, timeout = 0) {
         this.ensureLoggedIn();
 
         return makeSerializedPromise(
@@ -599,7 +600,7 @@ export class Client {
                 const request = makeGoWorkRequest(
                     this.walletId,
                     this.nextId(),
-                    heroId
+                    hero
                 );
                 this.sfs.send(request);
             },
@@ -894,6 +895,7 @@ export class Client {
                     gen_id: payload.getUtfString("gen_id"),
                     energy: payload.getInt("energy"),
                     active: payload.getInt("active"),
+                    heroType: payload.getInt("hero_type"),
                     restore_hp: payload.getInt("restore_hp"),
                 };
             });
@@ -924,9 +926,10 @@ export class Client {
                     id: payload.getLong("id"),
                     gen_id: payload.getUtfString("gen_id"),
                     energy: payload.getInt("energy"),
+                    heroType: payload.getInt("hero_type"),
                 } as IGetActiveBomberPayload;
             });
-
+        console.log(bombers);
         resolveUniquePromise(this.controller.getActiveHeroes, bombers);
         this.callHandler(this.handlers.getActiveBomber, bombers);
     }
@@ -1182,6 +1185,7 @@ export class Client {
             stage: rawHero.getInt("stage"),
             playerType: rawHero.getInt("playerType"),
             rare: rawHero.getInt("rare"),
+            heroType: rawHero.getInt("hero_type"),
             bombNum: rawHero.getInt("bombNum"),
             id: rawHero.getLong("id"),
         };
@@ -1202,6 +1206,7 @@ export class Client {
     }
 
     private handleSyncHouse(params: SFSObject) {
+        console.log("retorno");
         const data = params.getSFSArray("houses");
 
         const houses = Array(data.size())
@@ -1234,6 +1239,7 @@ export class Client {
             `Failed with code ${errorCode}`
         );
 
+        console.log("error", command);
         switch (command) {
             case "GET_BLOCK_MAP":
                 return rejectUniquePromise(this.controller.getBlockMap, error);
@@ -1389,7 +1395,6 @@ export class Client {
         if (params.containsKey("ec") && ec !== 0) {
             return this.handleMessageError(response.cmd, ec);
         }
-
         switch (response.cmd) {
             case "GET_BLOCK_MAP":
                 return this.handleGetBlockMap(response.params);

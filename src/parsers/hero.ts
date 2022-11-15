@@ -94,6 +94,7 @@ export type IGetActiveBomberPayload = {
     id: number;
     gen_id: string;
     energy: number;
+    heroType: number;
 };
 
 export function parseGetActiveBomberPayload(
@@ -104,6 +105,7 @@ export function parseGetActiveBomberPayload(
         state: parseHeroState(payload["stage"]),
         energy: payload["energy"],
         shields: payload?.shields,
+        heroType: payload.heroType,
         active: true,
         ...parseHeroStats(payload["gen_id"]),
     };
@@ -115,6 +117,7 @@ export type ISyncBombermanPayload = {
     gen_id: string;
     shields?: IShield[] | undefined;
     energy: number;
+    heroType: number;
     restore_hp: number;
     active: number;
 };

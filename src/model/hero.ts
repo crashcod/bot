@@ -65,6 +65,7 @@ export type IHeroParams = IHeroStats & {
     id: number;
     state: EHeroState;
     energy: number;
+    heroType: number;
     active: boolean;
     shields?: IShield[];
 };
@@ -89,6 +90,9 @@ export class Hero {
     }
     get shields() {
         return this.params.shields;
+    }
+    get heroType() {
+        return this.params.heroType;
     }
 
     get energy() {
@@ -208,4 +212,5 @@ export type IStoryHeroParams = {
     rare: number;
     id: number;
     bombNum: number;
+    heroType: number;
 };

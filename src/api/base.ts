@@ -84,7 +84,6 @@ export function makeLoginMessage(
     // data.put("password", password, SFSDataType.UTF_STRING);
     data.put("version_code", VERSION_CODE, SFSDataType.INT);
     data.put("lt", lt, SFSDataType.INT);
-    console.log("lt", lt);
     data.put("slogan", "senspark", SFSDataType.UTF_STRING);
     data.put("signature", signature, SFSDataType.UTF_STRING);
 
@@ -93,6 +92,5 @@ export function makeLoginMessage(
     params.put("hash", hash, SFSDataType.UTF_STRING);
     params.put("timestamp", timestamp, SFSDataType.LONG);
 
-    console.log("params", params);
     return new LoginRequest(pln, "", params);
 }

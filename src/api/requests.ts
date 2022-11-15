@@ -2,6 +2,7 @@ import { SFSArray, SFSObject } from "sfs2x-api";
 import Web3 from "web3";
 import { makeException } from "../err";
 import { currentTimeSinceAD } from "../lib";
+import { Hero } from "../model";
 import { IEnemyTakeDamageInput } from "../parsers";
 import {
     IStartExplodeInput,
@@ -100,6 +101,7 @@ export function makeGoSleepRequest(
     const data = new SFSObject();
     data.putLong("id", heroId);
     data.putInt("account_type", 0);
+    data.putInt("hero_type", 0);
     return makeGameMessage(wallet, "GO_SLEEP", messageId, data);
 }
 
@@ -117,11 +119,12 @@ export function makeGoHomeRequest(
 export function makeGoWorkRequest(
     wallet: string,
     messageId: number,
-    heroId: number
+    { id, heroType }: Hero
 ) {
     const data = new SFSObject();
-    data.putLong("id", heroId);
+    data.putLong("id", id);
     data.putInt("account_type", 0);
+    data.putInt("hero_type:", heroType);
     return makeGameMessage(wallet, "GO_WORK", messageId, data);
 }
 

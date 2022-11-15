@@ -132,7 +132,6 @@ export class TreasureMapBot {
         this.lastAdventure = 0;
 
         if (telegramKey) this.initTelegraf(telegramKey);
-        this.reset();
     }
 
     async stop() {
@@ -317,6 +316,8 @@ export class TreasureMapBot {
         if (this.client.isLoggedIn) return;
         logger.info("Logging in...");
 
+        await this.client.connectServer();
+        this.reset();
         await this.client.login();
         logger.info("Logged in successfully");
         await this.saveRewards();
@@ -402,10 +403,12 @@ export class TreasureMapBot {
         await this.client.getActiveHeroes();
 
         this.selection = this.squad.byState("Work");
-
+        console.log(this.squad.heroes);
+        console.log(this.squad.notWorking, " this.squad.notWorking");
         for (const hero of this.squad.notWorking) {
             const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
             if (percent < this.minHeroEnergyPercentage) continue;
+            console.log("percent", percent);
 
             if (
                 this.modeAmazon &&
@@ -416,9 +419,11 @@ export class TreasureMapBot {
                 logger.info(`Hero ${hero.id} needs shield repair`);
                 continue;
             }
+            console.log(hero, "hero");
 
             logger.info(`Sending hero ${hero.id} to work`);
-            await this.client.goWork(hero.id);
+            await this.client.goWork(hero);
+            console.log("foiiii");
             this.selection.push(hero);
         }
 
@@ -634,6 +639,7 @@ export class TreasureMapBot {
             id: hero.id,
             energy: hero.energy,
             active: true,
+            heroType: hero.heroType,
             state: "Sleep",
             ...parseHeroStats(hero.gen_id),
         });
@@ -798,7 +804,6 @@ export class TreasureMapBot {
     }
 
     async loadHouses() {
-        console.log("aaaaa");
         const payloads = await this.client.syncHouse();
         this.houses = payloads.map(parseSyncHousePayload).map(buildHouse);
     }
@@ -815,23 +820,21 @@ export class TreasureMapBot {
         await this.logIn();
         await this.loadHouses();
         await this.refreshMap();
-        await this.refreshHeroSelection();
 
         do {
             if (this.map.totalLife <= 0) await this.refreshMap();
+
+            logger.info("Opening map...");
+            this.playing = this.modeAmazon ? "Amazon" : "Treasure";
+            await this.client.startPVE(0, this.modeAmazon);
+
             await this.refreshHeroSelection();
+            await this.placeBombs();
+            await this.sleepAllHeroes();
+            await this.refreshHeroAtHome();
 
-            if (this.workingSelection.length > 0) {
-                logger.info("Opening map...");
-                this.playing = this.modeAmazon ? "Amazon" : "Treasure";
-                await this.client.startPVE(0, this.modeAmazon);
-
-                await this.placeBombs();
-                await this.sleepAllHeroes();
-                await this.refreshHeroAtHome();
-                logger.info("Closing map...");
-                await this.client.stopPVE();
-            }
+            logger.info("Closing map...");
+            await this.client.stopPVE();
             logger.info("There are no heroes to work now.");
 
             if (
