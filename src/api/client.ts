@@ -8,9 +8,13 @@ import {
     SmartFox,
 } from "sfs2x-api";
 import UserAgent from "user-agents";
-import { HOST, PORT, ZONE } from "../constants";
+import { HOST, PORT, SERVERS, ZONE } from "../constants";
 import { makeException } from "../err";
-import { askAndParseEnv, parseBoolean } from "../lib";
+import {
+    askAndParseEnv,
+    getDurationInMilliseconds,
+    parseBoolean,
+} from "../lib";
 import { logger } from "../logger";
 import {
     IGetBlockMapPayload,
@@ -36,7 +40,12 @@ import {
     IGetActiveBomberPayload,
     ISyncBombermanPayload,
 } from "../parsers/hero";
-import { ILoginParams } from "../parsers/login";
+import {
+    IJwtLoginResponse,
+    ILoginParams,
+    IUserLoginParams,
+    IVerifyTokenResponse,
+} from "../parsers/login";
 import {
     ICoinDetailPayload,
     IGetRewardPayload,
@@ -179,6 +188,7 @@ export class Client {
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site",
+            "content-type": "application/json",
             "user-agent": userAgent.toString(),
         };
         this.sfs = new SmartFox({
@@ -188,11 +198,12 @@ export class Client {
             debug: askAndParseEnv("DEBUG", parseBoolean, false),
             useSSL: true,
         });
+        this.sfs.setClientDetails("Unity WebGL", "");
+
         this.timeout = timeout;
         this.loginParams = loginParams;
         this.wipe();
 
-        this.sfs.setClientDetails("Unity WebGL", "");
         this.connectEvents();
     }
 
@@ -207,7 +218,7 @@ export class Client {
     }
 
     get isLoggedIn() {
-        return this.sfs.mySelf !== null;
+        return this.sfs == null || this.sfs.mySelf !== null;
     }
 
     on<T extends keyof EventHandlerMap>({ event, handler }: IEventHandler<T>) {
@@ -243,31 +254,118 @@ export class Client {
         });
     }
 
-    async login(timeout = 0) {
-        if (this.isLoggedIn) return this.walletId;
+    async createServer(server: string) {
+        console.log(`server-${server}.bombcrypto.io`);
+        this.sfs = new SmartFox({
+            host: `server-${server}.bombcrypto.io`,
+            port: PORT,
+            zone: ZONE,
+            debug: askAndParseEnv("DEBUG", parseBoolean, false),
+            useSSL: true,
+        });
+        this.sfs.setClientDetails("Unity WebGL", "");
+    }
 
-        let message = "";
-
-        if (this.loginParams.type === "wallet") {
-            const data = await got
-                .get("https://api.bombcrypto.io/auth/token", {
-                    searchParams: {
-                        address: this.loginParams.wallet,
+    async getJwtToken() {
+        try {
+            const { username, password } = <IUserLoginParams>this.loginParams;
+            const resultToken = await got
+                .post("https://api.bombcrypto.io/gateway/auth/tr/login", {
+                    json: {
+                        username,
+                        password,
                     },
                     headers: this.apiBaseHeaders,
                     http2: true,
                 })
-                .json<{ message: string }>();
+                .json<IJwtLoginResponse>();
+            logger.info(`New token: ${resultToken.message.token}`);
 
-            message = data.message;
+            const resultVerify = await got
+                .get("https://api.bombcrypto.io/gateway/auth/tr/verify-token", {
+                    headers: {
+                        ...this.apiBaseHeaders,
+                        authorization: `Bearer ${resultToken.message.token}`,
+                    },
+                })
+                .json<IVerifyTokenResponse>();
+
+            logger.info(`Wallet: ${resultVerify.message.address}`);
+            logger.info(`User Id: ${resultVerify.message.id}`);
+
+            if (resultVerify.message.isDeleted) {
+                throw makeException("LoginFailed", `Account deleted`);
+            }
+
+            this.loginParams.wallet = resultVerify.message.address;
+            this.loginParams.token = resultToken.message.token;
+        } catch (e: any) {
+            if (e.message == "Response code 401 (Unauthorized)") {
+                throw makeException(
+                    "LoginFailed",
+                    "username or password invalid"
+                );
+            }
+            throw makeException("LoginFailed", e.message);
         }
+    }
+
+    async login(timeout = 0) {
+        if (this.isLoggedIn) return this.walletId;
+
+        // let message = "";
+
+        // if (this.loginParams.type === "wallet") {
+        //     const data = await got
+        //         .get("https://api.bombcrypto.io/auth/token", {
+        //             searchParams: {
+        //                 address: this.loginParams.wallet,
+        //             },
+        //             headers: this.apiBaseHeaders,
+        //             http2: true,
+        //         })
+        //         .json<{ message: string }>();
+
+        //     message = data.message;
+        // }
+        await this.getJwtToken();
+
+        const resultPing = await this.getServerByPing();
+        logger.info(
+            `Best server found '${resultPing.server}' ping: ${resultPing.ping}ms`
+        );
+        // await this.createServer(resultPing.server);
 
         await this.connect();
         return await makeUniquePromise(
             this.controller.login,
-            () => this.sfs.send(makeLoginRequest(this.loginParams, message)),
+            () => this.sfs.send(makeLoginRequest(this.loginParams)),
             timeout || this.timeout
         );
+    }
+
+    async getPing(server: string) {
+        const start = process.hrtime();
+        await got.get(`https://api.bombcrypto.io/ping/${server}`, {
+            headers: this.apiBaseHeaders,
+            http2: true,
+        });
+        await got.get(`https://api.bombcrypto.io/ping/${server}`, {
+            headers: this.apiBaseHeaders,
+            http2: true,
+        });
+
+        return {
+            server,
+            ping: getDurationInMilliseconds(start),
+        };
+    }
+    async getServerByPing() {
+        const result = await Promise.all(
+            SERVERS.map((server) => this.getPing(server))
+        );
+        result.sort((a, b) => a.ping - b.ping);
+        return result[0];
     }
 
     async logout(timeout = 0) {

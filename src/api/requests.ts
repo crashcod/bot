@@ -1,5 +1,6 @@
 import { SFSArray, SFSObject } from "sfs2x-api";
 import Web3 from "web3";
+import { makeException } from "../err";
 import { currentTimeSinceAD } from "../lib";
 import { IEnemyTakeDamageInput } from "../parsers";
 import {
@@ -31,15 +32,27 @@ export function makeLoginSignature(privateKey: string, message: string) {
     return result.signature;
 }
 
-export function makeLoginRequest(params: ILoginParams, message: string) {
-    return params.type === "user"
-        ? makeLoginMessage(params.username, params.password, "", 1)
-        : makeLoginMessage(
-              params.wallet,
-              "",
-              makeLoginSignature(params.privateKey, message),
-              0
-          );
+export function makeLoginRequest(params: ILoginParams) {
+    if (params.type === "user") {
+        return makeLoginMessage(
+            params.username,
+            params.password,
+            params.wallet,
+            params.token,
+            "",
+            1
+        );
+    }
+
+    throw makeException("LoginFailed", "disabled login with wallet");
+    // return params.type === "user"
+    //     ? makeLoginMessage(params.username, params.password, params.wallet, params.token, "", 1)
+    //     // : makeLoginMessage(
+    //     //       params.wallet,
+    //     //       "",
+    //     //       makeLoginSignature(params.privateKey, message),
+    //     //       0
+    //     //   );
 }
 
 export function makeSyncBombermanRequest(wallet: string, messageId: number) {

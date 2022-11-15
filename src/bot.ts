@@ -316,6 +316,7 @@ export class TreasureMapBot {
     async logIn() {
         if (this.client.isLoggedIn) return;
         logger.info("Logging in...");
+
         await this.client.login();
         logger.info("Logged in successfully");
         await this.saveRewards();
@@ -797,6 +798,7 @@ export class TreasureMapBot {
     }
 
     async loadHouses() {
+        console.log("aaaaa");
         const payloads = await this.client.syncHouse();
         this.houses = payloads.map(parseSyncHousePayload).map(buildHouse);
     }
