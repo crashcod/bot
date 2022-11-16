@@ -63,6 +63,7 @@ interface IMoreOptions {
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
     adventureHeroes?: string;
+    rede?: string;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -105,7 +106,10 @@ export class TreasureMapBot {
             adventureHeroes = "",
             modeAdventure = false,
             saveRewardsCsv = false,
+            rede = "BSC",
         } = moreParams;
+
+        loginParams.rede = rede;
 
         this.modeAdventure = modeAdventure;
         this.modeAmazon = true;
@@ -403,12 +407,9 @@ export class TreasureMapBot {
         await this.client.getActiveHeroes();
 
         this.selection = this.squad.byState("Work");
-        console.log(this.squad.heroes);
-        console.log(this.squad.notWorking, " this.squad.notWorking");
         for (const hero of this.squad.notWorking) {
             const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
             if (percent < this.minHeroEnergyPercentage) continue;
-            console.log("percent", percent);
 
             if (
                 this.modeAmazon &&
@@ -419,11 +420,9 @@ export class TreasureMapBot {
                 logger.info(`Hero ${hero.id} needs shield repair`);
                 continue;
             }
-            console.log(hero, "hero");
 
             logger.info(`Sending hero ${hero.id} to work`);
             await this.client.goWork(hero);
-            console.log("foiiii");
             this.selection.push(hero);
         }
 
@@ -553,11 +552,13 @@ export class TreasureMapBot {
         const result = await this.client[method]({
             heroId: hero.id,
             bombId,
+            hero_type: hero.heroType,
             blocks: [],
             i: location.i,
             j: location.j,
         });
 
+        console.log("result", result);
         this.removeBombHero(hero, bombId);
         if (!result) {
             return false;
@@ -708,6 +709,7 @@ export class TreasureMapBot {
         );
         const startExplode = this.client.startStoryExplode({
             heroId: hero.id,
+            hero_type: hero.heroType,
             i: blockParse.i,
             j: blockParse.j,
             blocks: [],

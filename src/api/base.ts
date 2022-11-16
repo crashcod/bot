@@ -66,9 +66,9 @@ export function makeGameMessage(
 
 export function makeLoginMessage(
     pln: string,
-    password: string,
     wallet?: string,
     token?: string,
+    rede?: string,
     signature?: string,
     lt?: number
 ) {
@@ -79,7 +79,7 @@ export function makeLoginMessage(
     // data.put("pln", pln, SFSDataType.UTF_STRING);
     data.put("pln", wallet, SFSDataType.UTF_STRING);
     data.put("token", token, SFSDataType.UTF_STRING);
-    data.put("data_type", "BSC", SFSDataType.UTF_STRING);
+    data.put("data_type", rede, SFSDataType.UTF_STRING);
     data.put("device_type", "WEB", SFSDataType.UTF_STRING);
     // data.put("password", password, SFSDataType.UTF_STRING);
     data.put("version_code", VERSION_CODE, SFSDataType.INT);

@@ -3,6 +3,7 @@ export type IWalletLoginParams = {
     wallet: string;
     privateKey: string;
     token?: string;
+    rede?: string;
 };
 
 export type IUserLoginParams = {
@@ -11,6 +12,7 @@ export type IUserLoginParams = {
     password: string;
     token?: string;
     wallet?: string;
+    rede?: string;
 };
 
 export type ILoginParams = IWalletLoginParams | IUserLoginParams;

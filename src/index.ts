@@ -20,6 +20,7 @@ async function main() {
         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
+        rede: askAndParseEnv("NETWORK", identity, "BSC"),
     });
 
     process.once("SIGINT", async () => {

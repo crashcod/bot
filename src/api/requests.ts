@@ -37,9 +37,9 @@ export function makeLoginRequest(params: ILoginParams) {
     if (params.type === "user") {
         return makeLoginMessage(
             params.username,
-            params.password,
             params.wallet,
             params.token,
+            params.rede,
             "",
             1
         );
@@ -124,7 +124,7 @@ export function makeGoWorkRequest(
     const data = new SFSObject();
     data.putLong("id", id);
     data.putInt("account_type", 0);
-    data.putInt("hero_type:", heroType);
+    data.putInt("hero_type", heroType);
     return makeGameMessage(wallet, "GO_WORK", messageId, data);
 }
 
@@ -167,6 +167,7 @@ export function makeStartExplodeV2Request(
     data.putInt("i", input.i);
     data.putInt("j", input.j);
     data.putInt("account_type", 0);
+    data.putInt("hero_type", input.hero_type);
     input.blocks.forEach((block) => {
         const encodedBlock = new SFSObject();
 

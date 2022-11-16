@@ -16,6 +16,7 @@ export type IStartExplodePayload = {
 export type IStartExplodeInput = {
     heroId: number;
     bombId: number;
+    hero_type: number;
     i: number;
     j: number;
     blocks: {

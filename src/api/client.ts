@@ -338,6 +338,7 @@ export class Client {
         // }
         await this.getJwtToken();
         await this.connect();
+        logger.info(`Network: ${this.loginParams.rede}`);
         return await makeUniquePromise(
             this.controller.login,
             () => this.sfs.send(makeLoginRequest(this.loginParams)),
@@ -929,7 +930,6 @@ export class Client {
                     heroType: payload.getInt("hero_type"),
                 } as IGetActiveBomberPayload;
             });
-        console.log(bombers);
         resolveUniquePromise(this.controller.getActiveHeroes, bombers);
         this.callHandler(this.handlers.getActiveBomber, bombers);
     }
@@ -1206,7 +1206,6 @@ export class Client {
     }
 
     private handleSyncHouse(params: SFSObject) {
-        console.log("retorno");
         const data = params.getSFSArray("houses");
 
         const houses = Array(data.size())
@@ -1239,7 +1238,6 @@ export class Client {
             `Failed with code ${errorCode}`
         );
 
-        console.log("error", command);
         switch (command) {
             case "GET_BLOCK_MAP":
                 return rejectUniquePromise(this.controller.getBlockMap, error);
