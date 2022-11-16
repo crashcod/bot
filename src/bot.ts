@@ -215,6 +215,7 @@ export class TreasureMapBot {
             `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
             `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
+            `Network: ${this.client.loginParams.rede}`+
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
