@@ -1,6 +1,7 @@
 import { ObjectHeaderItem } from "csv-writer/src/lib/record";
 import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
+import { VERSION_CODE } from "./constants";
 import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import {
@@ -64,6 +65,7 @@ interface IMoreOptions {
     houseHeroes?: string;
     adventureHeroes?: string;
     rede?: string;
+    version?: number;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -107,9 +109,11 @@ export class TreasureMapBot {
             modeAdventure = false,
             saveRewardsCsv = false,
             rede = "BSC",
+            version = VERSION_CODE
         } = moreParams;
 
         loginParams.rede = rede;
+        loginParams.version = version;
 
         this.modeAdventure = modeAdventure;
         this.modeAmazon = true;

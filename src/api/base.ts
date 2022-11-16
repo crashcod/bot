@@ -69,6 +69,7 @@ export function makeLoginMessage(
     wallet?: string,
     token?: string,
     rede?: string,
+    version?: number,
     signature?: string,
     lt?: number
 ) {
@@ -82,7 +83,7 @@ export function makeLoginMessage(
     data.put("data_type", rede, SFSDataType.UTF_STRING);
     data.put("device_type", "WEB", SFSDataType.UTF_STRING);
     // data.put("password", password, SFSDataType.UTF_STRING);
-    data.put("version_code", VERSION_CODE, SFSDataType.INT);
+    data.put("version_code", version, SFSDataType.INT);
     data.put("lt", lt, SFSDataType.INT);
     data.put("slogan", "senspark", SFSDataType.UTF_STRING);
     data.put("signature", signature, SFSDataType.UTF_STRING);
