@@ -274,7 +274,6 @@ export class Client {
                         password,
                     },
                     headers: this.apiBaseHeaders,
-                    http2: true,
                 })
                 .json<IJwtLoginResponse>();
             logger.info(`New token: ${resultToken.message.token}`);
