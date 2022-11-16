@@ -109,7 +109,7 @@ export class TreasureMapBot {
             modeAdventure = false,
             saveRewardsCsv = false,
             rede = "BSC",
-            version = VERSION_CODE
+            version = VERSION_CODE,
         } = moreParams;
 
         loginParams.rede = rede;
@@ -219,7 +219,7 @@ export class TreasureMapBot {
             `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
             `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
-            `Network: ${this.client.loginParams.rede}`+
+            `Network: ${this.client.loginParams.rede}` +
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
@@ -563,7 +563,6 @@ export class TreasureMapBot {
             j: location.j,
         });
 
-        console.log("result", result);
         this.removeBombHero(hero, bombId);
         if (!result) {
             return false;

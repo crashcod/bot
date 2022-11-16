@@ -40,6 +40,7 @@ export function makeLoginRequest(params: ILoginParams) {
             params.wallet,
             params.token,
             params.rede,
+            params.version,
             "",
             1
         );

@@ -5,7 +5,7 @@ import {
     SFSObject,
 } from "sfs2x-api";
 
-import { LC, SALT_KEY, VERSION_CODE } from "../constants";
+import { LC, SALT_KEY } from "../constants";
 import { currentTimeSinceAD, hashMD5 } from "../lib";
 
 export type EGameAction =

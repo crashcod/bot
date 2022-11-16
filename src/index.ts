@@ -1,5 +1,4 @@
 import { TreasureMapBot } from "./bot";
-import { VERSION_CODE } from "./constants";
 import {
     askAndParseEnv,
     identity,
@@ -22,9 +21,7 @@ async function main() {
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
         rede: askAndParseEnv("NETWORK", identity, "BSC"),
-        version: parseInt(
-            askAndParseEnv("VERSION", identity, "")
-        ),
+        version: parseInt(askAndParseEnv("VERSION", identity, "")),
     });
 
     process.once("SIGINT", async () => {
