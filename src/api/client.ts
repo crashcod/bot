@@ -558,7 +558,7 @@ export class Client {
         );
     }
 
-    goSleep(heroId: number, timeout = 0) {
+    goSleep(hero: Hero, timeout = 0) {
         this.ensureLoggedIn();
 
         return makeSerializedPromise(
@@ -567,7 +567,7 @@ export class Client {
                 const request = makeGoSleepRequest(
                     this.walletId,
                     this.nextId(),
-                    heroId
+                    hero
                 );
                 this.sfs.send(request);
             },
@@ -575,7 +575,7 @@ export class Client {
         );
     }
 
-    goHome(heroId: number, timeout = 0) {
+    goHome(hero: Hero, timeout = 0) {
         this.ensureLoggedIn();
 
         return makeSerializedPromise(
@@ -584,7 +584,7 @@ export class Client {
                 const request = makeGoHomeRequest(
                     this.walletId,
                     this.nextId(),
-                    heroId
+                    hero
                 );
                 this.sfs.send(request);
             },

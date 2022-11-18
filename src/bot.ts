@@ -149,7 +149,7 @@ export class TreasureMapBot {
         await sleep(5000);
 
         for (const hero of this.workingSelection) {
-            await this.client.goSleep(hero.id);
+            await this.client.goSleep(hero);
         }
 
         if (this.telegraf) {
@@ -309,6 +309,7 @@ export class TreasureMapBot {
     }
 
     get homeSlots() {
+        console.log(this.home, "this.home");
         return this.home?.slots || 0;
     }
 
@@ -379,13 +380,18 @@ export class TreasureMapBot {
             if (hero.state === "Home") continue;
 
             const atHome = this.squad.byState("Home");
+
+            console.log(atHome.length, "atHome.length");
+            console.log(this.homeSlots, "this.homeSlots");
+            console.log(this.squad, "this.squad");
             if (
                 this.houseHeroes.includes(hero.id.toString()) ||
                 atHome.length < this.homeSlots
             ) {
                 if (atHome.length < this.homeSlots) {
                     logger.info(`Sending hero ${hero.id} home`);
-                    await this.client.goHome(hero.id);
+                    console.log("hero", hero);
+                    await this.client.goHome(hero);
                 } else {
                     const removeHero = atHome.find(
                         (hero) => !this.houseHeroes.includes(hero.id.toString())
@@ -393,9 +399,9 @@ export class TreasureMapBot {
 
                     if (removeHero) {
                         logger.info(`Removing hero ${removeHero.id} from home`);
-                        await this.client.goSleep(removeHero.id);
+                        await this.client.goSleep(removeHero);
                         logger.info(`Sending hero ${hero.id} home`);
-                        await this.client.goHome(hero.id);
+                        await this.client.goHome(hero);
                     }
                 }
             }
@@ -575,7 +581,7 @@ export class TreasureMapBot {
 
         if (energy <= 0) {
             logger.info(`Sending hero ${hero.id} to sleep`);
-            await this.client.goSleep(hero.id);
+            await this.client.goSleep(hero);
             await this.refreshHeroAtHome();
             await this.refreshHeroSelection();
         }
@@ -818,7 +824,7 @@ export class TreasureMapBot {
     async sleepAllHeroes() {
         logger.info("Sleep all heroes...");
         for (const hero of this.workingSelection) {
-            await this.client.goSleep(hero.id);
+            await this.client.goSleep(hero);
         }
     }
 

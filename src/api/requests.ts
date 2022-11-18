@@ -97,23 +97,24 @@ export function makeGetActiveBomberRequest(wallet: string, messageId: number) {
 export function makeGoSleepRequest(
     wallet: string,
     messageId: number,
-    heroId: number
+    { id, heroType }: Hero
 ) {
     const data = new SFSObject();
-    data.putLong("id", heroId);
+    data.putLong("id", id);
     data.putInt("account_type", 0);
-    data.putInt("hero_type", 0);
+    data.putInt("hero_type", heroType);
     return makeGameMessage(wallet, "GO_SLEEP", messageId, data);
 }
 
 export function makeGoHomeRequest(
     wallet: string,
     messageId: number,
-    heroId: number
+    { id, heroType }: Hero
 ) {
     const data = new SFSObject();
-    data.putLong("id", heroId);
+    data.putLong("id", id);
     data.putInt("account_type", 0);
+    data.putInt("hero_type", heroType);
     return makeGameMessage(wallet, "GO_HOME", messageId, data);
 }
 
