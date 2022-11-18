@@ -3,7 +3,13 @@ const REWARD_MAP = {
     BCOIN: "BCoin",
     BCOIN_DEPOSITED: "BCoin Deposited",
     SENSPARK: "Senspark",
+    MSPc: "MSPc",
+    BOSS_TICKET: "BOSS TICKET",
+    PVP_TICKET: "PVP TICKET",
+    COIN: "COIN",
+    NFT_PVP: "NFT PVP",
     LUS: "Lus",
+    WOFM: "WOFM",
     LUS_NFT: "Lus NFT",
     KEY: "Key",
 } as const;
@@ -24,10 +30,12 @@ export const isFloat = (n: number): boolean => {
     return n.toString().split(".")[1] !== undefined;
 };
 
+export type IGetRewardPayloadNetwork = "BSC" | "POLYGON" | "TR";
 export type IGetRewardPayload = {
     remainTime: number;
     type: ERewardType;
     value: number;
+    network: IGetRewardPayloadNetwork;
 };
 
 export type ICoinDetailPayload = {

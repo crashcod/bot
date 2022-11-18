@@ -50,6 +50,7 @@ import {
 import {
     ICoinDetailPayload,
     IGetRewardPayload,
+    IGetRewardPayloadNetwork,
     parseRewardType,
 } from "../parsers/reward";
 import { EGameAction } from "./base";
@@ -1083,6 +1084,9 @@ export class Client {
                     remainTime: reward.getInt("remain_time"),
                     type: parseRewardType(reward.getUtfString("type")),
                     value: reward.getFloat("value"),
+                    network: reward.getUtfString(
+                        "data_type"
+                    ) as IGetRewardPayloadNetwork,
                 };
             });
 

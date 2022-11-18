@@ -187,7 +187,8 @@ export class TreasureMapBot {
                 : "empty shield";
             return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
         };
-        const heroesAdventure = await this.getHeroesAdventure();
+
+        // const heroesAdventure = await this.getHeroesAdventure();
         const blocks = this.map.blocks.length;
 
         const workingHeroesLife = this.workingSelection
@@ -205,8 +206,7 @@ export class TreasureMapBot {
             const AllEnemies = this.adventureEnemies.length;
             msgEnemies = `Total enemies adventure: ${enemies}/${AllEnemies}\n\n`;
         }
-
-        const heroesAdventureSelected = this.adventureHeroes.join(", ");
+        // const heroesAdventureSelected = this.adventureHeroes.join(", ");
         const houseHeroesIds = this.houseHeroes.join(", ");
         const heroesAtHome = this.squad
             .byState("Home")
@@ -216,8 +216,8 @@ export class TreasureMapBot {
         const message =
             `Playing mode: ${this.getStatusPlaying()}\n\n` +
             `Adventure: \n` +
-            `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
-            `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
+            // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
+            // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
             `Network: ${this.client.loginParams.rede}` +
             `Treasure/Amazon:\n` +
@@ -237,16 +237,17 @@ export class TreasureMapBot {
     public async getRewardAccount() {
         if (this.client.isConnected) {
             const rewards = await this.client.getReward();
-            const detail = await this.client.coinDetail();
+            // const detail = await this.client.coinDetail();
 
             const message =
                 "Rewards:\n" +
-                `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
-                `| Rewards: ${detail.rewards}\n` +
+                // `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
+                // `| Rewards: ${detail.rewards}\n` +
                 rewards
+                    .sort((a, b) => (a.network > b.network ? -1 : 1))
                     .map(
                         (reward) =>
-                            `${reward.type}: ${
+                            `${reward.network}-${reward.type}: ${
                                 isFloat(reward.value)
                                     ? reward.value.toFixed(2)
                                     : reward.value
