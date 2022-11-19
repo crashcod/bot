@@ -8,6 +8,7 @@ function parseHouseStats(genId: string): IHouseStats {
     const GI_RARITY = 40;
     const GI_RECOVERY = 45;
     const GI_SLOTS = 60;
+    const GI_BLOCK = 65;
 
     const binRevGenId = toRevBin(genId);
     if (binRevGenId.length < GI_SLOTS)
@@ -18,7 +19,8 @@ function parseHouseStats(genId: string): IHouseStats {
         unknown0: parseRevBin(binRevGenId, GI_UNKNOWN0, GI_RARITY),
         rarity: parseRevBin(binRevGenId, GI_RARITY, GI_RECOVERY),
         recovery: parseRevBin(binRevGenId, GI_RECOVERY, GI_SLOTS),
-        slots: parseRevBin(binRevGenId, GI_SLOTS, binRevGenId.length),
+        slots: parseRevBin(binRevGenId, GI_SLOTS, GI_BLOCK),
+        blockNumber: parseRevBin(binRevGenId, GI_BLOCK, binRevGenId.length),
     };
 }
 

@@ -309,7 +309,6 @@ export class TreasureMapBot {
     }
 
     get homeSlots() {
-        console.log(this.home, "this.home");
         return this.home?.slots || 0;
     }
 
@@ -381,16 +380,12 @@ export class TreasureMapBot {
 
             const atHome = this.squad.byState("Home");
 
-            console.log(atHome.length, "atHome.length");
-            console.log(this.homeSlots, "this.homeSlots");
-            console.log(this.squad, "this.squad");
             if (
                 this.houseHeroes.includes(hero.id.toString()) ||
                 atHome.length < this.homeSlots
             ) {
                 if (atHome.length < this.homeSlots) {
                     logger.info(`Sending hero ${hero.id} home`);
-                    console.log("hero", hero);
                     await this.client.goHome(hero);
                 } else {
                     const removeHero = atHome.find(

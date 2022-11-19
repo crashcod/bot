@@ -15,6 +15,7 @@ export type IHouseStats = {
     rarity: number;
     recovery: number;
     unknown0: number;
+    blockNumber: number;
 };
 
 export type IHouseParams = IHouseStats & {
