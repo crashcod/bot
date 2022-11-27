@@ -416,15 +416,15 @@ export class TreasureMapBot {
             const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
             if (percent < this.minHeroEnergyPercentage) continue;
 
-            if (
-                this.modeAmazon &&
-                (!hero.shields ||
-                    hero.shields.length === 0 ||
-                    this.getSumShield(hero) === 0)
-            ) {
-                logger.info(`Hero ${hero.id} needs shield repair`);
-                continue;
-            }
+            // if (
+            //     this.modeAmazon &&
+            //     (!hero.shields ||
+            //         hero.shields.length === 0 ||
+            //         this.getSumShield(hero) === 0)
+            // ) {
+            //     logger.info(`Hero ${hero.id} needs shield repair`);
+            //     continue;
+            // }
 
             logger.info(`Sending hero ${hero.id} to work`);
             await this.client.goWork(hero);
@@ -551,27 +551,31 @@ export class TreasureMapBot {
         const bombId = bombIdObj.lastId;
         //seeta quantas bombas esta jogando ao mesmo tempo
 
-        logger.info(
-            `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
-                `bomb on (${location.i}, ${location.j})`
-        );
+        // logger.info(
+        //     `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
+        //         `bomb on (${location.i}, ${location.j})`
+        // );
         await sleep(3000);
         const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
-        const result = await this.client[method]({
-            heroId: hero.id,
-            bombId,
-            hero_type: hero.heroType,
-            blocks: [],
-            i: location.i - 1,
-            j: location.j,
-        });
+        const newPosition = this.map.getPossitionValid(location);
 
+        let result;
+        if (newPosition) {
+            result = await this.client[method]({
+                heroId: hero.id,
+                bombId,
+                hero_type: hero.heroType,
+                blocks: [],
+                i: newPosition.i,
+                j: newPosition.j,
+            });
+        }
         this.removeBombHero(hero, bombId);
+        console.log("result", result, newPosition, location);
         if (!result) {
             return false;
         }
 
-        console.log("result", result);
         const { energy } = result;
 
         if (energy <= 0) {
