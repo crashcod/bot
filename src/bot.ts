@@ -5,6 +5,7 @@ import { VERSION_CODE } from "./constants";
 import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import {
+    Block,
     BLOCK_TYPE_MAP,
     buildBlock,
     buildHero,
@@ -13,11 +14,10 @@ import {
     House,
     IGetBlockMapPayload,
     IHeroUpdateParams,
-    IMapTile,
     IMapTileEmpty,
     Squad,
-    TreasureMap,
 } from "./model";
+import { NewMap } from "./model/newMap";
 import {
     IEnemies,
     IEnemyTakeDamagePayload,
@@ -36,14 +36,13 @@ import {
 import { ILoginParams } from "./parsers/login";
 
 const DEFAULT_TIMEOUT = 120000;
-const HISTORY_SIZE = 5;
 const ADVENTURE_ENABLED = true;
 
 type ExplosionByHero = Map<
     number,
     {
         timestamp: number;
-        tile: IMapTile;
+        tile: Block;
     }
 >;
 type LocationByHeroWorking = Map<
@@ -74,7 +73,7 @@ type ETelegrafCommand = typeof TELEGRAF_COMMANDS[number];
 
 export class TreasureMapBot {
     public client!: Client;
-    public map!: TreasureMap;
+    public map!: NewMap;
     private squad!: Squad;
     private telegraf?: Telegraf;
     private selection: Hero[];
@@ -82,7 +81,6 @@ export class TreasureMapBot {
     private explosionByHero: ExplosionByHero;
     private locationByHeroWorking: LocationByHeroWorking;
     private heroBombs: Record<number, HeroBombs> = {};
-    private history: IMapTile[];
     private index: number;
     private shouldRun: boolean;
     private lastAdventure: number;
@@ -120,7 +118,8 @@ export class TreasureMapBot {
         this.saveRewardsCsv = saveRewardsCsv;
         this.playing = null;
         this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
-        this.map = new TreasureMap({ blocks: [] });
+        // this.map = new TreasureMap({ blocks: [] });
+        this.map = new NewMap();
         this.squad = new Squad({ heroes: [] });
         this.houses = [];
         this.forceExit = forceExit || true;
@@ -134,7 +133,6 @@ export class TreasureMapBot {
         this.heroBombs = {};
         this.locationByHeroWorking = new Map();
         this.selection = [];
-        this.history = [];
         this.index = 0;
         this.shouldRun = false;
         this.lastAdventure = 0;
@@ -219,7 +217,7 @@ export class TreasureMapBot {
             // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
             // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
-            `Network: ${this.client.loginParams.rede}` +
+            `Network: ${this.client.loginParams.rede}\n` +
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
@@ -448,47 +446,52 @@ export class TreasureMapBot {
         logger.info(`Current map state: ${this.map.toString()}`);
     }
 
-    nextLocation(hero: Hero) {
-        //verifica se ele ja esta jogando a bomba em um local
-        const result = this.locationByHeroWorking.get(hero.id);
-        const location = this.map
-            .getHeroDamageForMap(hero)
-            .find(
-                ({ tile }) =>
-                    tile.i == result?.tile.i && tile.j == result?.tile.j
-            );
+    nextLocation() {
+        const blocks = this.map.blocksLife;
 
-        if (result && location && location.damage > 0) {
-            return result;
-        }
-        const locations = this.map
-            .getHeroDamageForMap(hero)
-            .filter(({ damage }) => damage > 0);
-
-        let selected;
-
-        if (locations.length <= HISTORY_SIZE) {
-            selected = locations[0];
-        } else {
-            const items = locations.filter(
-                ({ tile: option }) =>
-                    !this.history.find(
-                        (tile) => tile.i === option.i && tile.j === option.j
-                    )
-            );
-            selected = items[0];
-            //random
-            //selected = items[Math.floor(Math.random() * items.length)];
-        }
-        if (!selected) {
-            selected = locations[0];
-        }
-
-        this.locationByHeroWorking.set(hero.id, selected);
+        const selected = blocks[Math.floor(Math.random() * blocks.length)];
         return selected;
+
+        // //verifica se ele ja esta jogando a bomba em um local
+        // const result = this.locationByHeroWorking.get(hero.id);
+        // const location = this.map
+        //     .getHeroDamageForMap(hero)
+        //     .find(
+        //         ({ tile }) =>
+        //             tile.i == result?.tile.i && tile.j == result?.tile.j
+        //     );
+
+        // if (result && location && location.damage > 0) {
+        //     return result;
+        // }
+        // const locations = this.map
+        //     .getHeroDamageForMap(hero)
+        //     .filter(({ damage }) => damage > 0);
+
+        // let selected;
+
+        // if (locations.length <= HISTORY_SIZE) {
+        //     selected = locations[0];
+        // } else {
+        //     const items = locations.filter(
+        //         ({ tile: option }) =>
+        //             !this.history.find(
+        //                 (tile) => tile.i === option.i && tile.j === option.j
+        //             )
+        //     );
+        //     selected = items[0];
+        //     //random
+        //     //selected = items[Math.floor(Math.random() * items.length)];
+        // }
+        // if (!selected) {
+        //     selected = locations[0];
+        // }
+
+        // this.locationByHeroWorking.set(hero.id, selected);
+        // return selected;
     }
 
-    canPlaceBomb(hero: Hero, location: IMapTile) {
+    canPlaceBomb(hero: Hero, location: Block) {
         const entry = this.explosionByHero.get(hero.id);
         if (!entry) return true;
 
@@ -532,7 +535,7 @@ export class TreasureMapBot {
         return bombsByHero;
     }
 
-    async placeBomb(hero: Hero, location: IMapTile) {
+    async placeBomb(hero: Hero, location: Block) {
         const bombIdObj = this.addBombHero(hero);
         this.locationByHeroWorking.delete(hero.id);
         this.explosionByHero.set(hero.id, {
@@ -540,15 +543,13 @@ export class TreasureMapBot {
             tile: location,
         });
 
-        this.nextLocation(hero);
+        // this.nextLocation(hero);
         if (!bombIdObj) {
             return false;
         }
 
         const bombId = bombIdObj.lastId;
         //seeta quantas bombas esta jogando ao mesmo tempo
-
-        this.history.push(location);
 
         logger.info(
             `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
@@ -561,7 +562,7 @@ export class TreasureMapBot {
             bombId,
             hero_type: hero.heroType,
             blocks: [],
-            i: location.i,
+            i: location.i - 1,
             j: location.j,
         });
 
@@ -570,9 +571,8 @@ export class TreasureMapBot {
             return false;
         }
 
+        console.log("result", result);
         const { energy } = result;
-
-        while (this.history.length > HISTORY_SIZE) this.history.shift();
 
         if (energy <= 0) {
             logger.info(`Sending hero ${hero.id} to sleep`);
@@ -585,10 +585,10 @@ export class TreasureMapBot {
     }
 
     async placeBombsHero(hero: Hero) {
-        const location = this.nextLocation(hero);
+        const location = this.nextLocation();
 
-        if (location && this.canPlaceBomb(hero, location.tile)) {
-            await this.placeBomb(hero, location.tile);
+        if (location && this.canPlaceBomb(hero, location)) {
+            await this.placeBomb(hero, location);
         }
     }
 
@@ -863,7 +863,6 @@ export class TreasureMapBot {
     }
 
     private resetState() {
-        this.history = [];
         this.explosionByHero = new Map();
         this.heroBombs = {};
         this.locationByHeroWorking = new Map();
@@ -926,7 +925,7 @@ export class TreasureMapBot {
     private handleMapLoad(payload: IGetBlockMapPayload[]) {
         const blocks = payload.map(parseGetBlockMapPayload).map(buildBlock);
 
-        this.map.update({ blocks });
+        this.map.update(blocks);
     }
 
     private handleSquadLoad(payload: IGetActiveBomberPayload[]) {
