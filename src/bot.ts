@@ -569,7 +569,6 @@ export class TreasureMapBot {
             });
         }
         this.removeBombHero(hero, bombId);
-        console.log(result?.blocks.length);
         if (!result) {
             return false;
         }

@@ -12,7 +12,6 @@ export class NewMap {
     static readonly HEIGHT = 17;
 
     public update(value: Block[]) {
-        console.log("value", value);
         this.blocks = value;
     }
 
