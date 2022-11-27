@@ -12,15 +12,16 @@ export class NewMap {
     static readonly HEIGHT = 17;
 
     public update(value: Block[]) {
+        console.log("value", value);
         this.blocks = value;
     }
 
     updateBlock(params: IMapBlockUpdateParams) {
-        const block = this.blocks.find(
+        const block = this.blocks.findIndex(
             (v) => v.i == params.i && v.j == params.j
         );
-        if (block) {
-            block.updateHp(params.hp);
+        if (block !== -1) {
+            this.blocks[block].updateHp(params.hp);
         }
     }
 
@@ -33,40 +34,36 @@ export class NewMap {
     }
 
     get blocksLife(): Block[] {
-        return this.blocks.filter((v) => v.hp > 0);
+        return this.blocks
+            .filter((v) => v.hp > 0)
+            .sort((a, b) => (b.hp > a.hp ? 1 : -1));
     }
 
     canPossitionValid(value: ITestPosition) {
-        const exists = this.blocks.find(
+        const exists = this.blocksLife.find(
             (b) => b.i == value.i && b.j == value.j
         );
         if (exists) return false;
 
-        if (value.i == 0 || value.i == NewMap.WIDTH) {
-            return true;
+        if (value.i > NewMap.WIDTH - 1) {
+            return false;
         }
-        if (value.j == 0 || value.j == NewMap.HEIGHT) {
-            return true;
-        }
-        if (value.j % 2 == 0 || value.i % 2 == 0) {
-            return true;
+        if (value.j > NewMap.HEIGHT - 1) {
+            return false;
         }
 
-        // this.blocks.find(b => )
-
-        // if (n == 0) {
+        // if (value.i == 0 || value.i == NewMap.WIDTH - 1) {
         //     return true;
         // }
-        // if (n == NewMap.WIDTH) {
+        // if (value.j == 0 || value.j == NewMap.HEIGHT - 1) {
         //     return true;
         // }
-        // if (n == NewMap.HEIGHT) {
-        //     return true;
-        // }
-        // //so pode soltar quando for par
-        // if (n % 2 != 0) {
-        //     return true;
-        // }
+        if (value.j % 2 === 0) {
+            return true;
+        }
+        if (value.i % 2 === 0) {
+            return true;
+        }
     }
 
     getPossitionValid(block: Block): { i: number; j: number } | undefined {
@@ -86,5 +83,17 @@ export class NewMap {
 
     toString(): string {
         return `Map: ${this.totalLife}/${this.totalMaxLife}`;
+    }
+
+    formatMsgBlock() {
+        const blocks = this.blocksLife.reduce(function (r, a) {
+            r[a.type] = r[a.type] || [];
+            r[a.type].push(a);
+            return r;
+        }, Object.create(null));
+
+        return Object.keys(blocks).map(
+            (type) => `${type}: ${blocks[type].length}\n`
+        );
     }
 }

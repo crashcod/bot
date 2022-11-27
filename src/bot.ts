@@ -187,7 +187,6 @@ export class TreasureMapBot {
         };
 
         // const heroesAdventure = await this.getHeroesAdventure();
-        const blocks = this.map.blocks.length;
 
         const workingHeroesLife = this.workingSelection
             .map(formatMsg)
@@ -224,7 +223,7 @@ export class TreasureMapBot {
             `Heroes at home (${
                 this.squad.byState("Home").length
             }): ${heroesAtHome}\n` +
-            `Remaining chest (Treasure/Amazon): ${blocks}\n\n` +
+            `Remaining chest (Amazon): \n${this.map.formatMsgBlock()}\n\n` +
             `INFO: LIFE HERO | SHIELD HERO\n` +
             `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
             `Resting heroes (${this.notWorkingSelection.length}): \n${notWorkingHeroesLife}`;
@@ -416,15 +415,15 @@ export class TreasureMapBot {
             const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
             if (percent < this.minHeroEnergyPercentage) continue;
 
-            // if (
-            //     this.modeAmazon &&
-            //     (!hero.shields ||
-            //         hero.shields.length === 0 ||
-            //         this.getSumShield(hero) === 0)
-            // ) {
-            //     logger.info(`Hero ${hero.id} needs shield repair`);
-            //     continue;
-            // }
+            if (
+                this.modeAmazon &&
+                (!hero.shields ||
+                    hero.shields.length === 0 ||
+                    this.getSumShield(hero) === 0)
+            ) {
+                logger.info(`Hero ${hero.id} needs shield repair`);
+                continue;
+            }
 
             logger.info(`Sending hero ${hero.id} to work`);
             await this.client.goWork(hero);
@@ -447,7 +446,7 @@ export class TreasureMapBot {
     }
 
     nextLocation() {
-        const blocks = this.map.blocksLife;
+        const blocks = this.map.blocksLife.slice(0, 5);
 
         const selected = blocks[Math.floor(Math.random() * blocks.length)];
         return selected;
@@ -551,11 +550,10 @@ export class TreasureMapBot {
         const bombId = bombIdObj.lastId;
         //seeta quantas bombas esta jogando ao mesmo tempo
 
-        // logger.info(
-        //     `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
-        //         `bomb on (${location.i}, ${location.j})`
-        // );
-        await sleep(3000);
+        logger.info(
+            `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
+                `bomb on (${location.i}, ${location.j})`
+        );
         const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
         const newPosition = this.map.getPossitionValid(location);
 
@@ -571,7 +569,7 @@ export class TreasureMapBot {
             });
         }
         this.removeBombHero(hero, bombId);
-        console.log("result", result, newPosition, location);
+        console.log(result?.blocks.length);
         if (!result) {
             return false;
         }
@@ -584,6 +582,7 @@ export class TreasureMapBot {
             await this.refreshHeroAtHome();
             await this.refreshHeroSelection();
         }
+        await sleep(3000);
 
         // logger.info(this.map.toString());
     }
