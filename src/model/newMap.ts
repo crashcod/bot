@@ -95,4 +95,5 @@ export class NewMap {
             (type) => `${type}: ${blocks[type].length}\n`
         );
     }
+    drawMap() {}
 }
