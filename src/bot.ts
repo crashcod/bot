@@ -550,15 +550,15 @@ export class TreasureMapBot {
         const bombId = bombIdObj.lastId;
         //seeta quantas bombas esta jogando ao mesmo tempo
 
-        logger.info(
-            `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
-                `bomb on (${location.i}, ${location.j})`
-        );
         const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
         const newPosition = this.map.getPossitionValid(location);
 
         let result;
         if (newPosition) {
+            logger.info(
+                `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
+                    `bomb on (${location.i}, ${location.j})`
+            );
             result = await this.client[method]({
                 heroId: hero.id,
                 bombId,

@@ -50,13 +50,6 @@ export class NewMap {
         if (value.j > NewMap.HEIGHT - 1) {
             return false;
         }
-
-        // if (value.i == 0 || value.i == NewMap.WIDTH - 1) {
-        //     return true;
-        // }
-        // if (value.j == 0 || value.j == NewMap.HEIGHT - 1) {
-        //     return true;
-        // }
         if (value.j % 2 === 0) {
             return true;
         }
@@ -64,19 +57,25 @@ export class NewMap {
             return true;
         }
     }
+    getPossitionValidRetry(block: Block, qty: number) {
+        if (this.canPossitionValid({ i: block.i + qty, j: block.j })) {
+            return { i: block.i + qty, j: block.j };
+        }
+        if (this.canPossitionValid({ i: block.i - qty, j: block.j })) {
+            return { i: block.i - qty, j: block.j };
+        }
+        if (this.canPossitionValid({ i: block.i, j: block.j + qty })) {
+            return { i: block.i, j: block.j + qty };
+        }
+        if (this.canPossitionValid({ i: block.i, j: block.j - qty })) {
+            return { i: block.i, j: block.j - qty };
+        }
+    }
 
     getPossitionValid(block: Block): { i: number; j: number } | undefined {
-        if (this.canPossitionValid({ i: block.i + 1, j: block.j })) {
-            return { i: block.i + 1, j: block.j };
-        }
-        if (this.canPossitionValid({ i: block.i - 1, j: block.j })) {
-            return { i: block.i - 1, j: block.j };
-        }
-        if (this.canPossitionValid({ i: block.i, j: block.j + 1 })) {
-            return { i: block.i, j: block.j + 1 };
-        }
-        if (this.canPossitionValid({ i: block.i, j: block.j - 1 })) {
-            return { i: block.i, j: block.j - 1 };
+        for (let tryQty = 1; tryQty <= 5; tryQty++) {
+            const isValid = this.getPossitionValidRetry(block, tryQty);
+            if (isValid) return isValid;
         }
     }
 
@@ -95,5 +94,7 @@ export class NewMap {
             (type) => `${type}: ${blocks[type].length}\n`
         );
     }
-    drawMap() {}
+    drawMap() {
+        console.log("kk");
+    }
 }
