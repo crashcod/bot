@@ -446,7 +446,7 @@ export class TreasureMapBot {
     }
 
     nextLocation() {
-        const blocks = this.map.blocksLife.slice(0, 5);
+        const blocks = this.map.blocksLife;
 
         const selected = blocks[Math.floor(Math.random() * blocks.length)];
         return selected;
@@ -498,7 +498,7 @@ export class TreasureMapBot {
             Math.abs(location.i - entry.tile.i) +
             Math.abs(location.j - entry.tile.j);
 
-        const timedelta = (distance / hero.speed) * 1000;
+        const timedelta = (distance / hero.speed) * 500;
         const elapsed = Date.now() - entry.timestamp;
 
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
@@ -572,7 +572,6 @@ export class TreasureMapBot {
         if (!result) {
             return false;
         }
-
         const { energy } = result;
 
         if (energy <= 0) {
@@ -581,7 +580,7 @@ export class TreasureMapBot {
             await this.refreshHeroAtHome();
             await this.refreshHeroSelection();
         }
-        await sleep(3000);
+        // await sleep(3000);
 
         // logger.info(this.map.toString());
     }

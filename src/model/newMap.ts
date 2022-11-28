@@ -73,10 +73,9 @@ export class NewMap {
     }
 
     getPossitionValid(block: Block): { i: number; j: number } | undefined {
-        for (let tryQty = 1; tryQty <= 5; tryQty++) {
-            const isValid = this.getPossitionValidRetry(block, tryQty);
-            if (isValid) return isValid;
-        }
+        // for (let tryQty = 1; tryQty <= 5; tryQty++) {
+        return this.getPossitionValidRetry(block, 1);
+        // }
     }
 
     toString(): string {
