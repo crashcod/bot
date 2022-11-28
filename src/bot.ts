@@ -449,7 +449,7 @@ export class TreasureMapBot {
     }
 
     nextLocation(hero: Hero) {
-        //verifica se ele ja esta jogando a bomba em um local
+        //verifica se ele ja esta jogando a bomba em um local.
         const result = this.locationByHeroWorking.get(hero.id);
         const location = this.map
             .getHeroDamageForMap(hero)
