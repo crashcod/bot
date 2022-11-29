@@ -56,7 +56,7 @@ export class TreasureMap {
     static readonly WIDTH = 35;
     static readonly HEIGHT = 17;
 
-    private params!: IMapParams;
+    public params!: IMapParams;
     private matrix!: IMapTile[];
 
     constructor(params: IMapParams) {
@@ -285,6 +285,20 @@ export class TreasureMap {
 
     toString(): string {
         return `Map: ${this.totalLife}/${this.totalMaxLife}`;
+    }
+
+    formatMsgBlock() {
+        const blocks = this.params.blocks
+            .filter((v) => v.hp > 0)
+            .reduce(function (r, a) {
+                r[a.type] = r[a.type] || [];
+                r[a.type].push(a);
+                return r;
+            }, Object.create(null));
+
+        return Object.keys(blocks).map(
+            (type) => `${type}: ${blocks[type].length}\n`
+        );
     }
 }
 

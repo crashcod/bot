@@ -189,7 +189,6 @@ export class TreasureMapBot {
         };
 
         // const heroesAdventure = await this.getHeroesAdventure();
-        const blocks = this.map.blocks.length;
 
         const workingHeroesLife = this.workingSelection
             .map(formatMsg)
@@ -215,18 +214,17 @@ export class TreasureMapBot {
 
         const message =
             `Playing mode: ${this.getStatusPlaying()}\n\n` +
-            `Adventure: \n` +
             // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
             // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
             msgEnemies +
-            `Network: ${this.client.loginParams.rede}` +
+            `Network: ${this.client.loginParams.rede}\n` +
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
             `Heroes at home (${
                 this.squad.byState("Home").length
             }): ${heroesAtHome}\n` +
-            `Remaining chest (Treasure/Amazon): ${blocks}\n\n` +
+            `Remaining chest (Amazon): \n${this.map.formatMsgBlock()}\n\n` +
             `INFO: LIFE HERO | SHIELD HERO\n` +
             `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
             `Resting heroes (${this.notWorkingSelection.length}): \n${notWorkingHeroesLife}`;
@@ -496,7 +494,7 @@ export class TreasureMapBot {
             Math.abs(location.i - entry.tile.i) +
             Math.abs(location.j - entry.tile.j);
 
-        const timedelta = (distance / hero.speed) * 1000;
+        const timedelta = (distance / hero.speed) * 500;
         const elapsed = Date.now() - entry.timestamp;
 
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
