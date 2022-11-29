@@ -552,7 +552,7 @@ export class TreasureMapBot {
             `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
                 `bomb on (${location.i}, ${location.j})`
         );
-        await sleep(3000);
+        // await sleep(3000);
         const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
         const result = await this.client[method]({
             heroId: hero.id,
