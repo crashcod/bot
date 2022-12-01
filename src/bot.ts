@@ -182,10 +182,17 @@ export class TreasureMapBot {
 
     public async getStatsAccount() {
         const formatMsg = (hero: Hero) => {
+            const isSelectedAtHome = this.houseHeroes.includes(
+                hero.id.toString()
+            );
             const shield = hero.shields?.length
                 ? `${hero.shields[0].current}/${hero.shields[0].total}`
                 : "empty shield";
-            return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+            if (isSelectedAtHome) {
+                return `<b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
+            } else {
+                return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+            }
         };
 
         // const heroesAdventure = await this.getHeroesAdventure();
@@ -193,9 +200,10 @@ export class TreasureMapBot {
         const workingHeroesLife = this.workingSelection
             .map(formatMsg)
             .join("\n");
-        const notWorkingHeroesLife = this.notWorkingSelection
+        const notWorkingHeroesLife = this.sleepingSelection
             .map(formatMsg)
             .join("\n");
+        const homeHeroesLife = this.homeSelection.map(formatMsg).join("\n");
         let msgEnemies = "\n";
 
         if (this.playing === "Adventure") {
@@ -207,10 +215,6 @@ export class TreasureMapBot {
         }
         // const heroesAdventureSelected = this.adventureHeroes.join(", ");
         const houseHeroesIds = this.houseHeroes.join(", ");
-        const heroesAtHome = this.squad
-            .byState("Home")
-            .map((hero) => hero.id)
-            .join(",");
 
         const message =
             `Playing mode: ${this.getStatusPlaying()}\n\n` +
@@ -221,13 +225,11 @@ export class TreasureMapBot {
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
-            `Heroes at home (${
-                this.squad.byState("Home").length
-            }): ${heroesAtHome}\n` +
             `Remaining chest (Amazon): \n${this.map.formatMsgBlock()}\n\n` +
             `INFO: LIFE HERO | SHIELD HERO\n` +
             `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
-            `Resting heroes (${this.notWorkingSelection.length}): \n${notWorkingHeroesLife}`;
+            `Resting heroes (${this.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
+            `Resting heroes at home (${this.homeSelection.length}): \n${homeHeroesLife}`;
 
         return message;
     }
@@ -287,7 +289,7 @@ export class TreasureMapBot {
             }
         } else if (command === "stats") {
             const message = await this.getStatsAccount();
-            await context.reply(message);
+            await context.replyWithHTML(message);
         } else {
             await context.reply("Command not implemented");
         }
@@ -300,6 +302,12 @@ export class TreasureMapBot {
     }
     get notWorkingSelection() {
         return this.squad.notWorking;
+    }
+    get sleepingSelection() {
+        return this.squad.sleeping;
+    }
+    get homeSelection() {
+        return this.squad.home;
     }
 
     get home(): House | undefined {
@@ -368,8 +376,8 @@ export class TreasureMapBot {
                         hero.shields.length &&
                         this.getSumShield(hero))
             )
-            .sort((a, b) => b.rarityIndex - a.rarityIndex)
-            .slice(0, this.homeSlots);
+            .sort((a, b) => b.rarityIndex - a.rarityIndex);
+        // .slice(0, this.homeSlots);
 
         logger.info(`Will send heroes home (${this.homeSlots} slots)`);
 

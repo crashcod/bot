@@ -38,6 +38,14 @@ export class Squad {
             (hero) => hero.state !== "Work" || hero.energy === 0
         );
     }
+    get sleeping() {
+        return this.activeHeroes.filter(
+            (hero) => hero.state === "Sleep" || hero.energy === 0
+        );
+    }
+    get home() {
+        return this.activeHeroes.filter((hero) => hero.state === "Home");
+    }
 
     update(params: ISquadParams) {
         this.params = params;
