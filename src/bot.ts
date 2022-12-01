@@ -175,7 +175,7 @@ export class TreasureMapBot {
     }
 
     getStatusPlaying() {
-        if (this.playing === "sleep") return "sleep for 2 minutes";
+        if (this.playing === "sleep") return "sleep for 10 seconds";
         if (this.playing === null) return "starting";
         return this.playing;
     }
