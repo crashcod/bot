@@ -376,8 +376,13 @@ export class TreasureMapBot {
                         hero.shields.length &&
                         this.getSumShield(hero))
             )
-            .sort((a, b) => b.rarityIndex - a.rarityIndex);
-        // .slice(0, this.homeSlots);
+            .sort(
+                (a, b) =>
+                    +this.houseHeroes.includes(b.id.toString()) -
+                        +this.houseHeroes.includes(a.id.toString()) ||
+                    b.rarityIndex - a.rarityIndex
+            )
+            .slice(0, this.homeSlots);
 
         logger.info(`Will send heroes home (${this.homeSlots} slots)`);
 
