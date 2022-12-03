@@ -66,6 +66,7 @@ interface IMoreOptions {
     adventureHeroes?: string;
     rede?: string;
     version?: number;
+    alertShield?: number;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -86,6 +87,7 @@ export class TreasureMapBot {
     private index: number;
     private shouldRun: boolean;
     private lastAdventure: number;
+    private alertShield: number;
     private forceExit = true;
     private minHeroEnergyPercentage;
     private modeAmazon = false;
@@ -110,6 +112,7 @@ export class TreasureMapBot {
             saveRewardsCsv = false,
             rede = "BSC",
             version = VERSION_CODE,
+            alertShield = 0,
         } = moreParams;
 
         loginParams.rede = rede;
@@ -138,6 +141,7 @@ export class TreasureMapBot {
         this.index = 0;
         this.shouldRun = false;
         this.lastAdventure = 0;
+        this.alertShield = alertShield;
 
         if (telegramKey) this.initTelegraf(telegramKey);
     }
@@ -420,6 +424,10 @@ export class TreasureMapBot {
             .reduce((p, r) => p + r, 0);
     }
 
+    alertShieldHero(hero: Hero) {
+        logger.info(`Hero ${hero.id} needs shield repair`);
+    }
+
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
         await this.client.getActiveHeroes();
@@ -433,9 +441,9 @@ export class TreasureMapBot {
                 this.modeAmazon &&
                 (!hero.shields ||
                     hero.shields.length === 0 ||
-                    this.getSumShield(hero) === 0)
+                    this.getSumShield(hero) === this.alertShield)
             ) {
-                logger.info(`Hero ${hero.id} needs shield repair`);
+                this.alertShieldHero(hero);
                 continue;
             }
 

@@ -22,6 +22,7 @@ async function main() {
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
         rede: askAndParseEnv("NETWORK", identity, "BSC"),
         version: parseInt(askAndParseEnv("VERSION", identity, "")),
+        alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
     });
 
     process.once("SIGINT", async () => {

@@ -8,6 +8,8 @@ moderated by Lucas Vieceli
 
 if you don't have a computer available to run the bot, you can use the service for free via telegram. https://t.me/bombcryptoFreeBot
 
+group telegram https://t.me/+tQcb45U9MwAxYWMx
+
 ## Features
 
 It does the following:
@@ -64,6 +66,7 @@ The envirement variables are explained below:
 -   `[ADVENTURE_HEROES]` (optional): If you have adventure mode enabled, here you can inform the ids of the heroes that will be used, if not informed, all heroes will be used, separated by ":", Example 151515881:51878184:16187755.
 -   `[HOUSE_HEROES]` (optional): If you have a house, here you can inform the ids of the heroes will use the house, separated by ":", Example 151515881:51878184:16187755.
 -   `[SAVE_REWARDS_CSV]` (optional): whenever the bot is started, it will write a csv file, the "csv" folder with the bombcrypto username, with the rewards data.
+-   `[ALERT_SHIELD]` (optional): The value of the shield to notify you when it's running low
 
 ## Telegram integration
 
