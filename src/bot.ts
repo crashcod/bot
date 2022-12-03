@@ -419,9 +419,11 @@ export class TreasureMapBot {
     }
 
     getSumShield(hero: Hero) {
-        return hero.shields
-            ?.map((hero) => hero.current)
-            .reduce((p, r) => p + r, 0);
+        return (
+            hero.shields
+                ?.map((hero) => hero.current)
+                .reduce((p, r) => p + r, 0) || 0
+        );
     }
 
     alertShieldHero(hero: Hero) {
@@ -441,7 +443,7 @@ export class TreasureMapBot {
                 this.modeAmazon &&
                 (!hero.shields ||
                     hero.shields.length === 0 ||
-                    this.getSumShield(hero) === this.alertShield)
+                    this.getSumShield(hero) <= this.alertShield)
             ) {
                 this.alertShieldHero(hero);
                 continue;
