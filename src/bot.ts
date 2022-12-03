@@ -46,6 +46,12 @@ type ExplosionByHero = Map<
         tile: IMapTile;
     }
 >;
+type NotificationShieldHero = Map<
+    number,
+    {
+        timestamp: number;
+    }
+>;
 type LocationByHeroWorking = Map<
     number,
     {
@@ -81,6 +87,7 @@ export class TreasureMapBot {
     private selection: Hero[];
     private houses: House[];
     private explosionByHero: ExplosionByHero;
+    private notificationShieldHero: NotificationShieldHero;
     private locationByHeroWorking: LocationByHeroWorking;
     private heroBombs: Record<number, HeroBombs> = {};
     private history: IMapTile[];
@@ -136,6 +143,7 @@ export class TreasureMapBot {
         this.explosionByHero = new Map();
         this.heroBombs = {};
         this.locationByHeroWorking = new Map();
+        this.notificationShieldHero = new Map();
         this.selection = [];
         this.history = [];
         this.index = 0;
@@ -445,8 +453,29 @@ export class TreasureMapBot {
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) <= this.alertShield)
             ) {
-                this.alertShieldHero(hero);
-                continue;
+                const lastDate = this.notificationShieldHero.get(
+                    hero.id
+                )?.timestamp;
+                //verifica se faz mais que 24 horas da ultima notificação
+                if (
+                    !lastDate ||
+                    (lastDate &&
+                        Math.abs(
+                            new Date(lastDate).getTime() - new Date().getTime()
+                        ) / 36e5) > 24
+                ) {
+                    this.alertShieldHero(hero);
+                    this.notificationShieldHero.set(hero.id, {
+                        timestamp: new Date().getTime(),
+                    });
+                }
+                if (
+                    !hero.shields ||
+                    hero.shields.length === 0 ||
+                    this.getSumShield(hero) === 0
+                ) {
+                    continue;
+                }
             }
 
             logger.info(`Sending hero ${hero.id} to work`);
