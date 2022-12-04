@@ -82,10 +82,10 @@ type ETelegrafCommand = typeof TELEGRAF_COMMANDS[number];
 export class TreasureMapBot {
     public client!: Client;
     public map!: TreasureMap;
-    private squad!: Squad;
+    public squad!: Squad;
     private telegraf?: Telegraf;
     private selection: Hero[];
-    private houses: House[];
+    public houses: House[];
     private explosionByHero: ExplosionByHero;
     private notificationShieldHero: NotificationShieldHero;
     private locationByHeroWorking: LocationByHeroWorking;
