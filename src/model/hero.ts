@@ -162,6 +162,33 @@ export class Hero {
         return this.params.skills;
     }
 
+    toJSON() {
+        return {
+            id: this.id,
+            state: this.state,
+            active: this.active,
+            shields: this.shields,
+            heroType: this.heroType,
+            energy: this.energy,
+            maxEnergy: this.maxEnergy,
+            index: this.index,
+            rarityIndex: this.rarityIndex,
+            rarity: this.rarity,
+            skin: this.skin,
+            variant: this.variant,
+            level: this.level,
+            stamina: this.stamina,
+            speed: this.speed,
+            strength: this.strength,
+            damage: this.damage,
+            range: this.range,
+            capacity: this.capacity,
+            bombSkin: this.bombSkin,
+            skillCount: this.skillCount,
+            skills: this.skills,
+        };
+    }
+
     constructor(params: IHeroParams) {
         this.update(params);
     }
