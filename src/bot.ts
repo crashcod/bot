@@ -237,7 +237,9 @@ export class TreasureMapBot {
             `Treasure/Amazon:\n` +
             `${this.map.toString()}\n` +
             `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
-            `Remaining chest (Amazon): \n${this.map.formatMsgBlock()}\n\n` +
+            `Remaining chest (Amazon): \n${this.map
+                .formatMsgBlock()
+                .join("\n")}\n\n` +
             `INFO: LIFE HERO | SHIELD HERO\n` +
             `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
             `Resting heroes (${this.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
