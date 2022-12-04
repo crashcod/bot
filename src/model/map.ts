@@ -297,7 +297,7 @@ export class TreasureMap {
             }, Object.create(null));
 
         return Object.keys(blocks).map(
-            (type) => `${type}: ${blocks[type].length}\n`
+            (type) => `${type}: ${blocks[type].length}`
         );
     }
 }
