@@ -23,6 +23,7 @@ async function main() {
         rede: askAndParseEnv("NETWORK", identity, "BSC"),
         version: parseInt(askAndParseEnv("VERSION", identity, "")),
         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
+        numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
     });
 
     process.once("SIGINT", async () => {

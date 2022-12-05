@@ -35,7 +35,7 @@ import {
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
 
-const DEFAULT_TIMEOUT = 120000;
+const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
 const ADVENTURE_ENABLED = true;
 
@@ -73,6 +73,7 @@ interface IMoreOptions {
     rede?: string;
     version?: number;
     alertShield?: number;
+    numHeroWork?: number;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -100,6 +101,7 @@ export class TreasureMapBot {
     private modeAmazon = false;
     private modeAdventure = false;
     private saveRewardsCsv = false;
+    private numHeroWork = 15;
     private adventureBlocks: IGetBlockMapPayload[] = [];
     private adventureEnemies: IEnemies[] = [];
     private houseHeroes: string[] = [];
@@ -120,6 +122,7 @@ export class TreasureMapBot {
             rede = "BSC",
             version = VERSION_CODE,
             alertShield = 0,
+            numHeroWork = 15,
         } = moreParams;
 
         loginParams.rede = rede;
@@ -129,6 +132,7 @@ export class TreasureMapBot {
         this.modeAmazon = true;
         this.saveRewardsCsv = saveRewardsCsv;
         this.playing = null;
+        this.numHeroWork = numHeroWork;
         this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
@@ -445,8 +449,14 @@ export class TreasureMapBot {
         await this.client.getActiveHeroes();
 
         this.selection = this.squad.byState("Work");
-        for (const hero of this.squad.notWorking) {
-            const percent = (hero.energy / hero.maxEnergy) * 100 * 1.2;
+        const heroes = this.squad.notWorking.sort((a, b) => {
+            const apercent = (a.energy / a.maxEnergy) * 100;
+            const bpercent = (b.energy / b.maxEnergy) * 100;
+
+            return bpercent - apercent;
+        });
+        for (const hero of heroes) {
+            const percent = (hero.energy / hero.maxEnergy) * 100;
             if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
@@ -480,9 +490,11 @@ export class TreasureMapBot {
                 }
             }
 
-            logger.info(`Sending hero ${hero.id} to work`);
-            await this.client.goWork(hero);
-            this.selection.push(hero);
+            if (this.workingSelection.length <= this.numHeroWork - 1) {
+                logger.info(`Sending hero ${hero.id} to work`);
+                await this.client.goWork(hero);
+                this.selection.push(hero);
+            }
         }
 
         logger.info(`Sent ${this.selection.length} heroes to work`);
@@ -552,6 +564,7 @@ export class TreasureMapBot {
         const elapsed = Date.now() - entry.timestamp;
 
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
+
         return elapsed >= timedelta && bombs < hero.capacity;
     }
 
@@ -618,6 +631,7 @@ export class TreasureMapBot {
         });
 
         this.removeBombHero(hero, bombId);
+
         if (!result) {
             return false;
         }
@@ -629,8 +643,8 @@ export class TreasureMapBot {
         if (energy <= 0) {
             logger.info(`Sending hero ${hero.id} to sleep`);
             await this.client.goSleep(hero);
-            await this.refreshHeroAtHome();
             await this.refreshHeroSelection();
+            await this.refreshHeroAtHome();
         }
 
         // logger.info(this.map.toString());
@@ -875,9 +889,14 @@ export class TreasureMapBot {
         }
     }
 
+    sendPing() {
+        setInterval(() => this.client.ping(), 1000 * 10);
+    }
+
     async loop() {
         this.shouldRun = true;
         await this.logIn();
+        this.sendPing();
         await this.loadHouses();
         await this.refreshMap();
 

@@ -78,6 +78,7 @@ import {
     makeGoSleepRequest,
     makeGoWorkRequest,
     makeLoginRequest,
+    makePingPongRequest,
     makeStartExplodeExplodeRequest,
     makeStartExplodeRequest,
     makeStartExplodeV2Request,
@@ -114,6 +115,7 @@ type EventHandlerMap = {
     syncBomberman: (heroes: ISyncBombermanPayload[]) => void;
     startPVE: () => void;
     stopPVE: () => void;
+    ping: () => void;
     startExplode: (payload: IStartExplodePayload) => void;
     startExplodeV2: (payload: IStartExplodePayload) => void;
     startStoryExplode: (payload: IStartStoryExplodePayload) => void;
@@ -152,6 +154,7 @@ type IClientController = {
     syncBomberman: IUniqueRequestController<ISyncBombermanPayload[]>;
     startPVE: IUniqueRequestController<void>;
     stopPVE: IUniqueRequestController<void>;
+    ping: IUniqueRequestController<void>;
     startExplode: ISerializedRequestController<IStartExplodePayload>;
     startExplodeV2: ISerializedRequestController<IStartExplodePayload>;
     startStoryExplode: ISerializedRequestController<
@@ -558,6 +561,23 @@ export class Client {
         );
     }
 
+    ping(timeout = 0) {
+        this.ensureLoggedIn();
+        logger.info("Send ping to server");
+
+        return makeUniquePromise(
+            this.controller.ping,
+            () => {
+                const request = makePingPongRequest(
+                    this.walletId,
+                    this.nextId()
+                );
+                this.sfs.send(request);
+            },
+            timeout || this.timeout
+        );
+    }
+
     goSleep(hero: Hero, timeout = 0) {
         this.ensureLoggedIn();
 
@@ -707,6 +727,7 @@ export class Client {
             getActiveBomber: [],
             syncBomberman: [],
             startPVE: [],
+            ping: [],
             stopPVE: [],
             startExplode: [],
             startExplodeV2: [],
@@ -755,6 +776,9 @@ export class Client {
                 current: undefined,
             },
             stopPVE: {
+                current: undefined,
+            },
+            ping: {
                 current: undefined,
             },
             startExplode: {

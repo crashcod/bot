@@ -232,7 +232,10 @@ export class TreasureMap {
     }
 
     get totalMaxLife(): number {
-        return this.blocks.reduce((total, block) => total + block.maxHp, 0);
+        return this.params.blocks.reduce(
+            (total, block) => total + block.maxHp,
+            0
+        );
     }
 
     isWall(i: number, j: number) {
