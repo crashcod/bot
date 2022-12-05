@@ -6,3 +6,4 @@ teste.txt
 .history
 package-lock.json
 docker-compose-local.yml
+src/ecosystem.config.js

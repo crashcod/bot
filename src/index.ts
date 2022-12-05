@@ -35,7 +35,16 @@ async function main() {
         process.exit();
     });
 
-    await bot.loop();
+    try {
+        await bot.loop();
+    } catch (e: any) {
+        console.log("caiu erro");
+        if (e.message == "PromiseTimeout: Promise timed out") {
+            await bot.loop();
+            return;
+        }
+        console.log(e);
+    }
 }
 
 main();
