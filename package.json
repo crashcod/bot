@@ -22,7 +22,7 @@
         "lint": "eslint src/ --ext .ts",
         "re:run": "yarn run build && node -r ./build/websocket.js --unhandled-rejections=strict build/reverse.js",
         "re": "yarn build && yarn re:run",
-        "start:nodemon": "yarn build && pm2 start ./build/ecosystem.config.js && pm2 logs"
+        "start:nodemon": "pm2 delete all && git pull && yarn build && pm2 start ./build/ecosystem.config.js"
     },
     "dependencies": {
         "csv-parser": "^3.0.0",
