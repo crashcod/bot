@@ -202,6 +202,7 @@ Salve o arquivo (CTRL + X) ele vai pergunte se você confirma, digite Y e ENTER
 ## Criando bot no telegram
 
 [![Video](https://i3.ytimg.com/vi/_FKLOTkRizA/maxresdefault.jpg)](https://youtu.be/_FKLOTkRizA)
+video: https://youtu.be/_FKLOTkRizA
 
 Para você conseguir ter a TELEGRAM_KEY, vá ate seu telegram e pesquise por "botfather" e inicie uma conversa.
 
@@ -230,6 +231,7 @@ Então coloque essa chave no arquivo de configuração do bot "src/ecosystem.con
 ## Recuperando TELEGRAM_CHAT_ID
 
 [![Video](https://i3.ytimg.com/vi/nSXbi9ihScI/maxresdefault.jpg)](https://youtu.be/nSXbi9ihScI)
+video: https://youtu.be/nSXbi9ihScI
 
 Para você ter o seu chat id, você precisa entrar nessa conversa: https://t.me/RawDataBot, e clicar em iniciar, ele irá te responder algo do tipo:
 
@@ -270,6 +272,7 @@ Em "chat" está seu id, no meu caso foi "1291257220", então coloque esse id no 
 ## Executando o bot
 
 [![Video](https://i3.ytimg.com/vi/N9_Z1qIYiKs/maxresdefault.jpg)](https://youtu.be/N9_Z1qIYiKs)
+video: https://i3.ytimg.com/vi/N9_Z1qIYiKs/maxresdefault.jpg)](https://youtu.be/N9_Z1qIYiKs
 
 Comando para da start em todas as contas ou quando precisa atualizar o código font
 
