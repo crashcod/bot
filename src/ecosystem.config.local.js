@@ -4,16 +4,15 @@ module.exports = {
             name: "client1",
             instances: "1",
             exec_mode: "fork",
-            script: "npm run go", // your script
+            script: "npm run start", // your script
             env: {
                 DEBUG_LEVEL: "info",
                 MIN_HERO_ENERGY_PERCENTAGE: "50",
-                LOGIN: "user:USER:PASSWORD",
-                TELEGRAM_KEY: "TELEGRAM_KEY",
+                LOGIN: "user:CHANGE:CHANGE",
+                TELEGRAM_KEY: "CHANGE",
                 NETWORK: "POLYGON",
-                VERSION: 22112406,
-                MIN_HERO_ENERGY_PERCENTAGE: 50,
                 ALERT_SHIELD: 50,
+                NUM_HERO_WORK: 5,
             },
         },
     ],

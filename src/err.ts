@@ -14,6 +14,7 @@ const ERRORS = [
     "GetActiveHeroesFailed",
     "StartExplodeFailed",
     "PromiseTimeout",
+    "Version",
 ] as const;
 
 export type ISuperBotError = typeof ERRORS[number];

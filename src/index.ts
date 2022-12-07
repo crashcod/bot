@@ -1,4 +1,5 @@
 import { TreasureMapBot } from "./bot";
+import { VERSION_CODE } from "./constants";
 import {
     askAndParseEnv,
     identity,
@@ -21,9 +22,12 @@ async function main() {
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
         rede: askAndParseEnv("NETWORK", identity, "BSC"),
-        version: parseInt(askAndParseEnv("VERSION", identity, "")),
+        version: parseInt(
+            askAndParseEnv("VERSION", identity, VERSION_CODE.toString())
+        ),
         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
         numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
+        telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
     });
 
     process.once("SIGINT", async () => {
@@ -35,16 +39,7 @@ async function main() {
         process.exit();
     });
 
-    try {
-        await bot.loop();
-    } catch (e: any) {
-        console.log("caiu erro");
-        if (e.message == "PromiseTimeout: Promise timed out") {
-            await bot.loop();
-            return;
-        }
-        console.log(e);
-    }
+    await bot.loop();
 }
 
 main();

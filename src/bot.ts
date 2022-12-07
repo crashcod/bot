@@ -1,9 +1,12 @@
 import { ObjectHeaderItem } from "csv-writer/src/lib/record";
+import got from "got";
 import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
 import { VERSION_CODE } from "./constants";
 import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
+import { default as version } from "./version.json";
+
 import {
     BLOCK_TYPE_MAP,
     buildBlock,
@@ -34,6 +37,7 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
+import { makeException } from "./err";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -74,6 +78,7 @@ interface IMoreOptions {
     version?: number;
     alertShield?: number;
     numHeroWork?: number;
+    telegramChatId?: string;
 }
 
 const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
@@ -108,12 +113,12 @@ export class TreasureMapBot {
     private adventureHeroes: string[] = [];
     private playing: "Adventure" | "Amazon" | "Treasure" | "sleep" | null =
         null;
+    public params: IMoreOptions;
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
             forceExit = true,
             minHeroEnergyPercentage = 90,
-            telegramKey,
             modeAmazon = false,
             houseHeroes = "",
             adventureHeroes = "",
@@ -125,6 +130,7 @@ export class TreasureMapBot {
             numHeroWork = 15,
         } = moreParams;
 
+        this.params = moreParams;
         loginParams.rede = rede;
         loginParams.version = version;
 
@@ -154,8 +160,6 @@ export class TreasureMapBot {
         this.shouldRun = false;
         this.lastAdventure = 0;
         this.alertShield = alertShield;
-
-        if (telegramKey) this.initTelegraf(telegramKey);
     }
 
     async stop() {
@@ -173,10 +177,9 @@ export class TreasureMapBot {
         }
     }
 
-    initTelegraf(telegramKey: string) {
+    async initTelegraf(telegramKey: string) {
         logger.info("Starting telegraf...");
         this.telegraf = new Telegraf(telegramKey);
-
         process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
         process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
@@ -187,7 +190,16 @@ export class TreasureMapBot {
             )
         );
 
-        this.telegraf.launch();
+        await this.telegraf.launch();
+    }
+
+    async sendMessageChat(message: string) {
+        if (!this.params.telegramChatId) return;
+
+        return this.telegraf?.telegram.sendMessage(
+            this.params.telegramChatId,
+            message
+        );
     }
 
     getStatusPlaying() {
@@ -441,6 +453,7 @@ export class TreasureMapBot {
     }
 
     alertShieldHero(hero: Hero) {
+        this.sendMessageChat(`Hero ${hero.id} needs shield repair`);
         logger.info(`Hero ${hero.id} needs shield repair`);
     }
 
@@ -892,9 +905,20 @@ export class TreasureMapBot {
     sendPing() {
         setInterval(() => this.client.ping(), 1000 * 10);
     }
+    async checkUpdate() {
+        await this.checkVersion();
+        setInterval(() => this.checkVersion(), 1000 * 60);
+    }
 
     async loop() {
+        console.log(this.params.version);
+        if (this.params.telegramKey) {
+            await this.initTelegraf(this.params.telegramKey);
+        }
+        await this.checkUpdate();
         this.shouldRun = true;
+
+        return;
         await this.logIn();
         this.sendPing();
         await this.loadHouses();
@@ -1060,6 +1084,23 @@ export class TreasureMapBot {
         );
         if (enemy) {
             enemy.hp = payload.hp;
+        }
+    }
+
+    async checkVersion() {
+        const currentVersion = await got
+            .get(
+                "https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/src/version.json",
+                {
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                }
+            )
+            .json<number>();
+        if (currentVersion != version) {
+            await this.sendMessageChat("Please update your code version");
+            throw makeException("Version", `Please update your code version`);
         }
     }
 }
