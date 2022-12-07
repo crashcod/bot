@@ -297,3 +297,5 @@ Comando para deletar um bot, você precisa tambem remover do arquivo de configur
 ```
 pm2 delete bot
 ```
+
+LEMBRANDO QUE VOCÊ PODE ACESSAR A MAQUINA VIRTUAL VIA APP Termius NO SEU CELULAR
