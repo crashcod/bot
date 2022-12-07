@@ -16,4 +16,4 @@ sudo apt install build-essential -y
 node -v
 npm -v
 echo "instalando yarn e pm2"
-sudo npm i -g yarn pm2
+sudo npm --force install -g yarn pm2
