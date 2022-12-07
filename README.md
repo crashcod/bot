@@ -92,7 +92,7 @@ Start a conversation with the created bot and send the following:
 
 Caso você não tenha um servidor para colocar seu bot, você pode contratar um servidor em https://linode.com, custa 5 dolares mensais e deve aguentar 10 contas
 
-Para aceessar o servidor do Linode, você pode utilizar o programa "Termius", ele existe para computador, android e ios
+Para aceessar o servidor do Linode, você pode utilizar o programa "Termius" [(Download Windows)](https://termius.com/windows) [(Download Linux)](https://termius.com/linux), ele existe para computador, android e ios
 
 Veja o vídeo de como contratar o serviço e acessar a máquina
 
