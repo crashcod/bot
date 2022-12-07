@@ -96,6 +96,8 @@ Para aceessar o servidor do Linode, você pode utilizar o programa "Termius" [(D
 
 Veja o vídeo de como contratar o serviço e acessar a máquina
 
+[![Video](https://i3.ytimg.com/vi/o4IH5C2YMtk/maxresdefault.jpg)](https://www.youtube.com/watch?v=o4IH5C2YMtk)
+
 ## Configurando a máquina
 
 Para utilizar o bot, você precisa ter o Nodejs, npm, yarn e pm2 instalado. Execute o seguinte comando que irá instalar tudo automaticamente:
