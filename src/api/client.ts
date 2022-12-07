@@ -561,7 +561,7 @@ export class Client {
         );
     }
 
-    ping(timeout = 0) {
+    ping() {
         this.ensureLoggedIn();
         logger.info("Send ping to server");
 
