@@ -911,14 +911,12 @@ export class TreasureMapBot {
     }
 
     async loop() {
-        console.log(this.params.version);
         if (this.params.telegramKey) {
             await this.initTelegraf(this.params.telegramKey);
         }
         await this.checkUpdate();
         this.shouldRun = true;
 
-        return;
         await this.logIn();
         this.sendPing();
         await this.loadHouses();
