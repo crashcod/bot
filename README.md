@@ -100,6 +100,8 @@ Veja o vídeo de como contratar o serviço e acessar a máquina
 
 ## Configurando a máquina
 
+[![Video](https://i3.ytimg.com/vi/rHMMF6KJ-Uk/maxresdefault.jpg)](https://youtu.be/rHMMF6KJ-Uk)
+
 Para utilizar o bot, você precisa ter o Nodejs, npm, yarn e pm2 instalado. Execute o seguinte comando que irá instalar tudo automaticamente:
 
 ```
@@ -110,7 +112,7 @@ bash vm.sh
 
 ## Configurações iniciais do bot
 
-Caso queira ver vídeo:
+Esta no video a cima
 
 Execute o seguinte comando que irá baixar todo o projeto e instalar as dependências para você:
 
@@ -199,6 +201,8 @@ Salve o arquivo (CTRL + X) ele vai pergunte se você confirma, digite Y e ENTER
 
 ## Criando bot no telegram
 
+[![Video](https://i3.ytimg.com/vi/_FKLOTkRizA/maxresdefault.jpg)](https://youtu.be/_FKLOTkRizA)
+
 Para você conseguir ter a TELEGRAM_KEY, vá ate seu telegram e pesquise por "botfather" e inicie uma conversa.
 
 Digite:
@@ -224,6 +228,8 @@ a onde está "Use this token to access the HTTP API:" é sua chave TELEGRAM_KEY,
 Então coloque essa chave no arquivo de configuração do bot "src/ecosystem.config.js". LEMBRANDO QUE CADA CONTA, PRECISA TER UMA CHAVE DIFERENTE
 
 ## Recuperando TELEGRAM_CHAT_ID
+
+[![Video](https://i3.ytimg.com/vi/nSXbi9ihScI/maxresdefault.jpg)](https://youtu.be/nSXbi9ihScI)
 
 Para você ter o seu chat id, você precisa entrar nessa conversa: https://t.me/RawDataBot, e clicar em iniciar, ele irá te responder algo do tipo:
 
@@ -260,3 +266,31 @@ Para você ter o seu chat id, você precisa entrar nessa conversa: https://t.me/
 ```
 
 Em "chat" está seu id, no meu caso foi "1291257220", então coloque esse id no arquivo "src/ecosystem.config.js", pode ser utilizado o mesmo id para todas as contas
+
+## Executando o bot
+
+[![Video](https://i3.ytimg.com/vi/N9_Z1qIYiKs/maxresdefault.jpg)](https://youtu.be/N9_Z1qIYiKs)
+
+Comando para da start em todas as contas ou quando precisa atualizar o código font
+
+```
+ yarn start:nodemon
+```
+
+Comando para parar uma conta
+
+```
+pm2 stop NOMEDOBOT
+```
+
+Comando para start em uma conta
+
+```
+pm2 start NOMEBOT
+```
+
+Comando para deletar um bot, você precisa tambem remover do arquivo de configuração
+
+```
+pm2 delete bot
+```
