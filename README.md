@@ -272,7 +272,7 @@ Em "chat" está seu id, no meu caso foi "1291257220", então coloque esse id no 
 ## Executando o bot
 
 [![Video](https://i3.ytimg.com/vi/N9_Z1qIYiKs/maxresdefault.jpg)](https://youtu.be/N9_Z1qIYiKs)
-video: https://i3.ytimg.com/vi/N9_Z1qIYiKs/maxresdefault.jpg)](https://youtu.be/N9_Z1qIYiKs
+video: https://youtu.be/N9_Z1qIYiKs
 
 Comando para da start em todas as contas ou quando precisa atualizar o código font
 
