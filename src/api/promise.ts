@@ -30,9 +30,7 @@ export class ControlledPromise<T> {
 
     init(executor: () => void, timeout = 0) {
         try {
-            timeout = 0;
             executor();
-            // timeout = 1000 * 60 * 2;
             if (timeout <= 0) return;
             const message = "Promise timed out";
             const exception = makeException("PromiseTimeout", message);

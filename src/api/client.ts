@@ -565,17 +565,8 @@ export class Client {
         this.ensureLoggedIn();
         logger.info("Send ping to server");
 
-        return makeUniquePromise(
-            this.controller.ping,
-            () => {
-                const request = makePingPongRequest(
-                    this.walletId,
-                    this.nextId()
-                );
-                this.sfs.send(request);
-            },
-            timeout || this.timeout
-        );
+        const request = makePingPongRequest(this.walletId, this.nextId());
+        this.sfs.send(request);
     }
 
     goSleep(hero: Hero, timeout = 0) {
