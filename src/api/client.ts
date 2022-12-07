@@ -8,7 +8,7 @@ import {
     SmartFox,
 } from "sfs2x-api";
 import UserAgent from "user-agents";
-import { PORT, SERVERS, ZONE } from "../constants";
+import { PORT, ZONE } from "../constants";
 import { makeException } from "../err";
 import {
     askAndParseEnv,
