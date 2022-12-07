@@ -104,7 +104,7 @@ Para utilizar o bot, você precisa ter o Nodejs, npm, yarn e pm2 instalado. Exec
 
 ```
 cd ~
-curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/novo/vm.sh -o vm.sh
+curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/vm.sh -o vm.sh
 bash vm.sh
 ```
 
@@ -116,7 +116,7 @@ Execute o seguinte comando que irá baixar todo o projeto e instalar as dependê
 
 ```
 cd ~
-curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/novo/init.sh -o init.sh
+curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/init.sh -o init.sh
 bash init.sh
 cd bombcrypto-superbot
 ```
