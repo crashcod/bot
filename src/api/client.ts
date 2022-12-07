@@ -366,11 +366,13 @@ export class Client {
         };
     }
     async getServerByPing() {
-        const result = await Promise.all(
-            SERVERS.map((server) => this.getPing(server))
-        );
-        result.sort((a, b) => a.ping - b.ping);
-        return result[0];
+        // const result = await Promise.all(
+        //     SERVERS.map((server) => this.getPing(server))
+        // );
+        // result.sort((a, b) => a.ping - b.ping);
+
+        return { server: "sea", ping: 0 };
+        // return result[0];
     }
 
     async logout(timeout = 0) {
