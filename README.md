@@ -97,6 +97,7 @@ Para aceessar o servidor do Linode, você pode utilizar o programa "Termius" [(D
 Veja o vídeo de como contratar o serviço e acessar a máquina
 
 [![Video](https://i3.ytimg.com/vi/o4IH5C2YMtk/maxresdefault.jpg)](https://www.youtube.com/watch?v=o4IH5C2YMtk)
+video: https://www.youtube.com/watch?v=o4IH5C2YMtk
 
 ## Configurando a máquina
 
