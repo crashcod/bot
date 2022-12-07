@@ -4,7 +4,7 @@ module.exports = {
             name: "client1",
             instances: "1",
             exec_mode: "fork",
-            script: "npm run start", // your script
+            script: "npm run start",
             env: {
                 DEBUG_LEVEL: "info",
                 MIN_HERO_ENERGY_PERCENTAGE: "50",
@@ -13,6 +13,7 @@ module.exports = {
                 NETWORK: "POLYGON",
                 ALERT_SHIELD: 50,
                 NUM_HERO_WORK: 5,
+                TELEGRAM_CHAT_ID: "CHANGE"
             },
         },
     ],

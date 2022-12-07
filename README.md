@@ -50,7 +50,13 @@ This command may fail if you have changed some of the files locally. If you did 
 Open a bash terminal on the project folder, run the following command:
 
 ```bash
-LOGIN=[login] TELEGRAM_KEY=[telegram_key] yarn go
+LOGIN=user:test:123 TELEGRAM_KEY=d2f43td2346f23... yarn go
+```
+
+If you get this error "Please update your code version", you need to update the code by running
+
+```bash
+git pull
 ```
 
 The envirement variables are explained below:
@@ -67,6 +73,8 @@ The envirement variables are explained below:
 -   `[HOUSE_HEROES]` (optional): If you have a house, here you can inform the ids of the heroes will use the house, separated by ":", Example 151515881:51878184:16187755.
 -   `[SAVE_REWARDS_CSV]` (optional): whenever the bot is started, it will write a csv file, the "csv" folder with the bombcrypto username, with the rewards data.
 -   `[ALERT_SHIELD]` (optional): The value of the shield to notify you when it's running low
+-   `[NUM_HERO_WORK]` (optional): Number of heroes that will work at the same time (default 15)
+-   `[TELEGRAM_CHAT_ID]` (optional): Telegram chat id, in case you want to receive notifications
 
 ## Telegram integration
 
@@ -78,98 +86,175 @@ Start a conversation with the created bot and send the following:
 -   `/rewards`: Brings the current amount of coins, heroes to be claimed and keys you have in your account.
 -   `/exit`: Will kill the bot.
 
-## Resilience and multi-account
+# Início do zero
 
-If you want the bot to never stop running for any exception (sometime the server of the games fails and you gave a **PromiseTimeout** exceptio), you can build the project using Docker.
+## Contratando servidor dedicado
 
-Install Docker: https://docs.docker.com/desktop/
+Caso você não tenha um servidor para colocar seu bot, você pode contratar um servidor em https://linode.com, custa 5 dolares mensais e deve aguentar 10 contas
 
-> This should be done whenever the projects gets updated.
+Para aceessar o servidor do Linode, você pode utilizar o programa "Termius", ele existe para computador, android e ios
 
-Now, create a `.env` file with the enviroment variables from the initialization, like:
+Veja o vídeo de como contratar o serviço e acessar a máquina
+
+## Configurando a máquina
+
+Para utilizar o bot, você precisa ter o Nodejs, npm, yarn e pm2 instalado. Execute o seguinte comando que irá instalar tudo automaticamente:
 
 ```
-LOGIN=
-TELEGRAM_KEY=
+cd ~
+curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/novo/vm.sh -o vm.sh
+bash vm.sh
 ```
 
-Fill the values after the `=` (equal) sign. Leave `TELEGRAM_KEY` empty if you do not need it.
+## Configurações iniciais do bot
 
-To run the bot in **interactive mode**:
+Caso queira ver vídeo:
 
-```bash
-docker run --env-file=.env --name bsb1 -it vieceli/bombcrypto-superbot
+Execute o seguinte comando que irá baixar todo o projeto e instalar as dependências para você:
+
+```
+cd ~
+curl -sL https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/novo/init.sh -o init.sh
+bash init.sh
+cd bombcrypto-superbot
 ```
 
-In interactive mode, you will see the logs just as usual. But you may want it to keep running if something fails, you must run it in **detached mode** then:
+Para configura suas contas você precisará editar um arquivo "src/ecosystem.config.js",
 
-```bash
-docker run --env-file=.env --restart=always --name bsb1 -dt vieceli/bombcrypto-superbot
+```
+nano src/ecosystem.config.js
 ```
 
-The `--restart=always` option will restart the bot if some error occurs. No output will be seen on this approach. if you want to see the logs:
+Você verá algo como isso aqui:
 
-```bash
-docker logs bsb1 --tail 200 -f
+```
+module.exports = {
+    apps: [
+        {
+            name: "client1", //Um nome para identificação
+            instances: "1",
+            exec_mode: "fork",
+            script: "npm run start",
+            env: {//aqui você irá colocar as configurações
+                DEBUG_LEVEL: "info",
+                MIN_HERO_ENERGY_PERCENTAGE: "50",
+                LOGIN: "user:CHANGE:CHANGE",
+                TELEGRAM_KEY: "CHANGE",
+                NETWORK: "POLYGON",
+                ALERT_SHIELD: 50,
+                NUM_HERO_WORK: 5,
+                TELEGRAM_CHAT_ID: "CHANGE"
+            },
+        },
+    ],
+};
+
 ```
 
-The option `--tail 200` will show the last 200 lines of output, the `-f` option will follow the logs as they are shown. To stop logging press the `CANCEL` command, on most cases press `CTRL+C` on the terminal window.
+Caso você queira colocar mais de uma conta, basta colocar mais um item, ficando assim:
 
-To list running bots (docker containers):
+```
+module.exports = {
+    apps: [
+        {
+            name: "client1", //Um nome para identificação
+            instances: "1",
+            exec_mode: "fork",
+            script: "npm run start",
+            env: {//aqui você irá colocar as configurações
+                DEBUG_LEVEL: "info",
+                MIN_HERO_ENERGY_PERCENTAGE: "50",
+                LOGIN: "user:CHANGE:CHANGE",
+                TELEGRAM_KEY: "CHANGE",
+                NETWORK: "POLYGON",
+                ALERT_SHIELD: 50,
+                NUM_HERO_WORK: 5,
+                TELEGRAM_CHAT_ID: "CHANGE"
+            },
+        },
+        {
+            name: "client2", //Um nome para identificação
+            instances: "1",
+            exec_mode: "fork",
+            script: "npm run start",
+            env: {//aqui você irá colocar as configurações
+                DEBUG_LEVEL: "info",
+                MIN_HERO_ENERGY_PERCENTAGE: "50",
+                LOGIN: "user:CHANGE:CHANGE",
+                TELEGRAM_KEY: "CHANGE",
+                NETWORK: "POLYGON",
+                ALERT_SHIELD: 50,
+                NUM_HERO_WORK: 5,
+                TELEGRAM_CHAT_ID: "CHANGE"
+            },
+        },
+    ],
+};
 
-```bash
-docker ps
 ```
 
-To remove the running bot:
+Salve o arquivo (CTRL + X) ele vai pergunte se você confirma, digite Y e ENTER
 
-```bash
-docker rm bsb1 -f
+## Criando bot no telegram
+
+Para você conseguir ter a TELEGRAM_KEY, vá ate seu telegram e pesquise por "botfather" e inicie uma conversa.
+
+Digite:
+
+```
+/newbot
 ```
 
-You may create as many `.env` files as you need. For each account you run using Docker, give a different name when running the `docker run` command. For each bot, you need a **different** telegram key to communicate with them. All commands listed here a simple Docker commands, I highly recommend studying them at the official documentation and learn how it works.
+Ele vai te perguntar qual nome você gostaria do bot. Depois de informar o nome, ele vai te retornar uma mensagem parecida com essa:
 
-## Docker-compose
+```
+Done! Congratulations on your new bot. You will find it at t.me/testeeee. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
 
-Copy the docker-compose.yml file and rename the copy to docker-compose-local.yml, modify the file with your accounts, you can put as many accounts as you like, example of two accounts:
+Use this token to access the HTTP API:
+5966491474:AAHy6SQXGYJQqiuQ9zdqW3rI3g-123123
+Keep your token secure and store it safely, it can be used by anyone to control your bot.
 
-```bash
-version: "3.4"
-
-services:
-  bomb1:
-    image: vieceli/bombcrypto-superbot:latest
-    restart: always
-    working_dir: "/bombcrypto-superbot"
-    environment:
-      LOGIN: "MUDAR"
-      TELEGRAM_KEY: "MUDAR"
-    volumes:
-      - ./csv:/bombcrypto-superbot/csv
-  bomb2:
-    image: vieceli/bombcrypto-superbot:latest
-    restart: always
-    working_dir: "/bombcrypto-superbot"
-    environment:
-      LOGIN: "MUDAR"
-      TELEGRAM_KEY: "MUDAR"
-    volumes:
-      - ./csv:/bombcrypto-superbot/csv
+For a description of the Bot API, see this page: https://core.telegram.org/bots/api
 ```
 
-To start all accounts at once, run
+a onde está "Use this token to access the HTTP API:" é sua chave TELEGRAM_KEY, exemplo "5966491474:AAHy6SQXGYJQqiuQ9zdqW3rI3g-123123"
 
-```bash
-docker-compose -f docker-compose-local.yml up
+Então coloque essa chave no arquivo de configuração do bot "src/ecosystem.config.js". LEMBRANDO QUE CADA CONTA, PRECISA TER UMA CHAVE DIFERENTE
+
+## Recuperando TELEGRAM_CHAT_ID
+
+Para você ter o seu chat id, você precisa entrar nessa conversa: https://t.me/RawDataBot, e clicar em iniciar, ele irá te responder algo do tipo:
+
+```
+{
+    "update_id": 823632503,
+    "message": {
+        "message_id": 1752228,
+        "from": {
+            "id": 123123123,
+            "is_bot": false,
+            "first_name": "NOME",
+            "last_name": "NOME",
+            "username": "NOME",
+            "language_code": "pt-br"
+        },
+        "chat": {
+            "id": 1291257220,
+            "first_name": "NOME",
+            "last_name": "NOME",
+            "username": "NOME",
+            "type": "private"
+        },
+        "date": 1670437683,
+        "text": "/start",
+        "entities": [
+            {
+                "offset": 0,
+                "length": 6,
+                "type": "bot_command"
+            }
+        ]
+    }
 ```
 
-To always keep your code up to date, run
-
-```bash
-git update && docker-compose -f docker-compose-local.yml up --build
-```
-
-## Donations
-
-There is no need to donate to this project. I work on it just for fun. Its a hobby. But if
-you truly insist: BEP20 `0x2E11Fd7125876B3B34C54D13Bb815FFC719c438c`.
+Em "chat" está seu id, no meu caso foi "1291257220", então coloque esse id no arquivo "src/ecosystem.config.js", pode ser utilizado o mesmo id para todas as contas
