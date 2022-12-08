@@ -127,7 +127,7 @@ module.exports = {
 
 ```
 
-aqui você ve as variaveis que existe
+[Aqui você ve as variaveis que existe](https://github.com/lucasvieceli/bombcrypto-superbot/#vari%C3%A1veis)
 
 Salve o arquivo (CTRL + X) ele vai pergunte se você confirma, digite Y e ENTER
 
