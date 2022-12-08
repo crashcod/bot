@@ -7,4 +7,4 @@ teste.txt
 package-lock.json
 docker-compose-local.yml
 src/ecosystem.config.js
-database.json
+database*
