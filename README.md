@@ -8,7 +8,7 @@ moderado por Lucas Vieceli
 
 se você não tiver um computador disponível para executar o bot, poderá usar o serviço gratuitamente via telegram. https://t.me/bombcryptoFreeBot
 
-telegrama do grupo https://t.me/+tQcb45U9MwAxYWMx
+telegram do grupo https://t.me/+tQcb45U9MwAxYWMx
 
 ## Funcionalidades
 
@@ -31,6 +31,7 @@ video: https://www.youtube.com/watch?v=o4IH5C2YMtk
 ## Configurando a máquina
 
 [![Video](https://i3.ytimg.com/vi/rHMMF6KJ-Uk/maxresdefault.jpg)](https://youtu.be/rHMMF6KJ-Uk)
+video: https://youtu.be/rHMMF6KJ-Uk
 
 Para utilizar o bot, você precisa ter o Nodejs, npm, yarn e pm2 instalado. Execute o seguinte comando que irá instalar tudo automaticamente:
 
@@ -250,7 +251,8 @@ As variáveis são:
 
 | Nome     | Descrição                                   |
 | -------- | ------------------------------------------- |
-| /rewards | retorna todas as moedas que você já minerou |
+| /rewards | Retorna todas as moedas que você já minerou |
 | /stats   | Retorna o status dos heroes                 |
 | /exit    | Da stop no bot                              |
 | /start   | Da start no bot                             |
+| /Shield  | Retorna os dados dos shields                |
