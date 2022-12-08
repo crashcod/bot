@@ -252,3 +252,5 @@ As variáveis são:
 | -------- | ------------------------------------------- |
 | /rewards | retorna todas as moedas que você já minerou |
 | /stats   | Retorna o status dos heroes                 |
+| /exit    | Da stop no bot                              |
+| /start   | Da start no bot                             |
