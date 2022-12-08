@@ -192,6 +192,9 @@ export class TreasureMapBot {
         process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
         this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
+        this.telegraf?.command("rewards_all", (ctx) =>
+            this.telegramRewardsAll(ctx)
+        );
         this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
         this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
         this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
@@ -202,6 +205,7 @@ export class TreasureMapBot {
             { command: "exit", description: "exit" },
             { command: "start", description: "start" },
             { command: "rewards", description: "rewards" },
+            { command: "rewards_all", description: "rewards_all" },
             { command: "shield", description: "shield" },
             { command: "stats", description: "stats" },
         ];
@@ -393,6 +397,44 @@ export class TreasureMapBot {
         }
 
         context.replyWithHTML(message);
+    }
+
+    async telegramRewardsAll(context: Context) {
+        const resultDb = this.db.getAllDatabase();
+
+        const html = `
+<b>Rewards</b>
+
+Bcoin | Bomberman | time last update UTC 0
+
+${resultDb
+    .filter((v) => v.rewards)
+    .map((account) => {
+        const date = new Date(account.rewards.date);
+        const username = account.username;
+        const bcoin = account.rewards.values
+            .find(
+                (v: any) =>
+                    v.network == this.loginParams.rede && v.type == "BCoin"
+            )
+            ?.value.toFixed(2);
+
+        const bomberman =
+            account.rewards.values.find(
+                (v: any) =>
+                    v.network == this.loginParams.rede && v.type == "Bomberman"
+            )?.value || "0";
+
+        const dateStr = `${date.getHours()}:${date
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}`;
+
+        return `<b>${username}</b>:  ${bcoin} | ${bomberman} | ${dateStr}`;
+    })
+    .join("\n")}`;
+
+        context.replyWithHTML(html);
     }
 
     get workingSelection() {
@@ -592,11 +634,22 @@ export class TreasureMapBot {
         await this.refreshHeroAtHome();
     }
 
+    async getReward() {
+        const result = await this.client.getReward();
+
+        this.db.set("rewards", {
+            values: result,
+            date: new Date().getTime(),
+        });
+
+        return result;
+    }
+
     async refreshMap() {
         logger.info(`Refreshing map...`);
         if (this.map.totalLife <= 0) {
             this.resetState();
-            logger.info(JSON.stringify(await this.client.getReward()));
+            logger.info(JSON.stringify(await this.getReward()));
         }
         await this.client.getBlockMap();
         logger.info(`Current map state: ${this.map.toString()}`);
@@ -997,6 +1050,7 @@ export class TreasureMapBot {
         await this.checkUpdate();
         this.shouldRun = true;
 
+        await this.db.set("username", this.getIdentify());
         await this.logIn();
         this.sendPing();
         await this.loadHouses();

@@ -249,10 +249,11 @@ As variáveis são:
 
 ## Comandos telegram
 
-| Nome     | Descrição                                   |
-| -------- | ------------------------------------------- |
-| /rewards | Retorna todas as moedas que você já minerou |
-| /stats   | Retorna o status dos heroes                 |
-| /exit    | Da stop no bot                              |
-| /start   | Da start no bot                             |
-| /shield  | Retorna os dados dos shields                |
+| Nome         | Descrição                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| /rewards     | Retorna todas as moedas que você já minerou                                                                       |
+| /stats       | Retorna o status dos heroes                                                                                       |
+| /exit        | Da stop no bot                                                                                                    |
+| /start       | Da start no bot                                                                                                   |
+| /shield      | Retorna os dados dos shields                                                                                      |
+| /rewards_all | Retorna todos os rewards das contas, o rewards é atualizado sempre q começa um novo mapa ou a conta for conectada |

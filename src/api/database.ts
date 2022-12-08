@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from "fs";
 import { Config, JsonDB } from "node-json-db";
 
 export class Database {
@@ -7,6 +8,16 @@ export class Database {
         this.identify = wallet;
         this.db = new JsonDB(
             new Config(`database-${this.identify}.json`, true, false, "/")
+        );
+    }
+
+    getAllDatabase() {
+        const files = readdirSync(".").filter((fn) =>
+            fn.startsWith("database-")
+        );
+
+        return files.map((file) =>
+            JSON.parse(readFileSync(file, { encoding: "utf8", flag: "r" }))
         );
     }
 
