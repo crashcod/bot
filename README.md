@@ -255,4 +255,4 @@ As variáveis são:
 | /stats   | Retorna o status dos heroes                 |
 | /exit    | Da stop no bot                              |
 | /start   | Da start no bot                             |
-| /Shield  | Retorna os dados dos shields                |
+| /shield  | Retorna os dados dos shields                |
