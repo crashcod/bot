@@ -83,10 +83,6 @@ interface IMoreOptions {
     telegramChatId?: string;
 }
 
-const TELEGRAF_COMMANDS = ["rewards", "exit", "stats", "start"] as const;
-
-type ETelegrafCommand = typeof TELEGRAF_COMMANDS[number];
-
 export class TreasureMapBot {
     public client!: Client;
     public map!: TreasureMap;
@@ -199,6 +195,22 @@ export class TreasureMapBot {
         this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
         this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
         this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
+        this.telegraf?.command("shield", (ctx) =>
+            this.telegramStatsShield(ctx)
+        );
+        const commands = [
+            { command: "exit", description: "exit" },
+            { command: "start", description: "start" },
+            { command: "rewards", description: "rewards" },
+            { command: "shield", description: "shield" },
+            { command: "stats", description: "stats" },
+        ];
+        await this.telegraf.telegram.setMyCommands(commands, {
+            language_code: "en",
+        });
+        await this.telegraf.telegram.setMyCommands(commands, {
+            language_code: "pt",
+        });
         this.telegraf.launch();
     }
 
@@ -207,7 +219,7 @@ export class TreasureMapBot {
 
         return this.telegraf?.telegram.sendMessage(
             this.params.telegramChatId,
-            message
+            `Account: ${this.getIdentify()}\n\n${message}`
         );
     }
 
@@ -254,6 +266,7 @@ export class TreasureMapBot {
         const houseHeroesIds = this.houseHeroes.join(", ");
 
         const message =
+            `Account: ${this.getIdentify()}\n\n` +
             `Playing mode: ${this.getStatusPlaying()}\n\n` +
             // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
             // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
@@ -279,10 +292,17 @@ export class TreasureMapBot {
             // const detail = await this.client.coinDetail();
 
             const message =
+                "Account: " +
+                this.getIdentify() +
+                "\n\n" +
                 "Rewards:\n" +
                 // `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
                 // `| Rewards: ${detail.rewards}\n` +
                 rewards
+                    .filter(
+                        (v) =>
+                            v.network == this.params.rede || v.network == "TR"
+                    )
                     .sort((a, b) => (a.network > b.network ? -1 : 1))
                     .map(
                         (reward) =>
@@ -301,7 +321,9 @@ export class TreasureMapBot {
     }
 
     async telegramExit(context: Context) {
-        await context.reply("Exiting in 5 seconds...");
+        await context.reply(
+            `Account: ${this.getIdentify()}\n\nExiting in 5 seconds...`
+        );
         await this.sleepAllHeroes();
         this.shouldRun = false;
         await sleep(10000);
@@ -315,19 +337,62 @@ export class TreasureMapBot {
             const message = await this.getRewardAccount();
             await context.reply(message);
         } catch (e) {
-            await context.reply("Not connected, please wait");
+            await context.reply(
+                `Account: ${this.getIdentify()}\n\nNot connected, please wait`
+            );
         }
     }
     async telegramStart(context: Context) {
         await this.db.set("start", true);
-        await context.reply("stating...");
+        await context.reply(`Account: ${this.getIdentify()}\n\nstating...`);
         await sleep(10000);
         await this.telegraf?.stop("SIGINT");
         throw new Error("exit");
     }
     async telegramStats(context: Context) {
+        if (!this.shouldRun) {
+            await context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nAccount not working`
+            );
+            return;
+        }
+
         const message = await this.getStatsAccount();
         await context.replyWithHTML(message);
+    }
+    async telegramStatsShield(context: Context) {
+        if (!this.shouldRun) {
+            await context.replyWithHTML("Account not working");
+            return;
+        }
+
+        const formatMsg = (hero: Hero) => {
+            const shield = hero.shields?.length
+                ? `${hero.shields[0].current}/${hero.shields[0].total}`
+                : "empty shield";
+            return `${hero.rarity} [${hero.id}]: ${shield}`;
+        };
+        let message =
+            "Account not connected, wait the bot will try to connect again";
+        const result = this.squad.heroes;
+
+        if (result && result.length) {
+            const heroes = result
+                .sort((a, b) => {
+                    const aShield = a.shields ? a.shields[0]?.current : 0;
+                    const bShield = b.shields ? b.shields[0]?.current : 0;
+
+                    return aShield - bShield;
+                })
+                .map(formatMsg)
+                .join("\n");
+
+            message =
+                `Account: ${this.getIdentify()}\n\n` +
+                `Shield heroes (${result.length}): \n\n${heroes}`;
+        }
+
+        context.replyWithHTML(message);
     }
 
     get workingSelection() {
@@ -914,6 +979,12 @@ export class TreasureMapBot {
         }
     }
 
+    getIdentify() {
+        return "username" in this.loginParams
+            ? this.loginParams.username
+            : this.loginParams.wallet;
+    }
+
     sendPing() {
         setInterval(() => this.client.ping(), 1000 * 10);
     }
@@ -930,7 +1001,6 @@ export class TreasureMapBot {
         this.sendPing();
         await this.loadHouses();
         await this.refreshMap();
-
         do {
             if (this.map.totalLife <= 0) await this.refreshMap();
 
