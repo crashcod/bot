@@ -7,6 +7,9 @@ import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import { default as version } from "./version.json";
 
+import { Database } from "./api/database";
+import { Notification } from "./api/notification";
+import { makeException } from "./err";
 import {
     BLOCK_TYPE_MAP,
     buildBlock,
@@ -37,7 +40,6 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
-import { makeException } from "./err";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -81,7 +83,7 @@ interface IMoreOptions {
     telegramChatId?: string;
 }
 
-const TELEGRAF_COMMANDS = ["rewards", "exit", "stats"] as const;
+const TELEGRAF_COMMANDS = ["rewards", "exit", "stats", "start"] as const;
 
 type ETelegrafCommand = typeof TELEGRAF_COMMANDS[number];
 
@@ -114,6 +116,9 @@ export class TreasureMapBot {
     private playing: "Adventure" | "Amazon" | "Treasure" | "sleep" | null =
         null;
     public params: IMoreOptions;
+    public loginParams: ILoginParams;
+    public notification: Notification;
+    public db: Database;
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
@@ -131,6 +136,7 @@ export class TreasureMapBot {
         } = moreParams;
 
         this.params = moreParams;
+        this.loginParams = loginParams;
         loginParams.rede = rede;
         loginParams.version = version;
 
@@ -160,6 +166,12 @@ export class TreasureMapBot {
         this.shouldRun = false;
         this.lastAdventure = 0;
         this.alertShield = alertShield;
+        if ("username" in loginParams) {
+            this.db = new Database(loginParams.username || "");
+        } else {
+            this.db = new Database(loginParams.wallet || "");
+        }
+        this.notification = new Notification(this.db);
     }
 
     async stop() {
@@ -183,14 +195,11 @@ export class TreasureMapBot {
         process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
         process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
-        TELEGRAF_COMMANDS.forEach((command) =>
-            this.telegraf?.command(
-                command,
-                this.handleTelegraf.bind(this, command)
-            )
-        );
-
-        await this.telegraf.launch();
+        this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
+        this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
+        this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
+        this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
+        this.telegraf.launch();
     }
 
     async sendMessageChat(message: string) {
@@ -291,38 +300,34 @@ export class TreasureMapBot {
         }
     }
 
-    public async handleTelegraf(command: ETelegrafCommand, context: Context) {
-        logger.info(`Running command ${command} from ${context.from?.id}.`);
+    async telegramExit(context: Context) {
+        await context.reply("Exiting in 5 seconds...");
+        await this.sleepAllHeroes();
+        this.shouldRun = false;
+        await sleep(10000);
+        await this.telegraf?.stop("SIGINT");
+        await this.db.set("start", false);
+        throw new Error("exit");
+    }
 
-        const now = Date.now() / 1000;
-        const timedelta = now - (context.message?.date || 0);
-
-        if (timedelta >= 30) {
-            logger.info(`Ignoring message ${context.message?.message_id}`);
-            return;
+    async telegramRewards(context: Context) {
+        try {
+            const message = await this.getRewardAccount();
+            await context.reply(message);
+        } catch (e) {
+            await context.reply("Not connected, please wait");
         }
-
-        if (command === "exit") {
-            await context.reply("Exiting in 5 seconds...");
-            this.shouldRun = false;
-            await this.telegraf?.stop();
-            await sleep(10000);
-            if (this.forceExit) {
-                process.exit(0);
-            }
-        } else if (command === "rewards") {
-            try {
-                const message = await this.getRewardAccount();
-                await context.reply(message);
-            } catch (e) {
-                await context.reply("Not connected, please wait");
-            }
-        } else if (command === "stats") {
-            const message = await this.getStatsAccount();
-            await context.replyWithHTML(message);
-        } else {
-            await context.reply("Command not implemented");
-        }
+    }
+    async telegramStart(context: Context) {
+        await this.db.set("start", true);
+        await context.reply("stating...");
+        await sleep(10000);
+        await this.telegraf?.stop("SIGINT");
+        throw new Error("exit");
+    }
+    async telegramStats(context: Context) {
+        const message = await this.getStatsAccount();
+        await context.replyWithHTML(message);
     }
 
     get workingSelection() {
@@ -452,8 +457,11 @@ export class TreasureMapBot {
         );
     }
 
-    alertShieldHero(hero: Hero) {
-        this.sendMessageChat(`Hero ${hero.id} needs shield repair`);
+    async alertShieldHero(hero: Hero) {
+        if (!(await this.notification.hasHeroShield(hero.id))) {
+            this.sendMessageChat(`Hero ${hero.id} needs shield repair`);
+            this.notification.setHeroShield(hero.id, this.getSumShield(hero));
+        }
         logger.info(`Hero ${hero.id} needs shield repair`);
     }
 
@@ -502,6 +510,10 @@ export class TreasureMapBot {
                     continue;
                 }
             }
+            await this.notification.checkHeroShield(
+                hero.id,
+                this.getSumShield(hero)
+            );
 
             if (this.workingSelection.length <= this.numHeroWork - 1) {
                 logger.info(`Sending hero ${hero.id} to work`);
@@ -911,9 +923,6 @@ export class TreasureMapBot {
     }
 
     async loop() {
-        if (this.params.telegramKey) {
-            await this.initTelegraf(this.params.telegramKey);
-        }
         await this.checkUpdate();
         this.shouldRun = true;
 
@@ -1096,9 +1105,19 @@ export class TreasureMapBot {
                 }
             )
             .json<number>();
+
         if (currentVersion != version) {
-            await this.sendMessageChat("Please update your code version");
-            throw makeException("Version", `Please update your code version`);
+            const message = "Please update your code version";
+
+            const existNotification =
+                await this.notification.hasUpdateVersion();
+            if (!existNotification) {
+                await this.notification.setUpdateVersion();
+                await this.sendMessageChat(message);
+            }
+            throw makeException("Version", message);
+        } else if (this.params.telegramChatId) {
+            await this.notification.unsetUpdateVersion();
         }
     }
 }

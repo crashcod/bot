@@ -13,7 +13,7 @@ module.exports = {
                 NETWORK: "POLYGON",
                 ALERT_SHIELD: 50,
                 NUM_HERO_WORK: 5,
-                TELEGRAM_CHAT_ID: "CHANGE"
+                TELEGRAM_CHAT_ID: "CHANGE",
             },
         },
     ],

@@ -2,89 +2,18 @@
 
 # Bombcrypto-superbot
 
-This bot is a product of reverse engineering Bombcrypto game. It simulates the game and send messages using `websocket`. Since it does not require a browser to work, the main usage is for **multi-account**. Have fun!
+Este bot é um produto da engenharia reversa do jogo Bombcrypto. Ele simula o jogo e envia mensagens usando `websocket`. Como não requer um navegador para funcionar, o uso principal é para **várias contas**. Divirta-se!
 
-moderated by Lucas Vieceli
+moderado por Lucas Vieceli
 
-if you don't have a computer available to run the bot, you can use the service for free via telegram. https://t.me/bombcryptoFreeBot
+se você não tiver um computador disponível para executar o bot, poderá usar o serviço gratuitamente via telegram. https://t.me/bombcryptoFreeBot
 
-group telegram https://t.me/+tQcb45U9MwAxYWMx
+telegrama do grupo https://t.me/+tQcb45U9MwAxYWMx
 
-## Features
+## Funcionalidades
 
-It does the following:
-
--   Automatic farming on Treasure Hunt
--   Automatic Adventure mode (see usage section)
--   Automatic Amazon mode
--   Handles Home feature if a house is available
-
-## Installation
-
-You need the following packages installed for this bot to work:
-
--   https://git-scm.com/downloads
--   https://nodejs.org/en/download/ Version **16** at least.
-
-Open bash on a folder you want the project to be cloned. Windows users (_shame_) can open **Git Bash** right-clicking on the Desktop folder or any other folder.
-
-With a bash window open:
-
-```bash
-npm install -g yarn
-git clone https://github.com/lucasvieceli/bombcrypto-superbot
-cd bombcrypto-superbot
-yarn install
-```
-
-Whenever the project updates, you can update your local files through `git`. Open a bash terminal on the project folder (right-click **Git Bash** inside the project folder for Windows users):
-
-```bash
-git pull
-```
-
-This command may fail if you have changed some of the files locally. If you did that, I assume you know how to use `git`. If you do not, https://git-scm.com/book.
-
-## Usage
-
-Open a bash terminal on the project folder, run the following command:
-
-```bash
-LOGIN=user:test:123 TELEGRAM_KEY=d2f43td2346f23... yarn go
-```
-
-If you get this error "Please update your code version", you need to update the code by running
-
-```bash
-git pull
-```
-
-The envirement variables are explained below:
-
--   `[LOGIN]` (**required**): The login string should be written in of the the following formats:
-    -   Login/Password mode: `user:[username]:[password]`. In this mode, you pass the `username` and the `password` registered for scholarship. The final string fould be like `LOGIN=user:username1:password1`.
-    -   Wallet/PrivateKey mode (:warning: **Not recommended**. Do not share your private key with anyone.): `wallet:[walletId]:[privateKey]`. In this mode, you pass the `walletId` and the `privateKey` of your wallet in order to login with full access. This mode mimics the Metamask login process. This mode is here only for completeness.
--   `[VERSION]` (**required**): Version of bombcrypto.
--   `[TELEGRAMK_KEY]` (optional): The key of a telegram bot. See Telegram integration section.
--   `[NETWORK]` (optional): BSC or POLYGON, default BSC.
--   `[MODE_ADVENTURE]` (optional): if you want to play adventure mode.
--   `[MIN_HERO_ENERGY_PERCENTAGE]` (optional): Percentage that will put the heroes to work.
--   `[ADVENTURE_HEROES]` (optional): If you have adventure mode enabled, here you can inform the ids of the heroes that will be used, if not informed, all heroes will be used, separated by ":", Example 151515881:51878184:16187755.
--   `[HOUSE_HEROES]` (optional): If you have a house, here you can inform the ids of the heroes will use the house, separated by ":", Example 151515881:51878184:16187755.
--   `[SAVE_REWARDS_CSV]` (optional): whenever the bot is started, it will write a csv file, the "csv" folder with the bombcrypto username, with the rewards data.
--   `[ALERT_SHIELD]` (optional): The value of the shield to notify you when it's running low
--   `[NUM_HERO_WORK]` (optional): Number of heroes that will work at the same time (default 15)
--   `[TELEGRAM_CHAT_ID]` (optional): Telegram chat id, in case you want to receive notifications
-
-## Telegram integration
-
-If you want to see the progress of the bot on your phone, you may create a telegram bot through BotFather (https://t.me/botfather). With the created key, pass the `TELEGRAM_KEY` enviroment variable when initializing the bot.
-
-Start a conversation with the created bot and send the following:
-
--   `/stats`: Brings information about the current map life, the amount of working heroes and the current hero selection identifier.
--   `/rewards`: Brings the current amount of coins, heroes to be claimed and keys you have in your account.
--   `/exit`: Will kill the bot.
+-   Farm Treasure Hunt
+-   Lida com o recurso Home se uma casa estiver disponível
 
 # Início do zero
 
@@ -198,6 +127,8 @@ module.exports = {
 
 ```
 
+aqui você ve as variaveis que existe
+
 Salve o arquivo (CTRL + X) ele vai pergunte se você confirma, digite Y e ENTER
 
 ## Criando bot no telegram
@@ -300,3 +231,26 @@ pm2 delete bot
 ```
 
 LEMBRANDO QUE VOCÊ PODE ACESSAR A MAQUINA VIRTUAL VIA APP Termius NO SEU CELULAR
+
+## Variáveis
+
+As variáveis são:
+
+| Nome da variável           | Obrigatório | Descrição                                                                                                                                                                                    | Exemplo                                               |
+| -------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| LOGIN                      | Sim         | dados usário para login, se for login com usuário e senha, deve ser utilizado "user:", se for com a wallet "wallet:"                                                                         | user:NOMEUSUARIO:SENHA ou wallet:WALLETID:PRIVATE_KEY |
+| TELEGRAM_KEY               | Não         | Chave do bot telegram, para você conseguir acionar comandos via telegram bot                                                                                                                 |                                                       |
+| NETWORK                    | Não         | A rede que será conectada, valores são BSC ou POLYGON, o padrão é BSC                                                                                                                        | POLYGON                                               |
+| MIN_HERO_ENERGY_PERCENTAGE | Não         | A porcentagem que o hero irá começar a trabalhar, você deve informar sem o símbulo %,o padrão é 50%                                                                                          | 50                                                    |
+| HOUSE_HEROES               | Não         | Caso você tenha casa, você pode informar quais heros terão preferencia na casa, o valor deve ser separado com :                                                                              | 312312312:12323123:2323232                            |
+| ALERT_SHIELD               | Não         | Caso você tenha informado TELEGRAM_KEY e TELEGRAM_CHAT_ID, você pode ser notificado quando o shield do hero estiver acabando, aqui você informa quanto de shield vc quer que seja notificado | 100                                                   |
+| NUM_HERO_WORK              | Não         | A quantidade de heroes que irão trabalhar ao mesmo tempo o padrão é 15                                                                                                                       | 5                                                     |
+
+## Comandos telegram
+
+| Nome     | Descrição                                   |
+| -------- | ------------------------------------------- |
+| /rewards | retorna todas as moedas que você já minerou |
+| /stats   | Retorna o status dos heroes                 |
+| /exit    | Da stop no bot                              |
+| /start   | Da start no bot                             |

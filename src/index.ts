@@ -30,16 +30,23 @@ async function main() {
         telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
     });
 
-    process.once("SIGINT", async () => {
+    const exit = async () => {
+        await bot.sleepAllHeroes();
         await bot.stop();
         process.exit();
-    });
-    process.once("SIGTERM", async () => {
-        await bot.stop();
-        process.exit();
-    });
+    };
 
-    await bot.loop();
+    process.once("SIGINT", exit);
+    process.once("SIGTERM", exit);
+
+    if (bot.params.telegramKey) {
+        await bot.initTelegraf(bot.params.telegramKey);
+    }
+
+    const start = await bot.db.get("start");
+    if (start || start === null) {
+        await bot.loop();
+    }
 }
 
 main();
