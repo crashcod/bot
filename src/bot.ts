@@ -40,6 +40,7 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
+import { differenceInMinutes, format } from "date-fns";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -198,6 +199,12 @@ export class TreasureMapBot {
         this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
         this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
         this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
+        this.telegraf?.command("start_calc_farm", (ctx) =>
+            this.telegramStartCalcFarm(ctx)
+        );
+        this.telegraf?.command("stop_calc_farm", (ctx) =>
+            this.telegramStopCalcFarm(ctx)
+        );
         this.telegraf?.command("shield", (ctx) =>
             this.telegramStatsShield(ctx)
         );
@@ -208,6 +215,8 @@ export class TreasureMapBot {
             { command: "rewards_all", description: "rewards_all" },
             { command: "shield", description: "shield" },
             { command: "stats", description: "stats" },
+            { command: "start_calc_farm", description: "start_calc_farm" },
+            { command: "stop_calc_farm", description: "stop_calc_farm" },
         ];
         await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
@@ -216,6 +225,96 @@ export class TreasureMapBot {
             language_code: "pt",
         });
         this.telegraf.launch();
+    }
+
+    async getCurrentCalcFarm() {
+        const rewards = await this.getReward();
+
+        const value = {
+            date: new Date().getTime(),
+            bcoin:
+                rewards.find(
+                    (r) => r.network == this.params.rede && r.type == "BCoin"
+                )?.value || 0,
+        };
+        return value;
+    }
+
+    async startCalcFarm() {
+        const value = await this.getCurrentCalcFarm();
+        this.db.set("calcFarm", value);
+        return value;
+    }
+    async stopCalcFarm() {
+        const start = await this.db.get("calcFarm");
+        if (!start) return null;
+
+        const current = await this.getCurrentCalcFarm();
+        this.db.set("calcFarm", null);
+        return {
+            current,
+            start,
+        };
+    }
+
+    async telegramStartCalcFarm(context: Context) {
+        if (!this.shouldRun) {
+            await context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nAccount not working`
+            );
+            return;
+        }
+
+        const value = await this.startCalcFarm();
+        const html =
+            `Account: ${this.getIdentify()}\n\n` +
+            `This command is for you to see a farm calculation from this moment on\n\n` +
+            `Date: ${this.formatDate(new Date(value.date))}\n` +
+            `Bcoin: ${value.bcoin.toFixed(2)}\n\n` +
+            `to terminate and see the final result, type /stop_calc_farm`;
+
+        context.replyWithHTML(html);
+    }
+
+    async telegramStopCalcFarm(context: Context) {
+        const value = await this.stopCalcFarm();
+        if (!value) {
+            return context.replyWithHTML(
+                "Account: ${this.getIdentify()}\n\nFarm calculation was not previously started"
+            );
+        }
+        const dateStart = value.start.date;
+        const dateEnd = value.current.date;
+        const bcoinStart = value.start.bcoin;
+        const bcoinEnd = value.current.bcoin;
+        const totalBcoin = bcoinEnd - bcoinStart;
+
+        const diffmin = differenceInMinutes(dateEnd, dateStart);
+        const diffHours = diffmin / 24;
+
+        if (diffmin == 0) {
+            return context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nwait at least 1 minute`
+            );
+        }
+
+        const totalAverageHour = totalBcoin / diffHours;
+
+        const html =
+            `Account: ${this.getIdentify()}\n\n` +
+            `Date start: ${this.formatDate(new Date(dateStart))}\n` +
+            `Date end: ${this.formatDate(new Date(dateEnd))}\n\n` +
+            `Bcoin start: ${bcoinStart.toFixed(2)}\n` +
+            `Bcoin end: ${bcoinEnd.toFixed(2)}\n\n` +
+            `Total bcoin: ${totalBcoin.toFixed(2)}\n` +
+            `Total hour: ${diffHours.toFixed(2)}\n` +
+            `Average per hour: ${totalAverageHour.toFixed(2)}\n`;
+
+        context.replyWithHTML(html);
+    }
+
+    formatDate(date: Date) {
+        return format(date, "dd, MMMM yyyy HH:mm");
     }
 
     async sendMessageChat(message: string) {
@@ -366,7 +465,9 @@ export class TreasureMapBot {
     }
     async telegramStatsShield(context: Context) {
         if (!this.shouldRun) {
-            await context.replyWithHTML("Account not working");
+            await context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nAccount not working`
+            );
             return;
         }
 

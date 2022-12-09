@@ -10,7 +10,6 @@ import {
 
 async function main() {
     const params = requireAndParseEnv("LOGIN", parseLogin);
-
     const bot = new TreasureMapBot(params, {
         telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
         minHeroEnergyPercentage: parseInt(
