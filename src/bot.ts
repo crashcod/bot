@@ -290,7 +290,7 @@ export class TreasureMapBot {
         const totalBcoin = bcoinEnd - bcoinStart;
 
         const diffmin = differenceInMinutes(dateEnd, dateStart);
-        const diffHours = diffmin / 24;
+        const diffHours = diffmin / 60;
 
         if (diffmin == 0) {
             return context.replyWithHTML(
