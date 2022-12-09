@@ -19,7 +19,7 @@ telegram do grupo https://t.me/+tQcb45U9MwAxYWMx
 
 ## Contratando servidor dedicado
 
-Caso você não tenha um servidor para colocar seu bot, você pode contratar um servidor em https://linode.com, custa 5 dolares mensais e deve aguentar 10 contas
+Caso você não tenha um servidor para colocar seu bot, você pode contratar um servidor em [Linode](https://linode.gvw92c.net/do1vYM), custa 5 dolares mensais e deve aguentar 10 contas
 
 Para aceessar o servidor do Linode, você pode utilizar o programa "Termius" [(Download Windows)](https://termius.com/windows) [(Download Linux)](https://termius.com/linux), ele existe para computador, android e ios
 
