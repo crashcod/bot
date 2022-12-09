@@ -7,6 +7,7 @@ import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
 import { logger } from "./logger";
 import { default as version } from "./version.json";
 
+import { differenceInMinutes, format } from "date-fns";
 import { Database } from "./api/database";
 import { Notification } from "./api/notification";
 import { makeException } from "./err";
@@ -40,7 +41,6 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
-import { differenceInMinutes, format } from "date-fns";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -205,6 +205,9 @@ export class TreasureMapBot {
         this.telegraf?.command("stop_calc_farm", (ctx) =>
             this.telegramStopCalcFarm(ctx)
         );
+        this.telegraf?.command("current_calc_farm", (ctx) =>
+            this.telegramStopCalcFarm(ctx, false)
+        );
         this.telegraf?.command("shield", (ctx) =>
             this.telegramStatsShield(ctx)
         );
@@ -217,6 +220,7 @@ export class TreasureMapBot {
             { command: "stats", description: "stats" },
             { command: "start_calc_farm", description: "start_calc_farm" },
             { command: "stop_calc_farm", description: "stop_calc_farm" },
+            { command: "current_calc_farm", description: "current_calc_farm" },
         ];
         await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
@@ -245,12 +249,12 @@ export class TreasureMapBot {
         this.db.set("calcFarm", value);
         return value;
     }
-    async stopCalcFarm() {
+    async currentCalcFarm() {
         const start = await this.db.get("calcFarm");
         if (!start) return null;
 
         const current = await this.getCurrentCalcFarm();
-        this.db.set("calcFarm", null);
+
         return {
             current,
             start,
@@ -258,7 +262,7 @@ export class TreasureMapBot {
     }
 
     async telegramStartCalcFarm(context: Context) {
-        if (!this.shouldRun) {
+        if (!this.shouldRun || !this.client.isLoggedIn) {
             await context.replyWithHTML(
                 `Account: ${this.getIdentify()}\n\nAccount not working`
             );
@@ -276,8 +280,14 @@ export class TreasureMapBot {
         context.replyWithHTML(html);
     }
 
-    async telegramStopCalcFarm(context: Context) {
-        const value = await this.stopCalcFarm();
+    async telegramStopCalcFarm(context: Context, stop = true) {
+        if (!this.shouldRun || !this.client.isLoggedIn) {
+            await context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nAccount not working`
+            );
+            return;
+        }
+        const value = await this.currentCalcFarm();
         if (!value) {
             return context.replyWithHTML(
                 "Account: ${this.getIdentify()}\n\nFarm calculation was not previously started"
@@ -298,7 +308,20 @@ export class TreasureMapBot {
             );
         }
 
-        const totalAverageHour = totalBcoin / diffHours;
+        if (stop) {
+            this.db.set("calcFarm", null);
+        }
+
+        let totalAverageHour = totalBcoin / diffmin;
+        let description =
+            `Total minutes: ${diffmin.toFixed(2)}\n` +
+            `Average per minute: ${totalAverageHour.toFixed(2)}\n`;
+        if (diffHours > 1) {
+            totalAverageHour = totalBcoin / diffHours;
+            description =
+                `Total hours: ${diffHours.toFixed(2)}\n` +
+                `Average per hour: ${totalAverageHour.toFixed(2)}\n`;
+        }
 
         const html =
             `Account: ${this.getIdentify()}\n\n` +
@@ -307,8 +330,7 @@ export class TreasureMapBot {
             `Bcoin start: ${bcoinStart.toFixed(2)}\n` +
             `Bcoin end: ${bcoinEnd.toFixed(2)}\n\n` +
             `Total bcoin: ${totalBcoin.toFixed(2)}\n` +
-            `Total hour: ${diffHours.toFixed(2)}\n` +
-            `Average per hour: ${totalAverageHour.toFixed(2)}\n`;
+            description;
 
         context.replyWithHTML(html);
     }

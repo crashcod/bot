@@ -249,13 +249,14 @@ As variáveis são:
 
 ## Comandos telegram
 
-| Nome             | Descrição                                                                                                         |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
-| /rewards         | Retorna todas as moedas que você já minerou                                                                       |
-| /stats           | Retorna o status dos heroes                                                                                       |
-| /exit            | Da stop no bot                                                                                                    |
-| /start           | Da start no bot                                                                                                   |
-| /shield          | Retorna os dados dos shields                                                                                      |
-| /rewards_all     | Retorna todos os rewards das contas, o rewards é atualizado sempre q começa um novo mapa ou a conta for conectada |
-| /start_calc_farm | Comando para iniciar o calculo do farm por hora                                                                   |
-| /stop_calc_farm  | Comando para da stop no calculo do farm por hora e mostra os resultados                                           |
+| Nome               | Descrição                                                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| /rewards           | Retorna todas as moedas que você já minerou                                                                       |
+| /stats             | Retorna o status dos heroes                                                                                       |
+| /exit              | Da stop no bot                                                                                                    |
+| /start             | Da start no bot                                                                                                   |
+| /shield            | Retorna os dados dos shields                                                                                      |
+| /rewards_all       | Retorna todos os rewards das contas, o rewards é atualizado sempre q começa um novo mapa ou a conta for conectada |
+| /start_calc_farm   | Comando para iniciar o calculo do farm por hora                                                                   |
+| /stop_calc_farm    | Comando para da stop no calculo do farm por hora e mostra os resultados                                           |
+| /current_calc_farm | Mostra o relatório atual do cáculo de farm, mas não da stop                                                       |
