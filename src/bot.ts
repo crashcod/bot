@@ -482,8 +482,6 @@ export class TreasureMapBot {
         }
     }
     async telegramStart(context: Context) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
         await this.db.set("start", true);
         await context.reply(`Account: ${this.getIdentify()}\n\nstating...`);
         await sleep(10000);
