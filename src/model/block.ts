@@ -15,6 +15,7 @@ export const BLOCK_TYPE_MAP = {
     5: "GoldChest",
     6: "DiamondChest",
     8: "KeyChest",
+    14: "Pig",
 } as const;
 
 export type EBlockType =
