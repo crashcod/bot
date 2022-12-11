@@ -266,7 +266,7 @@ export class TreasureMapBot {
     }
 
     async telegramStartCalcFarm(context: Context) {
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         if (!this.shouldRun || !this.client.isLoggedIn) {
             await context.replyWithHTML(
@@ -287,9 +287,7 @@ export class TreasureMapBot {
     }
 
     async telegramStopCalcFarm(context: Context, stop = true) {
-        if (!this.telegramCheckVersion(context)) return false;
-
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         if (!this.shouldRun || !this.client.isLoggedIn) {
             await context.replyWithHTML(
@@ -478,7 +476,7 @@ export class TreasureMapBot {
         }
     }
     async telegramStart(context: Context) {
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         await this.db.set("start", true);
         await context.reply(`Account: ${this.getIdentify()}\n\nstating...`);
@@ -487,7 +485,7 @@ export class TreasureMapBot {
         throw new Error("exit");
     }
     async telegramStats(context: Context) {
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         if (!this.shouldRun) {
             await context.replyWithHTML(
@@ -500,7 +498,7 @@ export class TreasureMapBot {
         await context.replyWithHTML(message);
     }
     async telegramStatsShield(context: Context) {
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         if (!this.shouldRun) {
             await context.replyWithHTML(
@@ -539,7 +537,7 @@ export class TreasureMapBot {
     }
 
     async telegramRewardsAll(context: Context) {
-        if (!this.telegramCheckVersion(context)) return false;
+        if (!(await this.telegramCheckVersion(context))) return false;
 
         const resultDb = this.db.getAllDatabase();
 
