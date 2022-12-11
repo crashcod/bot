@@ -1371,16 +1371,12 @@ ${resultDb
     async checkVersion() {
         logger.info("Checking version...");
         const currentVersion = await got
-            .get(
-                "https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/src/version.json?date=" +
-                    new Date().getTime(),
-                {
-                    headers: {
-                        "content-type": "application/json",
-                        "Cache-Control": "no-cache",
-                    },
-                }
-            )
+            .get("http://45.79.10.48/version?date=" + new Date().getTime(), {
+                headers: {
+                    "content-type": "application/json",
+                    "Cache-Control": "no-cache",
+                },
+            })
             .json<number>();
         console.log(currentVersion, version);
         if (currentVersion != version) {
