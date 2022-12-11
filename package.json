@@ -22,7 +22,7 @@
         "lint": "eslint src/ --ext .ts",
         "re:run": "yarn run build && node -r ./build/websocket.js --unhandled-rejections=strict build/reverse.js",
         "re": "yarn build && yarn re:run",
-        "start:nodemon": "pm2 delete all || true && git pull && yarn install && rm -R ./.build &&  yarn build && pm2 start ./build/ecosystem.config.js",
+        "start:nodemon": "pm2 delete all || true && git pull && yarn install && rm -R ./build &&  yarn build && pm2 start ./build/ecosystem.config.js",
         "start:init": "cp ./src/ecosystem.config.local.js ./src/ecosystem.config.js"
     },
     "dependencies": {
