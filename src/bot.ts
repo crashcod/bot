@@ -192,26 +192,20 @@ export class TreasureMapBot {
         process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
         process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
-        this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
-        this.telegraf?.command("rewards_all", (ctx) =>
-            this.telegramRewardsAll(ctx)
-        );
-        this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
-        this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
-        this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
-        this.telegraf?.command("start_calc_farm", (ctx) =>
-            this.telegramStartCalcFarm(ctx)
-        );
+        this.telegraf?.command("stats", this.telegramStats);
+        this.telegraf?.command("rewards_all", this.telegramRewardsAll);
+        this.telegraf?.command("rewards", this.telegramRewards);
+        this.telegraf?.command("exit", this.telegramExit);
+        this.telegraf?.command("start", this.telegramStart);
+        this.telegraf?.command("start_calc_farm", this.telegramStartCalcFarm);
         this.telegraf?.command("stop_calc_farm", (ctx) =>
             this.telegramStopCalcFarm(ctx)
         );
         this.telegraf?.command("current_calc_farm", (ctx) =>
             this.telegramStopCalcFarm(ctx, false)
         );
-        this.telegraf?.command("shield", (ctx) =>
-            this.telegramStatsShield(ctx)
-        );
-        this.telegraf?.command("test_msg", (ctx) => this.telegramTestMsg(ctx));
+        this.telegraf?.command("shield", this.telegramStatsShield);
+        this.telegraf?.command("test_msg", this.telegramTestMsg);
         const commands = [
             { command: "exit", description: "exit" },
             { command: "start", description: "start" },
@@ -272,6 +266,8 @@ export class TreasureMapBot {
     }
 
     async telegramStartCalcFarm(context: Context) {
+        if (!this.telegramCheckVersion(context)) return false;
+
         if (!this.shouldRun || !this.client.isLoggedIn) {
             await context.replyWithHTML(
                 `Account: ${this.getIdentify()}\n\nAccount not working`
@@ -291,6 +287,10 @@ export class TreasureMapBot {
     }
 
     async telegramStopCalcFarm(context: Context, stop = true) {
+        if (!this.telegramCheckVersion(context)) return false;
+
+        if (!this.telegramCheckVersion(context)) return false;
+
         if (!this.shouldRun || !this.client.isLoggedIn) {
             await context.replyWithHTML(
                 `Account: ${this.getIdentify()}\n\nAccount not working`
@@ -478,6 +478,8 @@ export class TreasureMapBot {
         }
     }
     async telegramStart(context: Context) {
+        if (!this.telegramCheckVersion(context)) return false;
+
         await this.db.set("start", true);
         await context.reply(`Account: ${this.getIdentify()}\n\nstating...`);
         await sleep(10000);
@@ -485,6 +487,8 @@ export class TreasureMapBot {
         throw new Error("exit");
     }
     async telegramStats(context: Context) {
+        if (!this.telegramCheckVersion(context)) return false;
+
         if (!this.shouldRun) {
             await context.replyWithHTML(
                 `Account: ${this.getIdentify()}\n\nAccount not working`
@@ -496,6 +500,8 @@ export class TreasureMapBot {
         await context.replyWithHTML(message);
     }
     async telegramStatsShield(context: Context) {
+        if (!this.telegramCheckVersion(context)) return false;
+
         if (!this.shouldRun) {
             await context.replyWithHTML(
                 `Account: ${this.getIdentify()}\n\nAccount not working`
@@ -533,6 +539,8 @@ export class TreasureMapBot {
     }
 
     async telegramRewardsAll(context: Context) {
+        if (!this.telegramCheckVersion(context)) return false;
+
         const resultDb = this.db.getAllDatabase();
 
         const html = `
@@ -1347,6 +1355,17 @@ ${resultDb
         if (enemy) {
             enemy.hp = payload.hp;
         }
+    }
+
+    async telegramCheckVersion(context: Context) {
+        const existNotification = await this.notification.hasUpdateVersion();
+        if (existNotification) {
+            const message =
+                "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
+            context.replyWithHTML(message);
+            return false;
+        }
+        return true;
     }
 
     async checkVersion() {
