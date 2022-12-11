@@ -1354,7 +1354,8 @@ ${resultDb
             .json<number>();
 
         if (currentVersion != version) {
-            const message = "Please update your code version";
+            const message =
+                "Please update your code version, run yarn start:nodemon on your computer";
 
             const existNotification =
                 await this.notification.hasUpdateVersion();
