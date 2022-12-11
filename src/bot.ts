@@ -1224,10 +1224,7 @@ ${resultDb
             this.playing = "sleep";
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
-        } while (
-            this.shouldRun &&
-            this.notification.hasUpdateVersion() === null
-        );
+        } while (this.shouldRun);
     }
 
     private resetState() {
@@ -1386,12 +1383,9 @@ ${resultDb
             const message =
                 "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
 
-            const existNotification =
-                await this.notification.hasUpdateVersion();
-            if (!existNotification) {
-                await this.notification.setUpdateVersion();
-                await this.sendMessageChat(message);
-            }
+            await this.notification.setUpdateVersion();
+            await this.sendMessageChat(message);
+
             await this.db.set("start", false);
             throw makeException("Version", message);
         } else if (this.params.telegramChatId) {
