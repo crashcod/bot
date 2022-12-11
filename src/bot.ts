@@ -264,7 +264,7 @@ export class TreasureMapBot {
     }
     async telegramTestMsg(context: Context) {
         context.replyWithHTML(
-            'if you receive message below "BARROUND", it means that your TELEGRAM_CHAT_ID is working, TELEGRAM_CHAT_ID: ' +
+            'if you receive message below "ARROMBADO", it means that your TELEGRAM_CHAT_ID is working, TELEGRAM_CHAT_ID: ' +
                 this.params.telegramChatId
         );
 
