@@ -1391,7 +1391,7 @@ ${resultDb
 
             await this.db.set("start", false);
             throw makeException("Version", message);
-        } else if (this.params.telegramChatId) {
+        } else {
             await this.notification.unsetUpdateVersion();
         }
     }
