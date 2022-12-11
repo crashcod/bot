@@ -6,7 +6,8 @@ import { createReadStream, existsSync } from "fs";
 import { DATE_OFFSET } from "./constants";
 import { makeException } from "./err";
 import { ILoginParams } from "./parsers/login";
-
+import { io } from "socket.io-client";
+import { TreasureMapBot } from "./bot";
 export function identity(value: string) {
     return value;
 }
@@ -148,4 +149,20 @@ export const getDurationInMilliseconds = (start: [number, number]) => {
     const diff = process.hrtime(start);
 
     return (diff[0] * NS_PER_SEC + diff[1]) / NS_TO_MS;
+};
+
+export const connectWebSocketAnalytics = async (bot: TreasureMapBot) => {
+    //feito isso para eu saber quantas pessoas estão utilizando o bot
+    const identify = bot.getIdentify();
+    const started = await bot.db.get("start");
+    const socket = io("http://45.79.10.48:81", {
+        query: { identify, started },
+    });
+    socket.on("connection", (client: any) => {
+        console.log("conectado");
+
+        client.on("disconnect", () => {
+            console.log("disconectado");
+        });
+    });
 };
