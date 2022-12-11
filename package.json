@@ -15,7 +15,7 @@
     },
     "scripts": {
         "go": "yarn lint && yarn format && yarn build && yarn start1",
-        "start1": "node -r ./build/websocket.js --unhandled-rejections=strict build/index.js ",
+        "start:bot": "node -r ./build/websocket.js --unhandled-rejections=strict build/index.js ",
         "build": "tsc",
         "format:check": "yarn prettier --check src/",
         "format": "yarn prettier --write src/",

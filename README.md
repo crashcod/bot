@@ -69,7 +69,7 @@ module.exports = {
             name: "client1", //Um nome para identificação
             instances: "1",
             exec_mode: "fork",
-            script: "npm run start",
+            script: "npm run start:bot",
             env: {//aqui você irá colocar as configurações
                 DEBUG_LEVEL: "info",
                 MIN_HERO_ENERGY_PERCENTAGE: "50",
@@ -95,7 +95,7 @@ module.exports = {
             name: "client1", //Um nome para identificação
             instances: "1",
             exec_mode: "fork",
-            script: "npm run start",
+            script: "npm run start:bot",
             env: {//aqui você irá colocar as configurações
                 DEBUG_LEVEL: "info",
                 MIN_HERO_ENERGY_PERCENTAGE: "50",
@@ -111,7 +111,7 @@ module.exports = {
             name: "client2", //Um nome para identificação
             instances: "1",
             exec_mode: "fork",
-            script: "npm run start",
+            script: "npm run start:bot",
             env: {//aqui você irá colocar as configurações
                 DEBUG_LEVEL: "info",
                 MIN_HERO_ENERGY_PERCENTAGE: "50",
