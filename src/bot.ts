@@ -1174,28 +1174,16 @@ ${resultDb
     sendPing() {
         setInterval(() => this.client.ping(), 1000 * 10);
     }
-    async checkUpdate() {
-        await this.checkVersion();
-        setInterval(() => {
-            try {
-                this.checkVersion();
-            } catch (e) {
-                this.shouldRun = false;
-                this.client.disconnect();
-            }
-        }, 1000 * 60);
-    }
 
     async loop() {
-        await this.checkUpdate();
         this.shouldRun = true;
-
         await this.db.set("username", this.getIdentify());
         await this.logIn();
         this.sendPing();
         await this.loadHouses();
         await this.refreshMap();
         do {
+            await this.checkVersion();
             if (this.map.totalLife <= 0) await this.refreshMap();
 
             logger.info("Opening map...");
@@ -1378,8 +1366,8 @@ ${resultDb
             if (!existNotification) {
                 await this.notification.setUpdateVersion();
                 await this.sendMessageChat(message);
-                await this.db.set("start", false);
             }
+            await this.db.set("start", false);
             throw makeException("Version", message);
         } else if (this.params.telegramChatId) {
             await this.notification.unsetUpdateVersion();
