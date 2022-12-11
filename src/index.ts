@@ -43,7 +43,11 @@ async function main() {
     process.once("SIGTERM", exit);
 
     if (bot.params.telegramKey) {
-        await bot.initTelegraf(bot.params.telegramKey);
+        try {
+            await bot.initTelegraf(bot.params.telegramKey);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     const start = await bot.db.get("start");

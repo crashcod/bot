@@ -211,6 +211,7 @@ export class TreasureMapBot {
         this.telegraf?.command("shield", (ctx) =>
             this.telegramStatsShield(ctx)
         );
+        this.telegraf?.command("test_msg", (ctx) => this.telegramTestMsg(ctx));
         const commands = [
             { command: "exit", description: "exit" },
             { command: "start", description: "start" },
@@ -221,6 +222,7 @@ export class TreasureMapBot {
             { command: "start_calc_farm", description: "start_calc_farm" },
             { command: "stop_calc_farm", description: "stop_calc_farm" },
             { command: "current_calc_farm", description: "current_calc_farm" },
+            { command: "test_msg", description: "test_msg" },
         ];
         await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
@@ -259,6 +261,14 @@ export class TreasureMapBot {
             current,
             start,
         };
+    }
+    async telegramTestMsg(context: Context) {
+        context.replyWithHTML(
+            'if you receive message below "BARROUND", it means that your TELEGRAM_CHAT_ID is working, TELEGRAM_CHAT_ID: ' +
+                this.params.telegramChatId
+        );
+
+        this.sendMessageChat("ARROMBADO");
     }
 
     async telegramStartCalcFarm(context: Context) {
@@ -1166,7 +1176,14 @@ ${resultDb
     }
     async checkUpdate() {
         await this.checkVersion();
-        setInterval(() => this.checkVersion(), 1000 * 60);
+        setInterval(() => {
+            try {
+                this.checkVersion();
+            } catch (e) {
+                this.shouldRun = false;
+                this.client.disconnect();
+            }
+        }, 1000 * 60);
     }
 
     async loop() {
@@ -1352,16 +1369,16 @@ ${resultDb
                 }
             )
             .json<number>();
-
         if (currentVersion != version) {
             const message =
-                "Please update your code version, run yarn start:nodemon on your computer";
+                "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
 
             const existNotification =
                 await this.notification.hasUpdateVersion();
             if (!existNotification) {
                 await this.notification.setUpdateVersion();
                 await this.sendMessageChat(message);
+                await this.db.set("start", false);
             }
             throw makeException("Version", message);
         } else if (this.params.telegramChatId) {
