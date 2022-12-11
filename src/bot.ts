@@ -1372,7 +1372,8 @@ ${resultDb
         logger.info("Checking version...");
         const currentVersion = await got
             .get(
-                "https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/src/version.json",
+                "https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/src/version.json?date=" +
+                    new Date().getTime(),
                 {
                     headers: {
                         "content-type": "application/json",
