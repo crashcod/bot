@@ -192,20 +192,26 @@ export class TreasureMapBot {
         process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
         process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
-        this.telegraf?.command("stats", this.telegramStats);
-        this.telegraf?.command("rewards_all", this.telegramRewardsAll);
-        this.telegraf?.command("rewards", this.telegramRewards);
-        this.telegraf?.command("exit", this.telegramExit);
-        this.telegraf?.command("start", this.telegramStart);
-        this.telegraf?.command("start_calc_farm", this.telegramStartCalcFarm);
+        this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
+        this.telegraf?.command("rewards_all", (ctx) =>
+            this.telegramRewardsAll(ctx)
+        );
+        this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
+        this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
+        this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
+        this.telegraf?.command("start_calc_farm", (ctx) =>
+            this.telegramStartCalcFarm(ctx)
+        );
         this.telegraf?.command("stop_calc_farm", (ctx) =>
             this.telegramStopCalcFarm(ctx)
         );
         this.telegraf?.command("current_calc_farm", (ctx) =>
             this.telegramStopCalcFarm(ctx, false)
         );
-        this.telegraf?.command("shield", this.telegramStatsShield);
-        this.telegraf?.command("test_msg", this.telegramTestMsg);
+        this.telegraf?.command("shield", (ctx) =>
+            this.telegramStatsShield(ctx)
+        );
+        this.telegraf?.command("test_msg", (ctx) => this.telegramTestMsg(ctx));
         const commands = [
             { command: "exit", description: "exit" },
             { command: "start", description: "start" },
@@ -1184,6 +1190,7 @@ ${resultDb
     async loop() {
         this.shouldRun = true;
         await this.db.set("username", this.getIdentify());
+        await this.checkVersion();
         await this.logIn();
         this.sendPing();
         await this.loadHouses();
