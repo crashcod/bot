@@ -1361,7 +1361,7 @@ ${resultDb
         const existNotification = await this.notification.hasUpdateVersion();
         if (existNotification) {
             const message =
-                "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
+                "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
             context.replyWithHTML(message);
             return false;
         }
@@ -1384,7 +1384,7 @@ ${resultDb
         console.log(currentVersion, "version");
         if (currentVersion != version) {
             const message =
-                "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
+                "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
 
             await this.notification.setUpdateVersion();
             await this.sendMessageChat(message);

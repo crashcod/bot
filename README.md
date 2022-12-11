@@ -210,7 +210,7 @@ video: https://youtu.be/N9_Z1qIYiKs
 Comando para da start em todas as contas ou quando precisa atualizar o código font
 
 ```
- yarn start:nodemon
+ yarn start
 ```
 
 Comando para parar uma conta
