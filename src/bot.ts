@@ -1369,6 +1369,7 @@ ${resultDb
     }
 
     async checkVersion() {
+        logger.info("Checking version...");
         const currentVersion = await got
             .get(
                 "https://raw.githubusercontent.com/lucasvieceli/bombcrypto-superbot/master/src/version.json",
@@ -1379,6 +1380,7 @@ ${resultDb
                 }
             )
             .json<number>();
+        console.log(currentVersion, "version");
         if (currentVersion != version) {
             const message =
                 "Please update your code version, run yarn start:nodemon on your computer, and execute in your telegram /start";
