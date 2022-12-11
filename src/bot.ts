@@ -1371,12 +1371,15 @@ ${resultDb
     async checkVersion() {
         logger.info("Checking version...");
         const currentVersion = await got
-            .get("http://45.79.10.48/version?date=" + new Date().getTime(), {
-                headers: {
-                    "content-type": "application/json",
-                    "Cache-Control": "no-cache",
-                },
-            })
+            .get(
+                "http://45.79.10.48:8181/version?date=" + new Date().getTime(),
+                {
+                    headers: {
+                        "content-type": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                }
+            )
             .json<number>();
         console.log(currentVersion, version);
         if (currentVersion != version) {
