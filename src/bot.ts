@@ -1377,11 +1377,12 @@ ${resultDb
                 {
                     headers: {
                         "content-type": "application/json",
+                        "Cache-Control": "no-cache",
                     },
                 }
             )
             .json<number>();
-        console.log(currentVersion, "version");
+        console.log(currentVersion, version);
         if (currentVersion != version) {
             const message =
                 "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
