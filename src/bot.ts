@@ -1208,7 +1208,7 @@ ${resultDb
             this.playing = "sleep";
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
-        } while (this.shouldRun);
+        } while (this.shouldRun && !this.notification.hasUpdateVersion());
     }
 
     private resetState() {
