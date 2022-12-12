@@ -7,10 +7,15 @@ export type IStartExplodeBlocksPayload = {
     j: number;
 };
 
+export type IStartExplodeReward = {
+    value: number;
+    type: "BCOIN";
+};
 export type IStartExplodePayload = {
     id: number;
     energy: number;
     blocks: IStartExplodeBlocksPayload[];
+    rewards?: IStartExplodeReward[];
 };
 
 export type IStartExplodeInput = {

@@ -36,6 +36,7 @@ import {
     IStartStoryExplodePayload,
     IEnemyTakeDamagePayload,
     IEnterDoorPayload,
+    IStartExplodeReward,
 } from "../parsers/explosion";
 import {
     IGetActiveBomberPayload,
@@ -65,6 +66,7 @@ import {
     resolveUniquePromise,
 } from "./promise";
 import {
+    makeActiveHouseRequest,
     makeCoinDetailRequest,
     makeEnemyTakeDamageRequest,
     makeEnterDoorRequest,
@@ -111,6 +113,7 @@ type EventHandlerMap = {
     getHeroUpgradePower: () => void;
     getBlockMap: (blocks: IGetBlockMapPayload[]) => void;
     syncHouse: (houses: ISyncHousePayload[]) => void;
+    activeHouse: () => void;
     getActiveBomber: (heroes: IGetActiveBomberPayload[]) => void;
     syncBomberman: (heroes: ISyncBombermanPayload[]) => void;
     startPVE: () => void;
@@ -150,6 +153,7 @@ type IClientController = {
     logout: IUniqueRequestController<void>;
     getBlockMap: IUniqueRequestController<IGetBlockMapPayload[]>;
     syncHouse: IUniqueRequestController<ISyncHousePayload[]>;
+    activeHouse: IUniqueRequestController<void>;
     getActiveHeroes: IUniqueRequestController<IGetActiveBomberPayload[]>;
     syncBomberman: IUniqueRequestController<ISyncBombermanPayload[]>;
     startPVE: IUniqueRequestController<void>;
@@ -424,6 +428,22 @@ export class Client {
             this.controller.syncHouse,
             () => {
                 const request = makeSyncHouseRequest(
+                    this.walletId,
+                    this.nextId()
+                );
+                this.sfs.send(request);
+            },
+            timeout || this.timeout
+        );
+    }
+    activeHouse(id: number, timeout = 0) {
+        this.ensureLoggedIn();
+
+        return makeUniquePromise(
+            this.controller.activeHouse,
+            () => {
+                const request = makeActiveHouseRequest(
+                    id,
                     this.walletId,
                     this.nextId()
                 );
@@ -717,6 +737,7 @@ export class Client {
             getHeroUpgradePower: [],
             getBlockMap: [],
             syncHouse: [],
+            activeHouse: [],
             getActiveBomber: [],
             syncBomberman: [],
             startPVE: [],
@@ -757,6 +778,9 @@ export class Client {
                 current: undefined,
             },
             syncHouse: {
+                current: undefined,
+            },
+            activeHouse: {
                 current: undefined,
             },
             getActiveHeroes: {
@@ -958,10 +982,23 @@ export class Client {
             .fill(null)
             .map((_, i) => {
                 const payload = data.getSFSObject(i);
+                const dataRewards = payload.getSFSArray("rewards");
+                const rewards = Array(dataRewards.size())
+                    .fill(null)
+                    .map((_, i) => {
+                        const payload = dataRewards.getSFSObject(i);
+
+                        return {
+                            type: payload.getUtfString("type"),
+                            value: payload.getFloat("value"),
+                        };
+                    });
+
                 return {
                     hp: payload.getInt("hp"),
                     i: payload.getInt("i"),
                     j: payload.getInt("j"),
+                    rewards,
                 };
             });
 
@@ -1032,10 +1069,24 @@ export class Client {
             .fill(null)
             .map((_, i) => {
                 const payload = data.getSFSObject(i);
+                const dataRewards = payload.getSFSArray("rewards");
+                let rewards: IStartExplodeReward[] = [];
+                if (dataRewards) {
+                    rewards = Array(dataRewards.size())
+                        .fill(null)
+                        .map((_, i) => {
+                            const payloadReward = dataRewards.getSFSObject(i);
+                            return {
+                                type: payloadReward.getUtfString("type"),
+                                value: payloadReward.getFloat("value"),
+                            } as IStartExplodeReward;
+                        });
+                }
                 return {
                     hp: payload.getInt("hp"),
                     i: payload.getInt("i"),
                     j: payload.getInt("j"),
+                    rewards,
                 };
             });
 
@@ -1241,6 +1292,10 @@ export class Client {
         resolveUniquePromise(this.controller.syncHouse, houses);
         this.callHandler(this.handlers.syncHouse, houses);
     }
+    private handleActiveHouse() {
+        resolveUniquePromise(this.controller.activeHouse, undefined);
+        this.callHandler(this.handlers.activeHouse);
+    }
 
     private handleEnterDoor(params: SFSObject) {
         const result = {
@@ -1264,6 +1319,9 @@ export class Client {
 
             case "SYNC_HOUSE":
                 return rejectUniquePromise(this.controller.syncHouse, error);
+
+            case "ACTIVE_HOUSE":
+                return rejectUniquePromise(this.controller.activeHouse, error);
 
             case "GET_ACTIVE_BOMBER":
                 return rejectUniquePromise(
@@ -1419,6 +1477,8 @@ export class Client {
 
             case "SYNC_HOUSE":
                 return this.handleSyncHouse(response.params);
+            case "ACTIVE_HOUSE":
+                return this.handleActiveHouse();
 
             case "GET_ACTIVE_BOMBER":
                 return this.handleGetActiveHeroes(response.params);

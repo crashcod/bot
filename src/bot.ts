@@ -3,7 +3,7 @@ import got from "got";
 import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
 import { VERSION_CODE } from "./constants";
-import { getFromCsv, getRandomArbitrary, sleep, writeCsv } from "./lib";
+import { getFromCsv, getRandomArbitrary, sleep, socket, writeCsv } from "./lib";
 import { logger } from "./logger";
 import { default as version } from "./version.json";
 
@@ -906,8 +906,8 @@ ${resultDb
                 `bomb on (${location.i}, ${location.j})`
         );
         // await sleep(3000);
-        const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
-        const result = await this.client[method]({
+        // const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
+        const result = await this.client.startExplodeV2({
             heroId: hero.id,
             bombId,
             hero_type: hero.heroType,
@@ -1166,6 +1166,17 @@ ${resultDb
     async loadHouses() {
         const payloads = await this.client.syncHouse();
         this.houses = payloads.map(parseSyncHousePayload).map(buildHouse);
+        // if (this.houses.length) {
+        //     const isActive = this.home;
+        //     if (!isActive) {
+        //         const [house] = this.houses
+        //             .sort((a, b) => b.slots - a.slots)
+        //             .slice(0, 1);
+
+        //         logger.info(`Activing house (${house.slots}) slots`);
+        //         await this.client.activeHouse(house.id);
+        //     }
+        // }
     }
 
     async sleepAllHeroes() {
@@ -1328,6 +1339,12 @@ ${resultDb
             );
             if (blockType?.type === BLOCK_TYPE_MAP[2] && block.hp === 0) {
                 this.notificationBlockCage();
+            }
+            if (block.rewards?.length) {
+                block.rewards.map((reward) => {
+                    console.log("fez emit", reward);
+                    socket?.emit("explosion-rewards", reward);
+                });
             }
         }
         mapParams.forEach((params) => this.map.updateBlock(params));

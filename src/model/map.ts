@@ -1,5 +1,6 @@
 import { buildEnemy, Enemy, Hero, IEnemyParams, IStoryHeroParams } from ".";
 import { makeException } from "../err";
+import { IStartExplodeReward } from "../parsers";
 import { Block } from "./block";
 
 export type IMapParams = {
@@ -10,6 +11,7 @@ export type IMapBlockUpdateParams = {
     i: number;
     j: number;
     hp: number;
+    rewards?: IStartExplodeReward[];
 };
 
 const WALL_TILE = { type: "Wall", icon: "█" } as const;

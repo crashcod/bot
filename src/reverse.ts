@@ -30,7 +30,7 @@ function decodeMessage(base64: string): string {
 // CONNECT Request
 console.log(
     decodeMessage(
-        "oANteJytmc1rE0EYhzdtlYjWQ0+e95zDzsfuzuSmIgoqevAmNYQasKIQaCgV8X+3yc7EzGR251mwh7a0D+/MvF+/eScXxWkxWV8UJ7vvD4onX5eb5c1ifbta3Mrpw7vPv8vrcl7Nyu/lvJmVm1/rVTkXs/Lbevfj5/Luzfa3P7MDroWczXJix1WQ05DLn6PjDOSEpOB+h9qBB6StHCvhoTtOQS7vHAXX1XDdGq7bcWIfFdWBRv4jK++bFto0YYI5k02TMClkFJv+IDqyjsxakTKrwhxyrDYpVkeG+7fQhEFyVlOucujRbmVyByasXM9WCVbKqDp8Msv2wL91zB9tpK1Txp0rIlYNoKACmvB0fsM6VX2dJ/Yl3Ti2MsmzmbAYPK0ancQtzTUl0lVRp5ymZDIrdD8q8j1QKdo3OlDEy7fJoMlkot0DAXxZPN1c/1jdrDZOis6K7dejvTpNn305lCbaLfMtvcLdYJQ2/T/NkWF+Zrh8S5FQi2U6ynHkAjhfmnrUqY96SHr1qPX6crdVot4VlXBFC0eP0tH8whrWoYaB1FEgM8LMAl7Dw4y7FOTzognlIsPl87FB7SlYmxoFPaWFXmyjpB3M8DZaffBMBiavgf40MCkNTUpD69WGvhw8tQ179KA7LcxMLPWWNhZRQacLOq8JOrA5EMTHk2BxPj1F95vB+PhbOjYLCnjEjEBvTQILjydZAQusU4IKkIhEenh9jc9FNUNQ0XAgydIaBzQeT/FslgPzouVAsMkGXvbEGH3z++QngikaT6b9dlvq0hZv1dCsM9T5hjqfiqEDj4a/Hnda6iRLj27p0akYCqyGEg90FawiB4JJyFnEJsnTA5ZDKaBoOxDMTIIWhSfBVClwIPGgiidVOsNLfAXwJPC6ouGJXrAGLysOBmfXIxq3HCPYR89ow3RNyxMrrOx5AO7ZAFVZGWkisQqiGwloDqTvJfFE12+3HeUtQ5ukCR1ArII3IzzWSSo5Eo9LigqEA8ETEJ2rFJ2rVPRJ2PBTFdYnT4IjCeh3hT9Gou3cgcCbtO8r+papsEAoPPl5Ehxchfk2HHSqO0fP8FkS2KRvmUrTWqOvmWqMhvnlxSh6KFKXxcnqqvvQ4fHBJxHbv5wVk6tpcf761afFi3cfXr5dvH/+sZgsT4vz+3+cTP4C9W0+aA=="
+        "gACSEgADAAFjAgEAAWEDAA0AAXASAAMAAWMIAAxBQ1RJVkVfSE9VU0UAAXIE/////wABcBIABAAEZGF0YRIAAQAIaG91c2VfaWQEAAACHgACaWQEAAAADgAEaGFzaAgAIDk2YmI2MGRlZTNkNjIxNDQxYzMyMzc0NGI1NDZjYjNjAAl0aW1lc3RhbXAFAAA6CBgp07k="
     )
 );
 /**
@@ -58,3 +58,17 @@ console.log(
     return results.filter(v => except.indexOf(v) === -1);
 }
  */
+// (sfs_array) blocks:
+// (sfs_object) 0:
+//         (int) hp: 113
+//         (int) i: 22
+//         (int) j: 13
+
+// (sfs_object) 1:
+//         (int) hp: 0
+//         (int) i: 22
+//         (int) j: 14
+//         (sfs_array) rewards:
+//                 (sfs_object) 0:
+//                         (utf_string) type: BCOIN
+//                         (float) value: 0.008505488745868206

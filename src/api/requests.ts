@@ -105,6 +105,15 @@ export function makeGoSleepRequest(
     data.putInt("hero_type", heroType);
     return makeGameMessage(wallet, "GO_SLEEP", messageId, data);
 }
+export function makeActiveHouseRequest(
+    id: number,
+    wallet: string,
+    messageId: number
+) {
+    const data = new SFSObject();
+    data.putInt("house_id", id);
+    return makeGameMessage(wallet, "ACTIVE_HOUSE", messageId, data);
+}
 
 export function makeGoHomeRequest(
     wallet: string,
