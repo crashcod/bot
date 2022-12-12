@@ -3,7 +3,14 @@ import got from "got";
 import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
 import { VERSION_CODE } from "./constants";
-import { getFromCsv, getRandomArbitrary, sleep, socket, writeCsv } from "./lib";
+import {
+    connectWebSocketAnalytics,
+    getFromCsv,
+    getRandomArbitrary,
+    sleep,
+    socket,
+    writeCsv,
+} from "./lib";
 import { logger } from "./logger";
 import { default as version } from "./version.json";
 
@@ -1198,6 +1205,9 @@ ${resultDb
 
     async loop() {
         this.shouldRun = true;
+        connectWebSocketAnalytics(this).catch((e) => {
+            console.log(e);
+        });
         await this.db.set("username", this.getIdentify());
         await this.checkVersion();
         await this.logIn();

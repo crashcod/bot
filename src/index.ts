@@ -2,7 +2,6 @@ import { TreasureMapBot } from "./bot";
 import { VERSION_CODE } from "./constants";
 import {
     askAndParseEnv,
-    connectWebSocketAnalytics,
     identity,
     parseBoolean,
     parseLogin,
@@ -28,9 +27,6 @@ async function main() {
         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
         numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
         telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
-    });
-    connectWebSocketAnalytics(bot).catch((e) => {
-        console.log(e);
     });
 
     const exit = async () => {
