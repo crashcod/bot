@@ -1407,7 +1407,6 @@ ${resultDb
                 }
             )
             .json<number>();
-        console.log(currentVersion, version);
         if (currentVersion != version) {
             const message =
                 "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
