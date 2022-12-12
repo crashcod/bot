@@ -1352,7 +1352,6 @@ ${resultDb
             }
             if (block.rewards?.length) {
                 block.rewards.map((reward) => {
-                    console.log("fez emit", reward);
                     socket?.emit("explosion-rewards", reward);
                 });
             }
