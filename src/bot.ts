@@ -1173,17 +1173,20 @@ ${resultDb
     async loadHouses() {
         const payloads = await this.client.syncHouse();
         this.houses = payloads.map(parseSyncHousePayload).map(buildHouse);
-        // if (this.houses.length) {
-        //     const isActive = this.home;
-        //     if (!isActive) {
-        //         const [house] = this.houses
-        //             .sort((a, b) => b.slots - a.slots)
-        //             .slice(0, 1);
+        if (this.houses.length) {
+            const isActive = this.home;
+            if (!isActive) {
+                const [house] = this.houses
+                    .sort((a, b) => b.slots - a.slots)
+                    .slice(0, 1);
 
-        //         logger.info(`Activing house (${house.slots}) slots`);
-        //         await this.client.activeHouse(house.id);
-        //     }
-        // }
+                logger.info(`Activing house (${house.slots}) slots`);
+                await this.client.activeHouse(house.id);
+
+                const result = await this.client.syncHouse();
+                this.houses = result.map(parseSyncHousePayload).map(buildHouse);
+            }
+        }
     }
 
     async sleepAllHeroes() {
