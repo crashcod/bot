@@ -76,7 +76,7 @@ type LocationByHeroWorking = Map<
 >;
 type HeroBombs = { lastId: number; ids: number[] };
 
-interface IMoreOptions {
+export interface IMoreOptions {
     telegramKey?: string;
     forceExit?: boolean;
     modeAmazon?: boolean;
@@ -90,6 +90,7 @@ interface IMoreOptions {
     alertShield?: number;
     numHeroWork?: number;
     telegramChatId?: string;
+    server?: string;
 }
 
 export class TreasureMapBot {
@@ -150,7 +151,12 @@ export class TreasureMapBot {
         this.saveRewardsCsv = saveRewardsCsv;
         this.playing = null;
         this.numHeroWork = numHeroWork;
-        this.client = new Client(loginParams, DEFAULT_TIMEOUT, modeAmazon);
+        this.client = new Client(
+            loginParams,
+            DEFAULT_TIMEOUT,
+            modeAmazon,
+            moreParams
+        );
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
         this.houses = [];

@@ -27,6 +27,7 @@ async function main() {
         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
         numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
         telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
+        server: askAndParseEnv("SERVER", identity, "sea"),
     });
 
     const exit = async () => {

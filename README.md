@@ -78,7 +78,8 @@ module.exports = {
                 NETWORK: "POLYGON",
                 ALERT_SHIELD: 50,
                 NUM_HERO_WORK: 5,
-                TELEGRAM_CHAT_ID: "CHANGE"
+                TELEGRAM_CHAT_ID: "CHANGE",
+                SERVER: "sea"
             },
         },
     ],
@@ -104,7 +105,8 @@ module.exports = {
                 NETWORK: "POLYGON",
                 ALERT_SHIELD: 50,
                 NUM_HERO_WORK: 5,
-                TELEGRAM_CHAT_ID: "CHANGE"
+                TELEGRAM_CHAT_ID: "CHANGE",
+                SERVER: "sea"
             },
         },
         {
@@ -120,7 +122,8 @@ module.exports = {
                 NETWORK: "POLYGON",
                 ALERT_SHIELD: 50,
                 NUM_HERO_WORK: 5,
-                TELEGRAM_CHAT_ID: "CHANGE"
+                TELEGRAM_CHAT_ID: "CHANGE",
+                SERVER: "sea"
             },
         },
     ],
@@ -246,6 +249,7 @@ As variáveis são:
 | HOUSE_HEROES               | Não         | Caso você tenha casa, você pode informar quais heros terão preferencia na casa, o valor deve ser separado com :                                                                              | 312312312:12323123:2323232                            |
 | ALERT_SHIELD               | Não         | Caso você tenha informado TELEGRAM_KEY e TELEGRAM_CHAT_ID, você pode ser notificado quando o shield do hero estiver acabando, aqui você informa quanto de shield vc quer que seja notificado | 100                                                   |
 | NUM_HERO_WORK              | Não         | A quantidade de heroes que irão trabalhar ao mesmo tempo o padrão é 15                                                                                                                       | 5                                                     |
+| SERVER                     | Não         | o servidor que será conectado valores existentes, "na", "sea", "sa", valor padrão se não for informado sea                                                                                   | sea                                                   |
 
 ## Comandos telegram
 

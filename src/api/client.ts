@@ -8,6 +8,7 @@ import {
     SmartFox,
 } from "sfs2x-api";
 import UserAgent from "user-agents";
+import { IMoreOptions } from "../bot";
 import { PORT, ZONE } from "../constants";
 import { makeException } from "../err";
 import {
@@ -184,8 +185,15 @@ export class Client {
     public loginParams: ILoginParams;
     private apiBaseHeaders;
     private modeAmazon = false;
+    private moreParams;
 
-    constructor(loginParams: ILoginParams, timeout = 0, modeAmazon = false) {
+    constructor(
+        loginParams: ILoginParams,
+        timeout = 0,
+        modeAmazon = false,
+        moreParams: IMoreOptions
+    ) {
+        this.moreParams = moreParams;
         this.modeAmazon = modeAmazon;
         const userAgent = new UserAgent();
         this.apiBaseHeaders = {
@@ -406,8 +414,7 @@ export class Client {
         //     SERVERS.map((server) => this.getPing(server))
         // );
         // result.sort((a, b) => a.ping - b.ping);
-
-        return { server: "sea", ping: 0 };
+        return { server: this.moreParams.server as string, ping: 0 };
         // return result[0];
     }
 
