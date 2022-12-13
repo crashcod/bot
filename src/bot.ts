@@ -1419,33 +1419,34 @@ ${resultDb
 
     async checkVersion() {
         logger.info("Checking version...");
-        try {
-            const currentVersion = await got
-                .get(
-                    "http://45.79.10.48:8181/version?date=" +
-                        new Date().getTime(),
-                    {
-                        headers: {
-                            "content-type": "application/json",
-                            "Cache-Control": "no-cache",
-                        },
-                    }
-                )
-                .json<number>();
-            if (currentVersion != version) {
-                const message =
-                    "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
+        const currentVersion = await got
+            .get(
+                "http://45.79.10.48:8181/version?date=" + new Date().getTime(),
+                {
+                    headers: {
+                        "content-type": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                }
+            )
+            .json<number>()
+            .catch((e) => {
+                return undefined;
+            });
 
-                await this.notification.setUpdateVersion();
-                await this.sendMessageChat(message);
+        if (currentVersion === undefined) return true;
 
-                await this.db.set("start", false);
-                throw makeException("Version", message);
-            } else {
-                await this.notification.unsetUpdateVersion();
-            }
-        } catch (e) {
-            return true;
+        if (currentVersion != version) {
+            const message =
+                "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
+
+            await this.notification.setUpdateVersion();
+            await this.sendMessageChat(message);
+
+            await this.db.set("start", false);
+            throw makeException("Version", message);
+        } else {
+            await this.notification.unsetUpdateVersion();
         }
     }
 }
