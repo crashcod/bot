@@ -48,6 +48,7 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
+import { EGameAction } from "./api/base";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -1391,7 +1392,7 @@ ${resultDb
             enemy.hp = payload.hp;
         }
     }
-    private handleMessageError({ command, errorCode }: any) {
+    private handleMessageError(command: EGameAction, errorCode: number) {
         if (
             ![
                 "ENEMY_TAKE_DAMAGE",
