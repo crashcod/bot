@@ -1391,7 +1391,7 @@ ${resultDb
             enemy.hp = payload.hp;
         }
     }
-    private handleMessageError(command: string, errorCode: string) {
+    private handleMessageError({ command, errorCode }: any) {
         if (
             ![
                 "ENEMY_TAKE_DAMAGE",
