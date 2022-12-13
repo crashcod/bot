@@ -1215,11 +1215,13 @@ ${resultDb
         await this.checkVersion();
         await this.logIn();
         this.sendPing();
-        await this.loadHouses();
         await this.refreshMap();
         do {
             await this.checkVersion();
-            if (this.map.totalLife <= 0) await this.refreshMap();
+            if (this.map.totalLife <= 0) {
+                await this.loadHouses();
+                await this.refreshMap();
+            }
 
             logger.info("Opening map...");
             this.playing = this.modeAmazon ? "Amazon" : "Treasure";
