@@ -1,6 +1,5 @@
 import { SFSArray, SFSObject } from "sfs2x-api";
 import Web3 from "web3";
-import { makeException } from "../err";
 import { currentTimeSinceAD } from "../lib";
 import { Hero } from "../model";
 import { IEnemyTakeDamageInput } from "../parsers";
@@ -44,9 +43,19 @@ export function makeLoginRequest(params: ILoginParams) {
             "",
             1
         );
+    } else {
+        return makeLoginMessage(
+            params.signature as string,
+            params.wallet,
+            params.token,
+            params.rede,
+            params.version,
+            "",
+            1
+        );
     }
 
-    throw makeException("LoginFailed", "disabled login with wallet");
+    // throw makeException("LoginFailed", "disabled login with wallet");
     // return params.type === "user"
     //     ? makeLoginMessage(params.username, params.password, params.wallet, params.token, "", 1)
     //     // : makeLoginMessage(

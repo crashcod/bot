@@ -1386,6 +1386,26 @@ ${resultDb
         }
     }
 
+    async telegramWithdraw(context: Context) {
+        if (this.loginParams.type == "user") {
+            return context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
+            );
+        }
+        const rewards = await this.getReward();
+
+        const bcoin = rewards.find(
+            (v) => v.network == this.loginParams.rede && v.type == "BCoin"
+        );
+        if (!bcoin) return;
+
+        if (bcoin.value < 40) {
+            return context.replyWithHTML(
+                `Account: ${this.getIdentify()}\n\nMinimum amount of 40 Bitcoin`
+            );
+        }
+    }
+
     async telegramCheckVersion(context: Context) {
         const existNotification = await this.notification.hasUpdateVersion();
         if (existNotification) {
@@ -1399,28 +1419,33 @@ ${resultDb
 
     async checkVersion() {
         logger.info("Checking version...");
-        const currentVersion = await got
-            .get(
-                "http://45.79.10.48:8181/version?date=" + new Date().getTime(),
-                {
-                    headers: {
-                        "content-type": "application/json",
-                        "Cache-Control": "no-cache",
-                    },
-                }
-            )
-            .json<number>();
-        if (currentVersion != version) {
-            const message =
-                "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
+        try {
+            const currentVersion = await got
+                .get(
+                    "http://45.79.10.48:8181/version?date=" +
+                        new Date().getTime(),
+                    {
+                        headers: {
+                            "content-type": "application/json",
+                            "Cache-Control": "no-cache",
+                        },
+                    }
+                )
+                .json<number>();
+            if (currentVersion != version) {
+                const message =
+                    "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
 
-            await this.notification.setUpdateVersion();
-            await this.sendMessageChat(message);
+                await this.notification.setUpdateVersion();
+                await this.sendMessageChat(message);
 
-            await this.db.set("start", false);
-            throw makeException("Version", message);
-        } else {
-            await this.notification.unsetUpdateVersion();
+                await this.db.set("start", false);
+                throw makeException("Version", message);
+            } else {
+                await this.notification.unsetUpdateVersion();
+            }
+        } catch (e) {
+            return true;
         }
     }
 }

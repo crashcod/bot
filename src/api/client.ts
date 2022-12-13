@@ -45,7 +45,6 @@ import {
 import {
     IJwtLoginResponse,
     ILoginParams,
-    IUserLoginParams,
     IVerifyTokenResponse,
 } from "../parsers/login";
 import {
@@ -80,6 +79,7 @@ import {
     makeGoSleepRequest,
     makeGoWorkRequest,
     makeLoginRequest,
+    makeLoginSignature,
     makePingPongRequest,
     makeStartExplodeExplodeRequest,
     makeStartExplodeRequest,
@@ -274,16 +274,48 @@ export class Client {
 
     async getJwtToken() {
         try {
-            const { username, password } = <IUserLoginParams>this.loginParams;
-            const resultToken = await got
-                .post("https://api.bombcrypto.io/gateway/auth/tr/login", {
-                    json: {
-                        username,
-                        password,
-                    },
-                    headers: this.apiBaseHeaders,
-                })
-                .json<IJwtLoginResponse>();
+            const { type } = this.loginParams;
+            let resultToken: IJwtLoginResponse;
+
+            if (type == "wallet") {
+                const { privateKey, wallet } = this.loginParams;
+
+                const dapp = await got
+                    .get(
+                        `https://api.bombcrypto.io/gateway/auth/dapp/token?address=${wallet}`,
+                        {
+                            headers: this.apiBaseHeaders,
+                        }
+                    )
+                    .json<{ message: string }>();
+
+                const signature = makeLoginSignature(privateKey, dapp.message);
+
+                resultToken = await got
+                    .post(
+                        "https://api.bombcrypto.io/gateway/auth/dapp/verify-signature",
+                        {
+                            json: {
+                                address: wallet,
+                                signature,
+                            },
+                            headers: this.apiBaseHeaders,
+                        }
+                    )
+                    .json<IJwtLoginResponse>();
+                this.loginParams.signature = signature;
+            } else {
+                const { password, username } = this.loginParams;
+                resultToken = await got
+                    .post("https://api.bombcrypto.io/gateway/auth/tr/login", {
+                        json: {
+                            username,
+                            password,
+                        },
+                        headers: this.apiBaseHeaders,
+                    })
+                    .json<IJwtLoginResponse>();
+            }
             logger.info(`New token: ${resultToken.message.token}`);
 
             const resultVerify = await got
