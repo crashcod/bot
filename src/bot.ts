@@ -1310,6 +1310,10 @@ ${resultDb
             event: "enemyTakeDamage",
             handler: this.handleEnemyTakeDamage.bind(this),
         });
+        this.client.on({
+            event: "messageError",
+            handler: this.handleMessageError.bind(this),
+        });
 
         this.resetState();
     }
@@ -1385,6 +1389,18 @@ ${resultDb
         );
         if (enemy) {
             enemy.hp = payload.hp;
+        }
+    }
+    private handleMessageError(command: string, errorCode: string) {
+        if (
+            ![
+                "ENEMY_TAKE_DAMAGE",
+                "START_EXPLODE",
+                "START_EXPLODE_V2",
+                "START_STORY_EXPLODE",
+            ].includes(command)
+        ) {
+            this.sendMessageChat(`Error: ${command} ${errorCode}`);
         }
     }
 
