@@ -1345,6 +1345,7 @@ export class Client {
             `Failed with code ${errorCode}`
         );
 
+        console.log("command", command);
         switch (command) {
             case "GET_BLOCK_MAP":
                 return rejectUniquePromise(this.controller.getBlockMap, error);
