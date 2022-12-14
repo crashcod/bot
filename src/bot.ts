@@ -711,6 +711,7 @@ ${resultDb
                 }
             }
         }
+        await this.client.getActiveHeroes();
     }
 
     getSumShield(hero: Hero) {
