@@ -493,6 +493,7 @@ export class Client {
     }
 
     getActiveHeroes(timeout = 0) {
+        logger.info("Update list heroes...");
         this.ensureLoggedIn();
 
         return makeUniquePromise(
@@ -1352,6 +1353,7 @@ export class Client {
             `Failed with code ${errorCode}`
         );
 
+        console.log("", command);
         switch (command) {
             case "GET_BLOCK_MAP":
                 return rejectUniquePromise(this.controller.getBlockMap, error);

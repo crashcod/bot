@@ -36,6 +36,7 @@ import {
     IEnemies,
     IEnemyTakeDamagePayload,
     IGetActiveBomberPayload,
+    isFloat,
     IStartExplodePayload,
     IStartStoryExplodePayload,
     IStoryMap,
@@ -73,9 +74,7 @@ type LocationByHeroWorking = Map<
     }
 >;
 type HeroBombs = { lastId: number; ids: number[] };
-type Required<T> = {
-    [P in keyof T]-?: T[P];
-};
+
 export interface IMoreOptions {
     telegramKey?: string;
     forceExit?: boolean;
@@ -92,11 +91,15 @@ export interface IMoreOptions {
     telegramChatId?: string;
     server?: string;
 }
+type Required<T> = {
+    [P in keyof T]-?: T[P];
+};
 
 export class TreasureMapBot {
     public client!: Client;
     public map!: TreasureMap;
     public squad!: Squad;
+    public telegram: Telegram;
     public selection: Hero[];
     public houses: House[];
     public explosionByHero: ExplosionByHero;
@@ -107,11 +110,9 @@ export class TreasureMapBot {
     public index: number;
     public shouldRun: boolean;
     public lastAdventure: number;
+    public alertShield: number;
     public forceExit = true;
-    public modeAmazon = false;
-    public modeAdventure = false;
-    public saveRewardsCsv = false;
-    public numHeroWork = 15;
+    public minHeroEnergyPercentage;
     public adventureBlocks: IGetBlockMapPayload[] = [];
     public adventureEnemies: IEnemies[] = [];
     public houseHeroes: string[] = [];
@@ -121,13 +122,12 @@ export class TreasureMapBot {
     public loginParams: ILoginParams;
     public notification: Notification;
     public db: Database;
-    public telegram: Telegram;
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
             forceExit = true,
             minHeroEnergyPercentage = 90,
-            modeAmazon = true,
+            modeAmazon = false,
             houseHeroes = "",
             adventureHeroes = "",
             modeAdventure = false,
@@ -136,15 +136,15 @@ export class TreasureMapBot {
             version = VERSION_CODE,
             alertShield = 0,
             numHeroWork = 15,
+            server = "sea",
             telegramChatId = "",
             telegramKey = "",
-            server = "sea",
         } = moreParams;
 
         this.params = {
             forceExit,
             minHeroEnergyPercentage,
-            modeAmazon,
+            modeAmazon: true,
             houseHeroes,
             adventureHeroes,
             modeAdventure,
@@ -153,29 +153,30 @@ export class TreasureMapBot {
             version,
             alertShield,
             numHeroWork,
+            server,
             telegramChatId,
             telegramKey,
-            server,
         };
         this.loginParams = loginParams;
         loginParams.rede = rede;
         loginParams.version = version;
 
-        this.params.modeAmazon = true;
         this.playing = null;
         this.client = new Client(
             loginParams,
             DEFAULT_TIMEOUT,
-            this.params.modeAmazon,
+            modeAmazon,
             moreParams
         );
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
         this.houses = [];
+        this.forceExit = forceExit || true;
         this.houseHeroes = houseHeroes ? houseHeroes.split(":") : [];
         this.adventureHeroes = adventureHeroes
             ? adventureHeroes.split(":")
             : [];
+        this.minHeroEnergyPercentage = minHeroEnergyPercentage;
 
         this.explosionByHero = new Map();
         this.heroBombs = {};
@@ -186,6 +187,7 @@ export class TreasureMapBot {
         this.index = 0;
         this.shouldRun = false;
         this.lastAdventure = 0;
+        this.alertShield = alertShield;
         if ("username" in loginParams) {
             this.db = new Database(loginParams.username || "");
         } else {
@@ -245,6 +247,97 @@ export class TreasureMapBot {
         return this.playing;
     }
 
+    public async getStatsAccount() {
+        const formatMsg = (hero: Hero) => {
+            const isSelectedAtHome = this.houseHeroes.includes(
+                hero.id.toString()
+            );
+            const shield = hero.shields?.length
+                ? `${hero.shields[0].current}/${hero.shields[0].total}`
+                : "empty shield";
+            if (isSelectedAtHome) {
+                return `<b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
+            } else {
+                return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+            }
+        };
+
+        // const heroesAdventure = await this.getHeroesAdventure();
+
+        const workingHeroesLife = this.workingSelection
+            .map(formatMsg)
+            .join("\n");
+        const notWorkingHeroesLife = this.sleepingSelection
+            .map(formatMsg)
+            .join("\n");
+        const homeHeroesLife = this.homeSelection.map(formatMsg).join("\n");
+        let msgEnemies = "\n";
+
+        if (this.playing === "Adventure") {
+            const enemies = this.adventureEnemies.filter(
+                (e) => e.hp > 0
+            ).length;
+            const AllEnemies = this.adventureEnemies.length;
+            msgEnemies = `Total enemies adventure: ${enemies}/${AllEnemies}\n\n`;
+        }
+        // const heroesAdventureSelected = this.adventureHeroes.join(", ");
+        const houseHeroesIds = this.houseHeroes.join(", ");
+
+        const message =
+            `Account: ${this.getIdentify()}\n\n` +
+            `Playing mode: ${this.getStatusPlaying()}\n\n` +
+            // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
+            // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
+            msgEnemies +
+            `Network: ${this.client.loginParams.rede}\n` +
+            `Treasure/Amazon:\n` +
+            `${this.map.toString()}\n` +
+            `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
+            `Remaining chest (Amazon): \n${this.map
+                .formatMsgBlock()
+                .join("\n")}\n\n` +
+            `INFO: LIFE HERO | SHIELD HERO\n` +
+            `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
+            `Resting heroes (${this.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
+            `Resting heroes at home (${this.homeSelection.length}): \n${homeHeroesLife}`;
+
+        return message;
+    }
+
+    public async getRewardAccount() {
+        if (this.client.isConnected) {
+            const rewards = await this.client.getReward();
+            // const detail = await this.client.coinDetail();
+
+            const message =
+                "Account: " +
+                this.getIdentify() +
+                "\n\n" +
+                "Rewards:\n" +
+                // `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
+                // `| Rewards: ${detail.rewards}\n` +
+                rewards
+                    .filter(
+                        (v) =>
+                            v.network == this.params.rede || v.network == "TR"
+                    )
+                    .sort((a, b) => (a.network > b.network ? -1 : 1))
+                    .map(
+                        (reward) =>
+                            `${reward.network}-${reward.type}: ${
+                                isFloat(reward.value)
+                                    ? reward.value.toFixed(2)
+                                    : reward.value
+                            }`
+                    )
+                    .join("\n");
+
+            return message;
+        } else {
+            throw new Error("Not connected, please wait");
+        }
+    }
+
     get workingSelection() {
         return this.selection.filter(
             (hero) => hero.state === "Work" && hero.energy > 0
@@ -290,7 +383,7 @@ export class TreasureMapBot {
     }
 
     async saveRewards() {
-        if (!this.saveRewardsCsv) return;
+        if (!this.params.saveRewardsCsv) return;
         logger.info("Save rewards in csv...");
         let user = "nameuser";
         if ("username" in this.client.loginParams) {
@@ -320,8 +413,8 @@ export class TreasureMapBot {
         const homeSelection = this.squad.notWorking
             .filter(
                 (hero) =>
-                    !this.modeAmazon ||
-                    (this.modeAmazon &&
+                    !this.params.modeAmazon ||
+                    (this.params.modeAmazon &&
                         hero.shields &&
                         hero.shields.length &&
                         this.getSumShield(hero))
@@ -362,7 +455,6 @@ export class TreasureMapBot {
                 }
             }
         }
-        await this.client.getActiveHeroes();
     }
 
     getSumShield(hero: Hero) {
@@ -394,17 +486,15 @@ export class TreasureMapBot {
 
             return bpercent - apercent;
         });
-        let modifyHero = false;
         for (const hero of heroes) {
-            modifyHero = true;
             const percent = (hero.energy / hero.maxEnergy) * 100;
-            if (percent < this.params.minHeroEnergyPercentage) continue;
+            if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
-                this.modeAmazon &&
+                this.params.modeAmazon &&
                 (!hero.shields ||
                     hero.shields.length === 0 ||
-                    this.getSumShield(hero) <= this.params.alertShield)
+                    this.getSumShield(hero) <= this.alertShield)
             ) {
                 const lastDate = this.notificationShieldHero.get(
                     hero.id
@@ -435,7 +525,7 @@ export class TreasureMapBot {
                 this.getSumShield(hero)
             );
 
-            if (this.workingSelection.length <= this.numHeroWork - 1) {
+            if (this.workingSelection.length <= this.params.numHeroWork - 1) {
                 logger.info(`Sending hero ${hero.id} to work`);
                 await this.client.goWork(hero);
                 this.selection.push(hero);
@@ -443,9 +533,7 @@ export class TreasureMapBot {
         }
 
         logger.info(`Sent ${this.selection.length} heroes to work`);
-        if (modifyHero) {
-            await this.client.getActiveHeroes();
-        }
+
         await this.refreshHeroAtHome();
     }
 
@@ -880,6 +968,7 @@ export class TreasureMapBot {
         await this.checkVersion();
         await this.logIn();
         this.sendPing();
+        await this.loadHouses();
         await this.refreshMap();
         do {
             await this.checkVersion();
@@ -889,8 +978,8 @@ export class TreasureMapBot {
             }
 
             logger.info("Opening map...");
-            this.playing = this.modeAmazon ? "Amazon" : "Treasure";
-            await this.client.startPVE(0, this.modeAmazon);
+            this.playing = this.params.modeAmazon ? "Amazon" : "Treasure";
+            await this.client.startPVE(0, this.params.modeAmazon);
 
             await this.refreshHeroSelection();
             await this.placeBombs();
@@ -904,7 +993,7 @@ export class TreasureMapBot {
             if (
                 (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
                     this.lastAdventure === 0) &&
-                this.modeAdventure
+                this.params.modeAdventure
             ) {
                 this.resetStateAdventure();
                 this.playing = "Adventure";
@@ -1082,7 +1171,7 @@ export class TreasureMapBot {
                 }
             )
             .json<number>()
-            .catch((e) => {
+            .catch(() => {
                 return undefined;
             });
 
