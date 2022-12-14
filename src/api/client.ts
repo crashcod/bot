@@ -1353,7 +1353,6 @@ export class Client {
             `Failed with code ${errorCode}`
         );
 
-        console.log("", command);
         switch (command) {
             case "GET_BLOCK_MAP":
                 return rejectUniquePromise(this.controller.getBlockMap, error);
@@ -1391,14 +1390,12 @@ export class Client {
                 );
                 break;
             case "START_STORY_EXPLODE":
-                console.log("error START_STORY_EXPLODE", error);
                 resolveUniquePromise(
                     this.controller.startStoryExplode,
                     undefined
                 );
                 break;
             case "ENEMY_TAKE_DAMAGE":
-                console.log("error ENEMY_TAKE_DAMAGE", error);
                 resolveUniquePromise(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     this.controller.enemyTakeDamage as any,
