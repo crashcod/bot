@@ -1,6 +1,5 @@
 import { ObjectHeaderItem } from "csv-writer/src/lib/record";
 import got from "got";
-import { Context, Telegraf } from "telegraf";
 import { Client } from "./api";
 import { VERSION_CODE } from "./constants";
 import {
@@ -14,9 +13,10 @@ import {
 import { logger } from "./logger";
 import { default as version } from "./version.json";
 
-import { differenceInMinutes, format } from "date-fns";
+import { EGameAction } from "./api/base";
 import { Database } from "./api/database";
 import { Notification } from "./api/notification";
+import { Telegram } from "./api/telegram";
 import { makeException } from "./err";
 import {
     BLOCK_TYPE_MAP,
@@ -36,7 +36,6 @@ import {
     IEnemies,
     IEnemyTakeDamagePayload,
     IGetActiveBomberPayload,
-    isFloat,
     IStartExplodePayload,
     IStartStoryExplodePayload,
     IStoryMap,
@@ -48,7 +47,6 @@ import {
     parseSyncHousePayload,
 } from "./parsers";
 import { ILoginParams } from "./parsers/login";
-import { EGameAction } from "./api/base";
 
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
@@ -75,7 +73,9 @@ type LocationByHeroWorking = Map<
     }
 >;
 type HeroBombs = { lastId: number; ids: number[] };
-
+type Required<T> = {
+    [P in keyof T]-?: T[P];
+};
 export interface IMoreOptions {
     telegramKey?: string;
     forceExit?: boolean;
@@ -97,40 +97,37 @@ export class TreasureMapBot {
     public client!: Client;
     public map!: TreasureMap;
     public squad!: Squad;
-    private telegraf?: Telegraf;
-    private selection: Hero[];
+    public selection: Hero[];
     public houses: House[];
-    private explosionByHero: ExplosionByHero;
-    private notificationShieldHero: NotificationShieldHero;
-    private locationByHeroWorking: LocationByHeroWorking;
-    private heroBombs: Record<number, HeroBombs> = {};
-    private history: IMapTile[];
-    private index: number;
-    private shouldRun: boolean;
-    private lastAdventure: number;
-    private alertShield: number;
-    private forceExit = true;
-    private minHeroEnergyPercentage;
-    private modeAmazon = false;
-    private modeAdventure = false;
-    private saveRewardsCsv = false;
-    private numHeroWork = 15;
-    private adventureBlocks: IGetBlockMapPayload[] = [];
-    private adventureEnemies: IEnemies[] = [];
-    private houseHeroes: string[] = [];
-    private adventureHeroes: string[] = [];
-    private playing: "Adventure" | "Amazon" | "Treasure" | "sleep" | null =
-        null;
-    public params: IMoreOptions;
+    public explosionByHero: ExplosionByHero;
+    public notificationShieldHero: NotificationShieldHero;
+    public locationByHeroWorking: LocationByHeroWorking;
+    public heroBombs: Record<number, HeroBombs> = {};
+    public history: IMapTile[];
+    public index: number;
+    public shouldRun: boolean;
+    public lastAdventure: number;
+    public forceExit = true;
+    public modeAmazon = false;
+    public modeAdventure = false;
+    public saveRewardsCsv = false;
+    public numHeroWork = 15;
+    public adventureBlocks: IGetBlockMapPayload[] = [];
+    public adventureEnemies: IEnemies[] = [];
+    public houseHeroes: string[] = [];
+    public adventureHeroes: string[] = [];
+    public playing: "Adventure" | "Amazon" | "Treasure" | "sleep" | null = null;
+    public params: Required<IMoreOptions>;
     public loginParams: ILoginParams;
     public notification: Notification;
     public db: Database;
+    public telegram: Telegram;
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
             forceExit = true,
             minHeroEnergyPercentage = 90,
-            modeAmazon = false,
+            modeAmazon = true,
             houseHeroes = "",
             adventureHeroes = "",
             modeAdventure = false,
@@ -139,33 +136,46 @@ export class TreasureMapBot {
             version = VERSION_CODE,
             alertShield = 0,
             numHeroWork = 15,
+            telegramChatId = "",
+            telegramKey = "",
+            server = "sea",
         } = moreParams;
 
-        this.params = moreParams;
+        this.params = {
+            forceExit,
+            minHeroEnergyPercentage,
+            modeAmazon,
+            houseHeroes,
+            adventureHeroes,
+            modeAdventure,
+            saveRewardsCsv,
+            rede,
+            version,
+            alertShield,
+            numHeroWork,
+            telegramChatId,
+            telegramKey,
+            server,
+        };
         this.loginParams = loginParams;
         loginParams.rede = rede;
         loginParams.version = version;
 
-        this.modeAdventure = modeAdventure;
-        this.modeAmazon = true;
-        this.saveRewardsCsv = saveRewardsCsv;
+        this.params.modeAmazon = true;
         this.playing = null;
-        this.numHeroWork = numHeroWork;
         this.client = new Client(
             loginParams,
             DEFAULT_TIMEOUT,
-            modeAmazon,
+            this.params.modeAmazon,
             moreParams
         );
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
         this.houses = [];
-        this.forceExit = forceExit || true;
         this.houseHeroes = houseHeroes ? houseHeroes.split(":") : [];
         this.adventureHeroes = adventureHeroes
             ? adventureHeroes.split(":")
             : [];
-        this.minHeroEnergyPercentage = minHeroEnergyPercentage;
 
         this.explosionByHero = new Map();
         this.heroBombs = {};
@@ -176,13 +186,14 @@ export class TreasureMapBot {
         this.index = 0;
         this.shouldRun = false;
         this.lastAdventure = 0;
-        this.alertShield = alertShield;
         if ("username" in loginParams) {
             this.db = new Database(loginParams.username || "");
         } else {
             this.db = new Database(loginParams.wallet || "");
         }
         this.notification = new Notification(this.db);
+        this.telegram = new Telegram(this);
+        this.telegram.init();
     }
 
     async stop() {
@@ -195,56 +206,7 @@ export class TreasureMapBot {
             await this.client.goSleep(hero);
         }
 
-        if (this.telegraf) {
-            this.telegraf.stop();
-        }
-    }
-
-    async initTelegraf(telegramKey: string) {
-        logger.info("Starting telegraf...");
-        this.telegraf = new Telegraf(telegramKey);
-        process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
-        process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
-
-        this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
-        this.telegraf?.command("rewards_all", (ctx) =>
-            this.telegramRewardsAll(ctx)
-        );
-        this.telegraf?.command("rewards", (ctx) => this.telegramRewards(ctx));
-        this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
-        this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
-        this.telegraf?.command("start_calc_farm", (ctx) =>
-            this.telegramStartCalcFarm(ctx)
-        );
-        this.telegraf?.command("stop_calc_farm", (ctx) =>
-            this.telegramStopCalcFarm(ctx)
-        );
-        this.telegraf?.command("current_calc_farm", (ctx) =>
-            this.telegramStopCalcFarm(ctx, false)
-        );
-        this.telegraf?.command("shield", (ctx) =>
-            this.telegramStatsShield(ctx)
-        );
-        this.telegraf?.command("test_msg", (ctx) => this.telegramTestMsg(ctx));
-        const commands = [
-            { command: "exit", description: "exit" },
-            { command: "start", description: "start" },
-            { command: "rewards", description: "rewards" },
-            { command: "rewards_all", description: "rewards_all" },
-            { command: "shield", description: "shield" },
-            { command: "stats", description: "stats" },
-            { command: "start_calc_farm", description: "start_calc_farm" },
-            { command: "stop_calc_farm", description: "stop_calc_farm" },
-            { command: "current_calc_farm", description: "current_calc_farm" },
-            { command: "test_msg", description: "test_msg" },
-        ];
-        await this.telegraf.telegram.setMyCommands(commands, {
-            language_code: "en",
-        });
-        await this.telegraf.telegram.setMyCommands(commands, {
-            language_code: "pt",
-        });
-        this.telegraf.launch();
+        this.telegram?.telegraf?.stop();
     }
 
     async getCurrentCalcFarm() {
@@ -276,322 +238,11 @@ export class TreasureMapBot {
             start,
         };
     }
-    async telegramTestMsg(context: Context) {
-        context.replyWithHTML(
-            'if you receive message below "ARROMBADO", it means that your TELEGRAM_CHAT_ID is working, TELEGRAM_CHAT_ID: ' +
-                this.params.telegramChatId
-        );
-
-        this.sendMessageChat("ARROMBADO");
-    }
-
-    async telegramStartCalcFarm(context: Context) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
-        if (!this.shouldRun || !this.client.isLoggedIn) {
-            await context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nAccount not working`
-            );
-            return;
-        }
-
-        const value = await this.startCalcFarm();
-        const html =
-            `Account: ${this.getIdentify()}\n\n` +
-            `This command is for you to see a farm calculation from this moment on\n\n` +
-            `Date: ${this.formatDate(new Date(value.date))}\n` +
-            `Bcoin: ${value.bcoin.toFixed(2)}\n\n` +
-            `to terminate and see the final result, type /stop_calc_farm`;
-
-        context.replyWithHTML(html);
-    }
-
-    async telegramStopCalcFarm(context: Context, stop = true) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
-        if (!this.shouldRun || !this.client.isLoggedIn) {
-            await context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nAccount not working`
-            );
-            return;
-        }
-        const value = await this.currentCalcFarm();
-        if (!value) {
-            return context.replyWithHTML(
-                "Account: ${this.getIdentify()}\n\nFarm calculation was not previously started"
-            );
-        }
-        const dateStart = value.start.date;
-        const dateEnd = value.current.date;
-        const bcoinStart = value.start.bcoin;
-        const bcoinEnd = value.current.bcoin;
-        const totalBcoin = bcoinEnd - bcoinStart;
-
-        const diffmin = differenceInMinutes(dateEnd, dateStart);
-        const diffHours = diffmin / 60;
-
-        if (diffmin == 0) {
-            return context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nwait at least 1 minute`
-            );
-        }
-
-        if (stop) {
-            this.db.set("calcFarm", null);
-        }
-
-        let totalAverageHour = totalBcoin / diffmin;
-        let description =
-            `Total minutes: ${diffmin.toFixed(2)}\n` +
-            `Average per minute: ${totalAverageHour.toFixed(2)}\n`;
-        if (diffHours > 1) {
-            totalAverageHour = totalBcoin / diffHours;
-            description =
-                `Total hours: ${diffHours.toFixed(2)}\n` +
-                `Average per hour: ${totalAverageHour.toFixed(2)}\n`;
-        }
-
-        const html =
-            `Account: ${this.getIdentify()}\n\n` +
-            `Date start: ${this.formatDate(new Date(dateStart))}\n` +
-            `Date end: ${this.formatDate(new Date(dateEnd))}\n\n` +
-            `Bcoin start: ${bcoinStart.toFixed(2)}\n` +
-            `Bcoin end: ${bcoinEnd.toFixed(2)}\n\n` +
-            `Total bcoin: ${totalBcoin.toFixed(2)}\n` +
-            description;
-
-        context.replyWithHTML(html);
-    }
-
-    formatDate(date: Date) {
-        return format(date, "dd, MMMM yyyy HH:mm");
-    }
-
-    async sendMessageChat(message: string) {
-        if (!this.params.telegramChatId) return;
-
-        return this.telegraf?.telegram.sendMessage(
-            this.params.telegramChatId,
-            `Account: ${this.getIdentify()}\n\n${message}`
-        );
-    }
 
     getStatusPlaying() {
         if (this.playing === "sleep") return "sleep for 10 seconds";
         if (this.playing === null) return "starting";
         return this.playing;
-    }
-
-    public async getStatsAccount() {
-        const formatMsg = (hero: Hero) => {
-            const isSelectedAtHome = this.houseHeroes.includes(
-                hero.id.toString()
-            );
-            const shield = hero.shields?.length
-                ? `${hero.shields[0].current}/${hero.shields[0].total}`
-                : "empty shield";
-            if (isSelectedAtHome) {
-                return `<b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
-            } else {
-                return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
-            }
-        };
-
-        // const heroesAdventure = await this.getHeroesAdventure();
-
-        const workingHeroesLife = this.workingSelection
-            .map(formatMsg)
-            .join("\n");
-        const notWorkingHeroesLife = this.sleepingSelection
-            .map(formatMsg)
-            .join("\n");
-        const homeHeroesLife = this.homeSelection.map(formatMsg).join("\n");
-        let msgEnemies = "\n";
-
-        if (this.playing === "Adventure") {
-            const enemies = this.adventureEnemies.filter(
-                (e) => e.hp > 0
-            ).length;
-            const AllEnemies = this.adventureEnemies.length;
-            msgEnemies = `Total enemies adventure: ${enemies}/${AllEnemies}\n\n`;
-        }
-        // const heroesAdventureSelected = this.adventureHeroes.join(", ");
-        const houseHeroesIds = this.houseHeroes.join(", ");
-
-        const message =
-            `Account: ${this.getIdentify()}\n\n` +
-            `Playing mode: ${this.getStatusPlaying()}\n\n` +
-            // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
-            // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
-            msgEnemies +
-            `Network: ${this.client.loginParams.rede}\n` +
-            `Treasure/Amazon:\n` +
-            `${this.map.toString()}\n` +
-            `Heroes selected for home(${this.houseHeroes.length}): ${houseHeroesIds}\n` +
-            `Remaining chest (Amazon): \n${this.map
-                .formatMsgBlock()
-                .join("\n")}\n\n` +
-            `INFO: LIFE HERO | SHIELD HERO\n` +
-            `Working heroes (${this.workingSelection.length}): \n${workingHeroesLife}\n\n` +
-            `Resting heroes (${this.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
-            `Resting heroes at home (${this.homeSelection.length}): \n${homeHeroesLife}`;
-
-        return message;
-    }
-
-    public async getRewardAccount() {
-        if (this.client.isConnected) {
-            const rewards = await this.client.getReward();
-            // const detail = await this.client.coinDetail();
-
-            const message =
-                "Account: " +
-                this.getIdentify() +
-                "\n\n" +
-                "Rewards:\n" +
-                // `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
-                // `| Rewards: ${detail.rewards}\n` +
-                rewards
-                    .filter(
-                        (v) =>
-                            v.network == this.params.rede || v.network == "TR"
-                    )
-                    .sort((a, b) => (a.network > b.network ? -1 : 1))
-                    .map(
-                        (reward) =>
-                            `${reward.network}-${reward.type}: ${
-                                isFloat(reward.value)
-                                    ? reward.value.toFixed(2)
-                                    : reward.value
-                            }`
-                    )
-                    .join("\n");
-
-            return message;
-        } else {
-            throw new Error("Not connected, please wait");
-        }
-    }
-
-    async telegramExit(context: Context) {
-        await context.reply(
-            `Account: ${this.getIdentify()}\n\nExiting in 5 seconds...`
-        );
-        await this.sleepAllHeroes();
-        this.shouldRun = false;
-        await sleep(10000);
-        await this.telegraf?.stop("SIGINT");
-        await this.db.set("start", false);
-        throw new Error("exit");
-    }
-
-    async telegramRewards(context: Context) {
-        try {
-            const message = await this.getRewardAccount();
-            await context.reply(message);
-        } catch (e) {
-            await context.reply(
-                `Account: ${this.getIdentify()}\n\nNot connected, please wait`
-            );
-        }
-    }
-    async telegramStart(context: Context) {
-        await this.db.set("start", true);
-        await context.reply(`Account: ${this.getIdentify()}\n\nstating...`);
-        await sleep(10000);
-        await this.telegraf?.stop("SIGINT");
-        throw new Error("exit");
-    }
-    async telegramStats(context: Context) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
-        if (!this.shouldRun) {
-            await context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nAccount not working`
-            );
-            return;
-        }
-
-        const message = await this.getStatsAccount();
-        await context.replyWithHTML(message);
-    }
-    async telegramStatsShield(context: Context) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
-        if (!this.shouldRun) {
-            await context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nAccount not working`
-            );
-            return;
-        }
-
-        const formatMsg = (hero: Hero) => {
-            const shield = hero.shields?.length
-                ? `${hero.shields[0].current}/${hero.shields[0].total}`
-                : "empty shield";
-            return `${hero.rarity} [${hero.id}]: ${shield}`;
-        };
-        let message =
-            "Account not connected, wait the bot will try to connect again";
-        const result = this.squad.heroes;
-
-        if (result && result.length) {
-            const heroes = result
-                .sort((a, b) => {
-                    const aShield = a.shields ? a.shields[0]?.current : 0;
-                    const bShield = b.shields ? b.shields[0]?.current : 0;
-
-                    return aShield - bShield;
-                })
-                .map(formatMsg)
-                .join("\n");
-
-            message =
-                `Account: ${this.getIdentify()}\n\n` +
-                `Shield heroes (${result.length}): \n\n${heroes}`;
-        }
-
-        context.replyWithHTML(message);
-    }
-
-    async telegramRewardsAll(context: Context) {
-        if (!(await this.telegramCheckVersion(context))) return false;
-
-        const resultDb = this.db.getAllDatabase();
-
-        const html = `
-<b>Rewards</b>
-
-Bcoin | Bomberman | time last update UTC 0
-
-${resultDb
-    .filter((v) => v.rewards)
-    .map((account) => {
-        const date = new Date(account.rewards.date);
-        const username = account.username;
-        const bcoin = account.rewards.values
-            .find(
-                (v: any) =>
-                    v.network == this.loginParams.rede && v.type == "BCoin"
-            )
-            ?.value.toFixed(2);
-
-        const bomberman =
-            account.rewards.values.find(
-                (v: any) =>
-                    v.network == this.loginParams.rede && v.type == "Bomberman"
-            )?.value || "0";
-
-        const dateStr = `${date.getHours()}:${date
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}`;
-
-        return `<b>${username}</b>:  ${bcoin} | ${bomberman} | ${dateStr}`;
-    })
-    .join("\n")}`;
-
-        context.replyWithHTML(html);
     }
 
     get workingSelection() {
@@ -724,7 +375,9 @@ ${resultDb
 
     async alertShieldHero(hero: Hero) {
         if (!(await this.notification.hasHeroShield(hero.id))) {
-            this.sendMessageChat(`Hero ${hero.id} needs shield repair`);
+            this.telegram.sendMessageChat(
+                `Hero ${hero.id} needs shield repair`
+            );
             this.notification.setHeroShield(hero.id, this.getSumShield(hero));
         }
         logger.info(`Hero ${hero.id} needs shield repair`);
@@ -741,15 +394,17 @@ ${resultDb
 
             return bpercent - apercent;
         });
+        let modifyHero = false;
         for (const hero of heroes) {
+            modifyHero = true;
             const percent = (hero.energy / hero.maxEnergy) * 100;
-            if (percent < this.minHeroEnergyPercentage) continue;
+            if (percent < this.params.minHeroEnergyPercentage) continue;
 
             if (
                 this.modeAmazon &&
                 (!hero.shields ||
                     hero.shields.length === 0 ||
-                    this.getSumShield(hero) <= this.alertShield)
+                    this.getSumShield(hero) <= this.params.alertShield)
             ) {
                 const lastDate = this.notificationShieldHero.get(
                     hero.id
@@ -788,7 +443,9 @@ ${resultDb
         }
 
         logger.info(`Sent ${this.selection.length} heroes to work`);
-
+        if (modifyHero) {
+            await this.client.getActiveHeroes();
+        }
         await this.refreshHeroAtHome();
     }
 
@@ -1408,39 +1065,8 @@ ${resultDb
                 "START_STORY_EXPLODE",
             ].includes(command)
         ) {
-            this.sendMessageChat(`Error: ${command} ${errorCode}`);
+            this.telegram.sendMessageChat(`Error: ${command} ${errorCode}`);
         }
-    }
-
-    async telegramWithdraw(context: Context) {
-        if (this.loginParams.type == "user") {
-            return context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
-            );
-        }
-        const rewards = await this.getReward();
-
-        const bcoin = rewards.find(
-            (v) => v.network == this.loginParams.rede && v.type == "BCoin"
-        );
-        if (!bcoin) return;
-
-        if (bcoin.value < 40) {
-            return context.replyWithHTML(
-                `Account: ${this.getIdentify()}\n\nMinimum amount of 40 Bitcoin`
-            );
-        }
-    }
-
-    async telegramCheckVersion(context: Context) {
-        const existNotification = await this.notification.hasUpdateVersion();
-        if (existNotification) {
-            const message =
-                "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
-            context.replyWithHTML(message);
-            return false;
-        }
-        return true;
     }
 
     async checkVersion() {
@@ -1467,7 +1093,7 @@ ${resultDb
                 "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
 
             await this.notification.setUpdateVersion();
-            await this.sendMessageChat(message);
+            await this.telegram.sendMessageChat(message);
 
             await this.db.set("start", false);
             throw makeException("Version", message);

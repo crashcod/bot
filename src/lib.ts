@@ -8,6 +8,7 @@ import { makeException } from "./err";
 import { ILoginParams } from "./parsers/login";
 import { io } from "socket.io-client";
 import { TreasureMapBot } from "./bot";
+import { format } from "date-fns";
 export function identity(value: string) {
     return value;
 }
@@ -168,4 +169,8 @@ export const connectWebSocketAnalytics = async (bot: TreasureMapBot) => {
             console.log("disconectado");
         });
     });
+};
+
+export const formatDate = (date: Date) => {
+    return format(date, "dd, MMMM yyyy HH:mm");
 };

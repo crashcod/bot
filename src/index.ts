@@ -39,14 +39,6 @@ async function main() {
     process.once("SIGINT", exit);
     process.once("SIGTERM", exit);
 
-    if (bot.params.telegramKey) {
-        try {
-            await bot.initTelegraf(bot.params.telegramKey);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
     const start = await bot.db.get("start");
     if (start || start === null) {
         await bot.loop();
