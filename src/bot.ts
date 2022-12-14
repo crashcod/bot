@@ -166,7 +166,7 @@ export class TreasureMapBot {
             loginParams,
             DEFAULT_TIMEOUT,
             modeAmazon,
-            moreParams
+            this.params
         );
         this.map = new TreasureMap({ blocks: [] });
         this.squad = new Squad({ heroes: [] });
