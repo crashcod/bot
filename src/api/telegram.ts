@@ -45,6 +45,7 @@ export class Telegram {
             this.telegraf?.command("test_msg", (ctx) =>
                 this.telegramTestMsg(ctx)
             );
+            this.telegraf?.command("config", (ctx) => this.telegramConfig(ctx));
             const commands = [
                 { command: "exit", description: "exit" },
                 { command: "start", description: "start" },
@@ -53,6 +54,7 @@ export class Telegram {
                 { command: "shield", description: "shield" },
                 { command: "stats", description: "stats" },
                 { command: "start_calc_farm", description: "start_calc_farm" },
+                { command: "config", description: "config" },
                 { command: "stop_calc_farm", description: "stop_calc_farm" },
                 {
                     command: "current_calc_farm",
@@ -70,6 +72,32 @@ export class Telegram {
         } catch (e) {
             console.log(e);
         }
+    }
+    async telegramConfig(context: Context) {
+        const {
+            rede,
+            alertShield,
+            houseHeroes,
+            minHeroEnergyPercentage,
+            numHeroWork,
+            server,
+            telegramChatId,
+            telegramKey,
+            version,
+        } = this.bot.params;
+        const html =
+            `Account: ${this.bot.getIdentify()}\n\n` +
+            `Network: ${rede}\n` +
+            `Alert shield: ${alertShield}\n` +
+            `Heroes select at home: ${houseHeroes.split(":").join(", ")}\n` +
+            `Percentage of hero life to work: ${minHeroEnergyPercentage}\n` +
+            `Amount of heroes to work: ${numHeroWork}\n` +
+            `Server: ${server}\n` +
+            `Telegram chat ID: ${telegramChatId}\n` +
+            `Telegram key: ${telegramKey}\n` +
+            `Bomb version: ${version}`;
+
+        context.replyWithHTML(html);
     }
     async telegramStats(context: Context) {
         if (!(await this.telegramCheckVersion(context))) return false;
