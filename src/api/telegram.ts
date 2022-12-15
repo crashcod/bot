@@ -90,7 +90,7 @@ export class Telegram {
             `Network: ${rede}\n` +
             `Alert shield: ${alertShield}\n` +
             `Heroes select at home: ${houseHeroes.split(":").join(", ")}\n` +
-            `Percentage of hero life to work: ${minHeroEnergyPercentage}\n` +
+            `Percentage of hero life to work: ${minHeroEnergyPercentage}%\n` +
             `Amount of heroes to work: ${numHeroWork}\n` +
             `Server: ${server}\n` +
             `Telegram chat ID: ${telegramChatId}\n` +
