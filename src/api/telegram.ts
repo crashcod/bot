@@ -18,8 +18,6 @@ export class Telegram {
             if (!this.bot.params.telegramKey) return;
             logger.info("Starting telegraf...");
             this.telegraf = new Telegraf(this.bot.params.telegramKey);
-            process.once("SIGINT", () => this.telegraf?.stop("SIGINT"));
-            process.once("SIGTERM", () => this.telegraf?.stop("SIGTERM"));
 
             this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
             this.telegraf?.command("rewards_all", (ctx) =>
@@ -69,6 +67,28 @@ export class Telegram {
                 language_code: "pt",
             });
             this.telegraf.launch();
+
+            const intervalStart = setInterval(async () => {
+                try {
+                    this.telegraf?.stop();
+                    setTimeout(() => {
+                        this.telegraf?.launch();
+                    }, 1000 * 10);
+                } catch (e: any) {
+                    setTimeout(() => {
+                        this.telegraf?.launch();
+                    }, 1000 * 10);
+                }
+            }, 3 * 60 * 1000);
+
+            process.once("SIGINT", () => {
+                this.telegraf?.stop("SIGINT");
+                clearInterval(intervalStart);
+            });
+            process.once("SIGTERM", () => {
+                this.telegraf?.stop("SIGTERM");
+                clearInterval(intervalStart);
+            });
         } catch (e) {
             console.log(e);
         }
