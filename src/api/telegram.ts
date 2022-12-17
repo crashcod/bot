@@ -368,6 +368,7 @@ ${resultDb
 
         if (stop) {
             this.bot.db.set("calcFarm", null);
+            this.bot.db.set("newMap", null);
         }
 
         let totalAverageMap = totalMap / diffmin;
