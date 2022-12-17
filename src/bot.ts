@@ -958,6 +958,14 @@ export class TreasureMapBot {
     sendPing() {
         setInterval(() => this.client.ping(), 1000 * 10);
     }
+    async registerNewMap() {
+        try {
+            const list = (await this.db.get<number[]>("newMap")) || [];
+            list.push(new Date().getTime());
+            this.db.set("newMap", list);
+            /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
+        } catch (_: any) {}
+    }
 
     async loop() {
         this.shouldRun = true;
@@ -975,6 +983,7 @@ export class TreasureMapBot {
             if (this.map.totalLife <= 0) {
                 await this.loadHouses();
                 await this.refreshMap();
+                this.registerNewMap();
             }
 
             logger.info("Opening map...");

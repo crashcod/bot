@@ -24,9 +24,9 @@ export class Database {
     public set(name: string, value: any) {
         return this.db.push(`/${name}`, value);
     }
-    public async get(name: string) {
+    public async get<T = any>(name: string): Promise<T | null> {
         try {
-            return await this.db.getData(`/${name}`);
+            return (await this.db.getData(`/${name}`)) as T;
         } catch (e: any) {
             return null;
         }

@@ -329,6 +329,13 @@ ${resultDb
 
         context.replyWithHTML(message);
     }
+
+    async getTotalMap(dateStart: number) {
+        const list = (await this.bot.db.get<number[]>("newMap")) || [];
+
+        return list.filter((v) => v >= dateStart).length;
+    }
+
     async telegramStopCalcFarm(context: Context, stop = true) {
         if (!(await this.telegramCheckVersion(context))) return false;
 
@@ -349,7 +356,7 @@ ${resultDb
         const bcoinStart = value.start.bcoin;
         const bcoinEnd = value.current.bcoin;
         const totalBcoin = bcoinEnd - bcoinStart;
-
+        const totalMap = await this.getTotalMap(dateStart);
         const diffmin = differenceInMinutes(dateEnd, dateStart);
         const diffHours = diffmin / 60;
 
@@ -363,15 +370,19 @@ ${resultDb
             this.bot.db.set("calcFarm", null);
         }
 
+        let totalAverageMap = totalMap / diffmin;
         let totalAverageHour = totalBcoin / diffmin;
         let description =
             `Total minutes: ${diffmin.toFixed(2)}\n` +
-            `Average per minute: ${totalAverageHour.toFixed(2)}\n`;
+            `Average per minute: ${totalAverageHour.toFixed(2)}\n` +
+            `Average map per minute: ${totalAverageMap.toFixed(2)}`;
         if (diffHours > 1) {
             totalAverageHour = totalBcoin / diffHours;
+            totalAverageMap = totalMap / diffHours;
             description =
                 `Total hours: ${diffHours.toFixed(2)}\n` +
-                `Average per hour: ${totalAverageHour.toFixed(2)}\n`;
+                `Average per hour: ${totalAverageHour.toFixed(2)}\n` +
+                `Average map per hour: ${totalAverageMap.toFixed(2)}`;
         }
 
         const html =
@@ -381,6 +392,7 @@ ${resultDb
             `Bcoin start: ${bcoinStart.toFixed(2)}\n` +
             `Bcoin end: ${bcoinEnd.toFixed(2)}\n\n` +
             `Total bcoin: ${totalBcoin.toFixed(2)}\n` +
+            `Total maps: ${totalMap}\n\n` +
             description;
 
         context.replyWithHTML(html);
