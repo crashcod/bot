@@ -6,7 +6,7 @@ import { createReadStream, existsSync } from "fs";
 import { DATE_OFFSET } from "./constants";
 import { makeException } from "./err";
 import { ILoginParams } from "./parsers/login";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { TreasureMapBot } from "./bot";
 import { format } from "date-fns";
 export function identity(value: string) {
@@ -152,14 +152,15 @@ export const getDurationInMilliseconds = (start: [number, number]) => {
     return (diff[0] * NS_PER_SEC + diff[1]) / NS_TO_MS;
 };
 
-export let socket: any;
+export let socket: Socket;
+
 export const connectWebSocketAnalytics = async (bot: TreasureMapBot) => {
     //feito isso para eu saber quantas pessoas estão utilizando o bot
     const identify = bot.getIdentify();
     const network = bot.loginParams.rede;
     let started = await bot.db.get("start");
     started = started === null || started === true ? true : false;
-    socket = io("http://45.79.10.48:81", {
+    socket = io("http://bombcrypto.lucasvieceli.com.br:81", {
         query: { identify, started, network },
     });
     socket.on("connection", (client: any) => {
@@ -169,6 +170,14 @@ export const connectWebSocketAnalytics = async (bot: TreasureMapBot) => {
             console.log("disconectado");
         });
     });
+};
+
+export const sendEventSockect = (event: string, value: any) => {
+    if (!socket || !socket.connected) {
+        return;
+    }
+
+    socket.emit(event, value);
 };
 
 export const formatDate = (date: Date) => {

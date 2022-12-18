@@ -6,8 +6,8 @@ import {
     connectWebSocketAnalytics,
     getFromCsv,
     getRandomArbitrary,
+    sendEventSockect,
     sleep,
-    socket,
     writeCsv,
 } from "./lib";
 import { logger } from "./logger";
@@ -1124,7 +1124,7 @@ export class TreasureMapBot {
             }
             if (block.rewards?.length) {
                 block.rewards.map((reward) => {
-                    socket?.emit("explosion-rewards", reward);
+                    sendEventSockect("explosion-rewards", reward);
                 });
             }
         }
@@ -1171,7 +1171,8 @@ export class TreasureMapBot {
         logger.info("Checking version...");
         const currentVersion = await got
             .get(
-                "http://45.79.10.48:8181/version?date=" + new Date().getTime(),
+                "http://bombcrypto.lucasvieceli.com.br:8181/version?date=" +
+                    new Date().getTime(),
                 {
                     headers: {
                         "content-type": "application/json",
@@ -1194,6 +1195,7 @@ export class TreasureMapBot {
             await this.telegram.sendMessageChat(message);
 
             await this.db.set("start", false);
+            logger.warning("Disabled because the version");
             throw makeException("Version", message);
         } else {
             await this.notification.unsetUpdateVersion();
