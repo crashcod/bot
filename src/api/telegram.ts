@@ -232,9 +232,9 @@ ${resultDb
     async telegramRewards(context: Context) {
         try {
             const message = await this.getRewardAccount();
-            await context.reply(message);
+            await context.replyWithHTML(message);
         } catch (e) {
-            await context.reply(
+            await context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nNot connected, please wait`
             );
         }
@@ -274,7 +274,7 @@ ${resultDb
         }
     }
     async telegramExit(context: Context) {
-        await context.reply(
+        await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nExiting in 5 seconds...`
         );
         await this.bot.sleepAllHeroes();
@@ -286,7 +286,9 @@ ${resultDb
     }
     async telegramStart(context: Context) {
         await this.bot.db.set("start", true);
-        await context.reply(`Account: ${this.bot.getIdentify()}\n\nstating...`);
+        await context.replyWithHTML(
+            `Account: ${this.bot.getIdentify()}\n\nstating...`
+        );
         await sleep(10000);
         await this.telegraf?.stop("SIGINT");
         throw new Error("exit");

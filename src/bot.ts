@@ -1108,7 +1108,7 @@ export class TreasureMapBot {
     }
 
     notificationBlockCage() {
-        logger.info("you won a hero");
+        this.telegram.sendMessageChat("You won a hero");
     }
 
     private handleExplosion(payload: IStartExplodePayload) {
@@ -1116,7 +1116,7 @@ export class TreasureMapBot {
         this.squad.updateHeroEnergy(heroParams);
 
         for (const block of mapParams) {
-            const blockType = this.map.blocks.find(
+            const blockType = this.map.params.blocks.find(
                 (b) => b.i == block.i && b.j == block.j
             );
             if (blockType?.type === BLOCK_TYPE_MAP[2] && block.hp === 0) {
