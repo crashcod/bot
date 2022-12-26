@@ -251,6 +251,8 @@ As variáveis são:
 | NUM_HERO_WORK              | Não         | A quantidade de heroes que irão trabalhar ao mesmo tempo o padrão é 15                                                                                                                       | 5                                                     |
 | SERVER                     | Não         | o servidor que será conectado valores existentes, "na", "sea", "sa", valor padrão se não for informado sea                                                                                   | sea                                                   |
 | TELEGRAM_CHAT_ID_CHECK     | Não         | Caso seja informado com o valor 1 e tamém seja informado o telegram chat id, a pessoa que náo é dona do telegram bot, não irá conseguir acionar os comandos do telegram                      | 1                                                     |
+| REPORT_REWARDS             | Não         | caso seja informado, e também seja informado TELEGRAM_CHAT_ID, o bot irá enviar os rewards automaticamente para o chat, o valor é em minutos, exemplo 30 é 30 minutos, 120, é duas horas     | 30                                                    |
+| TELEGRAM_CHAT_ID           | Não         | chat id do telegram para funcionar as notificações                                                                                                                                           |                                                       |
 
 ## Comandos telegram
 

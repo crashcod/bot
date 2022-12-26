@@ -10,6 +10,7 @@ import {
 
 async function main() {
     const params = requireAndParseEnv("LOGIN", parseLogin);
+    const report = askAndParseEnv("REPORT_REWARDS", parseInt, 0);
     const bot = new TreasureMapBot(params, {
         telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
         minHeroEnergyPercentage: parseInt(
@@ -32,12 +33,27 @@ async function main() {
             parseBoolean,
             false
         ),
+        reportRewards: report,
         server: askAndParseEnv("SERVER", identity, "sea"),
     });
+
+    let intervalReport: NodeJS.Timer;
+
+    if (report) {
+        intervalReport = setInterval(async () => {
+            const start = await bot.db.get("start");
+            if (start || start === null) {
+                bot.telegram.sendRewardReport();
+            }
+        }, 1000 * 60 * report);
+    }
 
     const exit = async () => {
         await bot.sleepAllHeroes();
         await bot.stop();
+        if (intervalReport) {
+            clearInterval(intervalReport);
+        }
         process.exit();
     };
 

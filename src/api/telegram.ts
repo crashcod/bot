@@ -264,6 +264,16 @@ ${resultDb
             );
         }
     }
+    async sendRewardReport() {
+        try {
+            const message = await this.getRewardAccount();
+            await this.sendMessageChat(message);
+        } catch (e) {
+            await this.sendMessageChat(
+                `Account: ${this.bot.getIdentify()}\n\nNot connected, please wait`
+            );
+        }
+    }
     public async getRewardAccount() {
         if (this.bot.client.isConnected) {
             const rewards = await this.bot.client.getReward();
