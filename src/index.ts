@@ -42,18 +42,21 @@ async function main() {
     if (report) {
         intervalReport = setInterval(async () => {
             const start = await bot.db.get("start");
-            if (start || start === null) {
-                bot.telegram.sendRewardReport();
+            const lastDate = (await bot.db.get("report")) || 0;
+            const now = Date.now();
+            const valid = now > lastDate + report * 60 * 1000;
+
+            if ((start || start === null) && valid) {
+                bot.telegram.sendRewardReport(now - 1000);
             }
-        }, 1000 * 60 * report);
+        }, 1000 * 60);
     }
 
     const exit = async () => {
         await bot.sleepAllHeroes();
         await bot.stop();
-        if (intervalReport) {
-            clearInterval(intervalReport);
-        }
+        if (intervalReport) clearInterval(intervalReport);
+
         process.exit();
     };
 

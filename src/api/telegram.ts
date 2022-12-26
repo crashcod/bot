@@ -264,10 +264,11 @@ ${resultDb
             );
         }
     }
-    async sendRewardReport() {
+    async sendRewardReport(date: number) {
         try {
             const message = await this.getRewardAccount();
             await this.sendMessageChat(message);
+            await this.bot.db.set("report", date);
         } catch (e) {
             await this.sendMessageChat(
                 `Account: ${this.bot.getIdentify()}\n\nNot connected, please wait`
