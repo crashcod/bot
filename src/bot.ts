@@ -81,6 +81,7 @@ export interface IMoreOptions {
     modeAmazon?: boolean;
     modeAdventure?: boolean;
     saveRewardsCsv?: boolean;
+    telegramChatIdCheck?: boolean;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
     adventureHeroes?: string;
@@ -132,6 +133,7 @@ export class TreasureMapBot {
             adventureHeroes = "",
             modeAdventure = false,
             saveRewardsCsv = false,
+            telegramChatIdCheck = false,
             rede = "BSC",
             version = VERSION_CODE,
             alertShield = 0,
@@ -156,6 +158,7 @@ export class TreasureMapBot {
             server,
             telegramChatId,
             telegramKey,
+            telegramChatIdCheck,
         };
         this.loginParams = loginParams;
         loginParams.rede = rede;

@@ -250,6 +250,7 @@ As variáveis são:
 | ALERT_SHIELD               | Não         | Caso você tenha informado TELEGRAM_KEY e TELEGRAM_CHAT_ID, você pode ser notificado quando o shield do hero estiver acabando, aqui você informa quanto de shield vc quer que seja notificado | 100                                                   |
 | NUM_HERO_WORK              | Não         | A quantidade de heroes que irão trabalhar ao mesmo tempo o padrão é 15                                                                                                                       | 5                                                     |
 | SERVER                     | Não         | o servidor que será conectado valores existentes, "na", "sea", "sa", valor padrão se não for informado sea                                                                                   | sea                                                   |
+| TELEGRAM_CHAT_ID_CHECK     | Não         | Caso seja informado com o valor 1 e tamém seja informado o telegram chat id, a pessoa que náo é dona do telegram bot, não irá conseguir acionar os comandos do telegram                      | 1                                                     |
 
 ## Comandos telegram
 

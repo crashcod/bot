@@ -106,7 +106,10 @@ export class Telegram {
     checkChatId(context: Context, fn: any) {
         if (this.bot.params.telegramChatId) {
             const chatId = getChatId(context);
-            if (chatId != this.bot.params.telegramChatId) {
+            if (
+                this.bot.params.telegramChatIdCheck &&
+                chatId != this.bot.params.telegramChatId
+            ) {
                 context.replyWithHTML(
                     `Account: ${this.bot.getIdentify()}\n\nYou do not have permission. your Telegram Chat Id is different from what was informed in the settings`
                 );
