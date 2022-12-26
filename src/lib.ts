@@ -183,3 +183,20 @@ export const sendEventSockect = (event: string, value: any) => {
 export const formatDate = (date: Date) => {
     return format(date, "dd, MMMM yyyy HH:mm");
 };
+
+export const getChatId = (ctx: any) => {
+    try {
+        if (ctx.message) {
+            return ctx.message.chat.id;
+        }
+        if (ctx.update.callback_query) {
+            return ctx.update.callback_query.message.chat.id;
+        }
+        if (ctx.update.message) {
+            return ctx.update.message.chat.id;
+        }
+        return ctx.message.chat.id;
+    } catch (e) {
+        console.log("nao achou id", e, ctx);
+    }
+};

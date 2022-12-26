@@ -1,7 +1,7 @@
 import { differenceInMinutes } from "date-fns";
 import { Context, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
-import { formatDate, sleep } from "../lib";
+import { formatDate, getChatId, sleep } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
@@ -19,31 +19,41 @@ export class Telegram {
             logger.info("Starting telegraf...");
             this.telegraf = new Telegraf(this.bot.params.telegramKey);
 
-            this.telegraf?.command("stats", (ctx) => this.telegramStats(ctx));
+            this.telegraf?.command("stats", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramStats(ctx))
+            );
             this.telegraf?.command("rewards_all", (ctx) =>
-                this.telegramRewardsAll(ctx)
+                this.checkChatId(ctx, () => this.telegramRewardsAll(ctx))
             );
             this.telegraf?.command("rewards", (ctx) =>
-                this.telegramRewards(ctx)
+                this.checkChatId(ctx, () => this.telegramRewards(ctx))
             );
-            this.telegraf?.command("exit", (ctx) => this.telegramExit(ctx));
-            this.telegraf?.command("start", (ctx) => this.telegramStart(ctx));
+            this.telegraf?.command("exit", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramExit(ctx))
+            );
+            this.telegraf?.command("start", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramStart(ctx))
+            );
             this.telegraf?.command("start_calc_farm", (ctx) =>
-                this.telegramStartCalcFarm(ctx)
+                this.checkChatId(ctx, () => this.telegramStartCalcFarm(ctx))
             );
             this.telegraf?.command("stop_calc_farm", (ctx) =>
-                this.telegramStopCalcFarm(ctx)
+                this.checkChatId(ctx, () => this.telegramStopCalcFarm(ctx))
             );
             this.telegraf?.command("current_calc_farm", (ctx) =>
-                this.telegramStopCalcFarm(ctx, false)
+                this.checkChatId(ctx, () =>
+                    this.telegramStopCalcFarm(ctx, false)
+                )
             );
             this.telegraf?.command("shield", (ctx) =>
-                this.telegramStatsShield(ctx)
+                this.checkChatId(ctx, () => this.telegramStatsShield(ctx))
             );
             this.telegraf?.command("test_msg", (ctx) =>
-                this.telegramTestMsg(ctx)
+                this.checkChatId(ctx, () => this.telegramTestMsg(ctx))
             );
-            this.telegraf?.command("config", (ctx) => this.telegramConfig(ctx));
+            this.telegraf?.command("config", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramConfig(ctx))
+            );
             const commands = [
                 { command: "exit", description: "exit" },
                 { command: "start", description: "start" },
@@ -92,6 +102,18 @@ export class Telegram {
         } catch (e) {
             console.log(e);
         }
+    }
+    checkChatId(context: Context, fn: any) {
+        if (this.bot.params.telegramChatId) {
+            const chatId = getChatId(context);
+            if (chatId != this.bot.params.telegramChatId) {
+                context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nYou do not have permission. your Telegram Chat Id is different from what was informed in the settings`
+                );
+                return;
+            }
+        }
+        return fn(context);
     }
     async telegramConfig(context: Context) {
         const {
