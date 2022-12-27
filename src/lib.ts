@@ -163,12 +163,9 @@ export const connectWebSocketAnalytics = async (bot: TreasureMapBot) => {
     socket = io("http://bombcrypto.lucasvieceli.com.br:81", {
         query: { identify, started, network },
     });
-    socket.on("connection", (client: any) => {
-        console.log("conectado");
 
-        client.on("disconnect", () => {
-            console.log("disconectado");
-        });
+    socket.on("message", (message: any) => {
+        bot.telegram.sendMessageChat(message);
     });
 };
 

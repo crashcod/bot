@@ -28,7 +28,7 @@ export function makeGetHeroUpgradePowerRequest(
 export function makeLoginSignature(privateKey: string, message: string) {
     const web3 = new Web3();
     const result = web3.eth.accounts.sign(message, privateKey);
-
+    result.signature;
     return result.signature;
 }
 
