@@ -76,7 +76,7 @@ console.log(
 
 //         (sfs_object) p:
 //                 (double) amount: 233.56678508864695
-//                 (utf_string) signature: 0xbae4c0f588cbd6cb57089de83fc72d259b503382a2c3f71a3e48d115565042c74b029fa2afbcb6dd713bef2d6087933f9b3fbba65c366a30873627ca4fbfb9181b
+//                 (utf_string) signature:
 //                 (utf_string_array) details:
 //                 (int) tokenType: 0
 //                 (int) nonce: 133
