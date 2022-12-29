@@ -481,7 +481,10 @@ export class TreasureMapBot {
         logger.info(`Hero ${hero.id} needs shield repair`);
     }
     async alertShielZerodHero(hero: Hero) {
-        this.telegram.sendMessageChat(`Hero ${hero.id} has 0 shield`);
+        if (!(await this.notification.hasHeroZeroShield(hero.id))) {
+            this.telegram.sendMessageChat(`Hero ${hero.id} has 0 shield`);
+            this.notification.setHeroZeroShield(hero.id, 0);
+        }
     }
 
     async refreshHeroSelection() {

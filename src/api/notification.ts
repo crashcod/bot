@@ -18,13 +18,20 @@ export class Notification {
     setHeroShield(heroId: number, shield: number) {
         return this.db.set(`heroShield${heroId}`, shield);
     }
+    setHeroZeroShield(heroId: number, shield: number) {
+        return this.db.set(`heroZeroShield${heroId}`, shield);
+    }
     async hasHeroShield(heroId: number) {
         return (await this.db.get(`heroShield${heroId}`)) !== null;
+    }
+    async hasHeroZeroShield(heroId: number) {
+        return (await this.db.get(`heroZeroShield${heroId}`)) !== null;
     }
     async checkHeroShield(heroId: number, shield: number) {
         const exists = await this.db.get(`heroShield${heroId}`);
         if (exists && shield > exists) {
             this.db.delete(`heroShield${heroId}`);
+            this.db.delete(`heroZeroShield${heroId}`);
         }
     }
 }
