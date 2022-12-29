@@ -480,6 +480,9 @@ export class TreasureMapBot {
         }
         logger.info(`Hero ${hero.id} needs shield repair`);
     }
+    async alertShielZerodHero(hero: Hero) {
+        this.telegram.sendMessageChat(`Hero ${hero.id} has 0 shield`);
+    }
 
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
@@ -523,6 +526,7 @@ export class TreasureMapBot {
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) === 0
                 ) {
+                    this.alertShielZerodHero(hero);
                     continue;
                 }
             }
