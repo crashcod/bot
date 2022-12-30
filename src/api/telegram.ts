@@ -157,6 +157,7 @@ export class Telegram {
         const message = await this.getStatsAccount();
         await context.replyWithHTML(message);
     }
+
     public async getStatsAccount() {
         const formatMsg = (hero: Hero) => {
             const isSelectedAtHome = this.bot.houseHeroes.includes(
@@ -213,6 +214,13 @@ export class Telegram {
 
         return message;
     }
+
+    public getTotalHeroZeroShield(database: any) {
+        return Object.keys(database).filter(
+            (v) => v.indexOf("heroZeroShield") !== -1
+        ).length;
+    }
+
     async telegramRewardsAll(context: Context) {
         if (!(await this.telegramCheckVersion(context))) return false;
 
@@ -221,13 +229,14 @@ export class Telegram {
         const html = `
 <b>Rewards</b>
 
-Bcoin | Bomberman | time last update UTC 0
+Bcoin | Bomberman | heroes with zero shield | time last update UTC 0
 
 ${resultDb
     .filter((v) => v.rewards)
     .map((account) => {
         const date = new Date(account.rewards.date);
         const username = account.username;
+        const zeroShield = this.getTotalHeroZeroShield(account);
         const bcoin = account.rewards.values
             .find(
                 (v: any) =>
@@ -247,7 +256,7 @@ ${resultDb
             .toString()
             .padStart(2, "0")}`;
 
-        return `<b>${username}</b>:  ${bcoin} | ${bomberman} | ${dateStr}`;
+        return `<b>${username}</b>:  ${bcoin} | ${bomberman} | ${zeroShield} | ${dateStr}`;
     })
     .join("\n")}`;
 
