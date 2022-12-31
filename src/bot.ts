@@ -529,7 +529,8 @@ export class TreasureMapBot {
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) === 0
                 ) {
-                    this.alertShielZerodHero(hero);
+                    console.log("áqio");
+                    await this.alertShielZerodHero(hero);
                     continue;
                 }
             }
