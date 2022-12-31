@@ -508,35 +508,8 @@ export class TreasureMapBot {
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) <= this.alertShield)
             ) {
-                const lastDate = this.notificationShieldHero.get(
-                    hero.id
-                )?.timestamp;
-                //verifica se faz mais que 24 horas da ultima notificação
-                if (
-                    !lastDate ||
-                    (lastDate &&
-                        Math.abs(
-                            new Date(lastDate).getTime() - new Date().getTime()
-                        ) / 36e5) > 24
-                ) {
-                    this.alertShieldHero(hero);
-                    this.notificationShieldHero.set(hero.id, {
-                        timestamp: new Date().getTime(),
-                    });
-                }
-                if (
-                    !hero.shields ||
-                    hero.shields.length === 0 ||
-                    this.getSumShield(hero) === 0
-                ) {
-                    await this.alertShielZerodHero(hero);
-                    continue;
-                }
+                continue;
             }
-            await this.notification.checkHeroShield(
-                hero.id,
-                this.getSumShield(hero)
-            );
 
             if (this.workingSelection.length <= this.params.numHeroWork - 1) {
                 logger.info(`Sending hero ${hero.id} to work`);
@@ -1102,6 +1075,44 @@ export class TreasureMapBot {
 
     private handleSquadLoad(payload: IGetActiveBomberPayload[]) {
         const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
+
+        heroes.map(async (hero) => {
+            if (
+                this.params.modeAmazon &&
+                (!hero.shields ||
+                    hero.shields.length === 0 ||
+                    this.getSumShield(hero) <= this.alertShield)
+            ) {
+                const lastDate = this.notificationShieldHero.get(
+                    hero.id
+                )?.timestamp;
+                //verifica se faz mais que 24 horas da ultima notificação
+                if (
+                    !lastDate ||
+                    (lastDate &&
+                        Math.abs(
+                            new Date(lastDate).getTime() - new Date().getTime()
+                        ) / 36e5) > 24
+                ) {
+                    this.alertShieldHero(hero);
+                    this.notificationShieldHero.set(hero.id, {
+                        timestamp: new Date().getTime(),
+                    });
+                }
+                if (
+                    !hero.shields ||
+                    hero.shields.length === 0 ||
+                    this.getSumShield(hero) === 0
+                ) {
+                    await this.alertShielZerodHero(hero);
+                }
+            }
+            await this.notification.checkHeroShield(
+                hero.id,
+                this.getSumShield(hero)
+            );
+        });
+
         this.squad.update({ heroes });
     }
 
