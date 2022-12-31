@@ -500,7 +500,8 @@ export class TreasureMapBot {
         });
         for (const hero of heroes) {
             const percent = (hero.energy / hero.maxEnergy) * 100;
-            if (percent < this.minHeroEnergyPercentage) continue;
+            if (percent < this.minHeroEnergyPercentage && hero.id != 919856)
+                continue;
 
             if (
                 this.params.modeAmazon &&
