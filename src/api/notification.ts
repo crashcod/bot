@@ -30,12 +30,12 @@ export class Notification {
     async checkHeroShield(heroId: number, shield: number) {
         const exists = await this.db.get(`heroShield${heroId}`);
         if (exists && shield > exists) {
-            this.db.delete(`heroShield${heroId}`);
+            await this.db.delete(`heroShield${heroId}`);
         }
         console.log(heroId, shield);
         const existsZero = await this.db.get(`heroZeroShield${heroId}`);
         if (existsZero && shield > 0) {
-            this.db.delete(`heroZeroShield${heroId}`);
+            await this.db.delete(`heroZeroShield${heroId}`);
         }
     }
 }
