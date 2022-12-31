@@ -500,8 +500,7 @@ export class TreasureMapBot {
         });
         for (const hero of heroes) {
             const percent = (hero.energy / hero.maxEnergy) * 100;
-            if (percent < this.minHeroEnergyPercentage && hero.id != 919856)
-                continue;
+            if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
                 this.params.modeAmazon &&
@@ -530,7 +529,6 @@ export class TreasureMapBot {
                     hero.shields.length === 0 ||
                     this.getSumShield(hero) === 0
                 ) {
-                    console.log("áqio");
                     await this.alertShielZerodHero(hero);
                     continue;
                 }
