@@ -35,6 +35,7 @@ export class Notification {
         console.log(heroId, shield);
         const existsZero = await this.db.get(`heroZeroShield${heroId}`);
         if (existsZero && shield > 0) {
+            console.log(heroId, "entrou");
             await this.db.delete(`heroZeroShield${heroId}`);
         }
     }

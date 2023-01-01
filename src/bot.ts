@@ -1094,7 +1094,7 @@ export class TreasureMapBot {
                             new Date(lastDate).getTime() - new Date().getTime()
                         ) / 36e5) > 24
                 ) {
-                    this.alertShieldHero(hero);
+                    await this.alertShieldHero(hero);
                     this.notificationShieldHero.set(hero.id, {
                         timestamp: new Date().getTime(),
                     });
