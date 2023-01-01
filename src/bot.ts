@@ -503,10 +503,9 @@ export class TreasureMapBot {
             if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
-                this.params.modeAmazon &&
-                (!hero.shields ||
-                    hero.shields.length === 0 ||
-                    this.getSumShield(hero) <= this.alertShield)
+                !hero.shields ||
+                hero.shields.length === 0 ||
+                this.getSumShield(hero) <= 0
             ) {
                 continue;
             }
