@@ -27,7 +27,9 @@ export type EGameAction =
     | "GET_REWARD"
     | "COIN_DETAIL"
     | "GET_STORY_LEVEL_DETAIL"
+    | "APPROVE_CLAIM"
     | "GET_STORY_MAP"
+    | "CONFIRM_CLAIM_REWARD_SUCCESS"
     | "START_STORY_EXPLODE"
     | "ENEMY_TAKE_DAMAGE"
     | "ENTER_DOOR";

@@ -7,14 +7,24 @@ import {
     SFSObject,
     SmartFox,
 } from "sfs2x-api";
+import Web3 from "web3";
+import { TransactionReceipt } from "web3-core";
 import UserAgent from "user-agents";
 import { IMoreOptions } from "../bot";
-import { PORT, ZONE } from "../constants";
+import {
+    ABI_APPROVE_CLAIM,
+    CONTRACT_APPROVE_CLAIM,
+    PORT,
+    WEB3_RPC,
+    ZONE,
+} from "../constants";
 import { makeException } from "../err";
 import {
     askAndParseEnv,
     getDurationInMilliseconds,
+    getGasPolygon,
     parseBoolean,
+    retryWeb3,
 } from "../lib";
 import { logger } from "../logger";
 import {
@@ -49,9 +59,12 @@ import {
     IVerifyTokenResponse,
 } from "../parsers/login";
 import {
+    IApproveClaimPayload,
     ICoinDetailPayload,
     IGetRewardPayload,
     IGetRewardPayloadNetwork,
+    ISuccessClaimRewardSuccessPayload,
+    IWeb3ApproveClaimParams,
     parseRewardType,
 } from "../parsers/reward";
 import { EGameAction } from "./base";
@@ -67,6 +80,8 @@ import {
 } from "./promise";
 import {
     makeActiveHouseRequest,
+    makeApproveClaim,
+    makeApproveConfirmClaimRewardSuccess,
     makeCoinDetailRequest,
     makeEnemyTakeDamageRequest,
     makeEnterDoorRequest,
@@ -109,6 +124,10 @@ type EventHandlerMap = {
     connectionFailed: () => void;
     connectionLost: () => void;
     login: () => void;
+    approveClaim: (params: IApproveClaimPayload) => void;
+    confirmClaimRewardSuccess: (
+        params: ISuccessClaimRewardSuccessPayload
+    ) => void;
     loginError: (errorCode: number) => void;
     logout: () => void;
     getHeroUpgradePower: () => void;
@@ -150,6 +169,8 @@ type IClientController = {
     connect: IUniqueRequestController<void>;
     disconnect: IUniqueRequestController<void>;
     login: IUniqueRequestController<void>;
+    approveClaim: IUniqueRequestController<IApproveClaimPayload>;
+    confirmClaimRewardSuccess: IUniqueRequestController<ISuccessClaimRewardSuccessPayload>;
     getHeroUpgradePower: IUniqueRequestController<void>;
     logout: IUniqueRequestController<void>;
     getBlockMap: IUniqueRequestController<IGetBlockMapPayload[]>;
@@ -392,6 +413,34 @@ export class Client {
             timeout || this.timeout
         );
     }
+    async approveClaim(blockReward: number, timeout = 0) {
+        this.ensureLoggedIn();
+
+        return await makeUniquePromise(
+            this.controller.approveClaim,
+            () =>
+                this.sfs.send(
+                    makeApproveClaim(this.walletId, this.nextId(), blockReward)
+                ),
+            timeout || this.timeout
+        );
+    }
+    async confirmClaimRewardSuccess(blockReward: number, timeout = 0) {
+        this.ensureLoggedIn();
+
+        return await makeUniquePromise(
+            this.controller.confirmClaimRewardSuccess,
+            () =>
+                this.sfs.send(
+                    makeApproveConfirmClaimRewardSuccess(
+                        this.walletId,
+                        this.nextId(),
+                        blockReward
+                    )
+                ),
+            timeout || this.timeout
+        );
+    }
 
     async getPing(server: string) {
         const start = process.hrtime();
@@ -631,6 +680,98 @@ export class Client {
         this.sfs.send(request);
     }
 
+    async web3ApproveClaim({
+        amount,
+        details,
+        nonce,
+        signature,
+        tokenType,
+    }: IWeb3ApproveClaimParams) {
+        const promise = new Promise<TransactionReceipt>(
+            async (resolve, error) => {
+                try {
+                    if (
+                        !("privateKey" in this.loginParams) ||
+                        !this.loginParams?.privateKey
+                    ) {
+                        return false;
+                    }
+
+                    const web3 = new Web3(WEB3_RPC);
+
+                    const contract = new web3.eth.Contract(
+                        ABI_APPROVE_CLAIM,
+                        web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
+                    );
+                    const account = web3.eth.accounts.privateKeyToAccount(
+                        this.loginParams.privateKey
+                    );
+
+                    const transactionCount = await web3.eth.getTransactionCount(
+                        account.address
+                    );
+
+                    const temp = contract.methods.claimTokens(
+                        web3.utils.toBN(tokenType),
+                        web3.utils.toWei(amount.toString(), "ether"),
+                        web3.utils.toBN(nonce),
+                        details,
+                        signature
+                    );
+                    const gasPolygon = await getGasPolygon();
+
+                    const txObject = {
+                        nonce: parseInt(web3.utils.toHex(transactionCount)),
+                        to: contract.options.address,
+                        gasLimit: web3.utils.toHex(300000),
+                        gasPrice: web3.utils.toHex(
+                            web3.utils.toWei(gasPolygon.toString(), "gwei")
+                        ),
+                        data: temp.encodeABI(),
+                    };
+
+                    const sign = await account.signTransaction(txObject);
+
+                    if (sign.rawTransaction) {
+                        web3.eth.sendSignedTransaction(
+                            sign.rawTransaction,
+                            (e, hash) => {
+                                if (e) {
+                                    return error(e);
+                                }
+
+                                const interval = setInterval(() => {
+                                    web3.eth.getTransactionReceipt(
+                                        hash,
+                                        (e, obj) => {
+                                            try {
+                                                if (e) {
+                                                    return error(e);
+                                                }
+                                                if (obj) {
+                                                    clearInterval(interval);
+                                                    resolve(obj);
+                                                    return;
+                                                }
+                                            } catch (e) {
+                                                clearInterval(interval);
+                                                return error(e);
+                                            }
+                                        }
+                                    );
+                                }, 1000);
+                            }
+                        );
+                    }
+                } catch (e) {
+                    error(e);
+                }
+            }
+        );
+
+        return retryWeb3(promise);
+    }
+
     goSleep(hero: Hero, timeout = 0) {
         this.ensureLoggedIn();
 
@@ -772,6 +913,8 @@ export class Client {
             connectionFailed: [],
             connectionLost: [],
             login: [],
+            approveClaim: [],
+            confirmClaimRewardSuccess: [],
             loginError: [],
             logout: [],
             getHeroUpgradePower: [],
@@ -806,6 +949,12 @@ export class Client {
                 current: undefined,
             },
             login: {
+                current: undefined,
+            },
+            approveClaim: {
+                current: undefined,
+            },
+            confirmClaimRewardSuccess: {
                 current: undefined,
             },
             logout: {
@@ -1192,6 +1341,7 @@ export class Client {
                     remainTime: reward.getInt("remain_time"),
                     type: parseRewardType(reward.getUtfString("type")),
                     value: reward.getFloat("value"),
+                    claimPending: reward.getDouble("claimPending"),
                     network: reward.getUtfString(
                         "data_type"
                     ) as IGetRewardPayloadNetwork,
@@ -1332,6 +1482,26 @@ export class Client {
         resolveUniquePromise(this.controller.syncHouse, houses);
         this.callHandler(this.handlers.syncHouse, houses);
     }
+    private handleApproveClaim(params: SFSObject) {
+        const result = {
+            amount: params.getDouble("amount"),
+            signature: params.getUtfString("signature"),
+            tokenType: params.getInt("tokenType"),
+            nonce: params.getInt("nonce"),
+            details: params.getUtfStringArray("details"),
+        };
+
+        resolveUniquePromise(this.controller.approveClaim, result);
+        this.callHandler(this.handlers.approveClaim, result);
+    }
+    private handleConfirmClaimRewardSuccess(params: SFSObject) {
+        const result = {
+            received: params.getDouble("received"),
+        };
+
+        resolveUniquePromise(this.controller.confirmClaimRewardSuccess, result);
+        this.callHandler(this.handlers.confirmClaimRewardSuccess, result);
+    }
     private handleActiveHouse() {
         resolveUniquePromise(this.controller.activeHouse, undefined);
         this.callHandler(this.handlers.activeHouse);
@@ -1368,6 +1538,8 @@ export class Client {
                     this.controller.getActiveHeroes,
                     error
                 );
+            case "APPROVE_CLAIM":
+                return rejectUniquePromise(this.controller.approveClaim, error);
 
             case "SYNC_BOMBERMAN":
                 return rejectUniquePromise(
@@ -1520,6 +1692,10 @@ export class Client {
 
             case "GET_ACTIVE_BOMBER":
                 return this.handleGetActiveHeroes(response.params);
+            case "APPROVE_CLAIM":
+                return this.handleApproveClaim(response.params);
+            case "CONFIRM_CLAIM_REWARD_SUCCESS":
+                return this.handleConfirmClaimRewardSuccess(response.params);
 
             case "SYNC_BOMBERMAN":
                 return this.handleSyncBomberman(response.params);

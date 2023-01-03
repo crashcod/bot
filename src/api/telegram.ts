@@ -1,6 +1,7 @@
 import { differenceInMinutes } from "date-fns";
 import { Context, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
+import { BLOCK_REWARD_TYPE_BCOIN_POLYGON } from "../constants";
 import { formatDate, getChatId, sleep } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
@@ -54,6 +55,12 @@ export class Telegram {
             this.telegraf?.command("config", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramConfig(ctx))
             );
+            this.telegraf?.command("withdraw", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramWithdraw(ctx))
+            );
+            this.telegraf?.command("gas_polygon", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramAverageGasPolygon(ctx))
+            );
             const commands = [
                 { command: "exit", description: "exit" },
                 { command: "start", description: "start" },
@@ -69,6 +76,8 @@ export class Telegram {
                     description: "current_calc_farm",
                 },
                 { command: "test_msg", description: "test_msg" },
+                { command: "gas_polygon", description: "gas_polygon" },
+                { command: "withdraw", description: "withdraw" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -273,6 +282,7 @@ ${resultDb
             );
         }
     }
+
     async sendRewardReport(date: number) {
         try {
             const message = await this.getRewardAccount();
@@ -395,7 +405,7 @@ ${resultDb
         const value = await this.bot.currentCalcFarm();
         if (!value) {
             return context.replyWithHTML(
-                "Account: ${this.getIdentify()}\n\nFarm calculation was not previously started"
+                `Account: ${this.bot.getIdentify()}\n\nFarm calculation was not previously started`
             );
         }
         const dateStart = value.start.date;
@@ -456,22 +466,71 @@ ${resultDb
         }
         return true;
     }
+    async telegramAverageGasPolygon(context: Context) {
+        const result = await this.bot.getAverageWeb3Transaction();
+        const html =
+            `Account: ${this.bot.getIdentify()}\n\n` +
+            `The values below are an average of how much it would cost right now\n\n` +
+            `Claim: ${result.claim}\n` +
+            `Reset Shield: ${result.resetShield}`;
+
+        context.replyWithHTML(html);
+    }
+
     async telegramWithdraw(context: Context) {
-        if (this.bot.loginParams.type == "user") {
-            return context.replyWithHTML(
-                `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
+        try {
+            if (this.bot.loginParams.type == "user") {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
+                );
+            }
+            if (this.bot.loginParams.rede != "POLYGON") {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed for POLYGON`
+                );
+            }
+
+            const rewards = await this.bot.getReward();
+            const bcoin = rewards.find(
+                (v) =>
+                    v.network == this.bot.loginParams.rede && v.type == "BCoin"
             );
-        }
-        const rewards = await this.bot.getReward();
 
-        const bcoin = rewards.find(
-            (v) => v.network == this.bot.loginParams.rede && v.type == "BCoin"
-        );
-        if (!bcoin) return;
+            if (!bcoin) return;
+            if (bcoin.value + bcoin.claimPending < 40) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nMinimum amount of 40 bcoin`
+                );
+            }
 
-        if (bcoin.value < 40) {
+            context.replyWithHTML(
+                `Account: ${this.bot.getIdentify()}\n\nStarting withdraw ${
+                    bcoin.value + bcoin.claimPending
+                }`
+            );
+
+            const approve = await this.bot.client.approveClaim(
+                BLOCK_REWARD_TYPE_BCOIN_POLYGON
+            );
+            const result = await this.bot.client.web3ApproveClaim(approve);
+            if (result.status) {
+                const { received } =
+                    await this.bot.client.confirmClaimRewardSuccess(
+                        BLOCK_REWARD_TYPE_BCOIN_POLYGON
+                    );
+
+                context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nYou withdraw ${received} Bcoin`
+                );
+            } else {
+                context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nfailed`
+                );
+            }
+            this.telegramRewards(context);
+        } catch (e: any) {
             return context.replyWithHTML(
-                `Account: ${this.bot.getIdentify()}\n\nMinimum amount of 40 Bitcoin`
+                `Account: ${this.bot.getIdentify()}\n\nError: ${e.message}`
             );
         }
     }

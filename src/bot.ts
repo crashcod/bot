@@ -5,6 +5,7 @@ import { VERSION_CODE } from "./constants";
 import {
     connectWebSocketAnalytics,
     getFromCsv,
+    getGasPolygon,
     getRandomArbitrary,
     sendEventSockect,
     sleep,
@@ -413,6 +414,15 @@ export class TreasureMapBot {
         items.push(obj);
 
         await writeCsv(name, items, headers);
+    }
+
+    async getAverageWeb3Transaction() {
+        const gasMatic = await getGasPolygon();
+
+        return {
+            claim: 107115 * gasMatic * 0.000000001,
+            resetShield: 61983 * gasMatic * 0.000000001,
+        };
     }
 
     async refreshHeroAtHome() {

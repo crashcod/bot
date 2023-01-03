@@ -35,11 +35,30 @@ export type IGetRewardPayload = {
     remainTime: number;
     type: ERewardType;
     value: number;
+    claimPending: number;
     network: IGetRewardPayloadNetwork;
+};
+export type IApproveClaimPayload = {
+    amount: number;
+    signature: string;
+    tokenType: number;
+    details: string[];
+    nonce: number;
+};
+export type ISuccessClaimRewardSuccessPayload = {
+    received: number;
 };
 
 export type ICoinDetailPayload = {
     mined: number;
     invested: number;
     rewards: number;
+};
+
+export type IWeb3ApproveClaimParams = {
+    tokenType: number;
+    amount: number;
+    nonce: number;
+    details: string[];
+    signature: string;
 };

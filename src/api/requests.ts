@@ -85,6 +85,30 @@ export function makeStopPVERequest(wallet: string, messageId: number) {
     data.putUtfString("slogan", "stick_war");
     return makeGameMessage(wallet, "STOP_PVE", messageId, data);
 }
+export function makeApproveClaim(
+    wallet: string,
+    messageId: number,
+    blockReward: number
+) {
+    const data = new SFSObject();
+    data.putInt("block_reward_type", blockReward);
+    return makeGameMessage(wallet, "APPROVE_CLAIM", messageId, data);
+}
+export function makeApproveConfirmClaimRewardSuccess(
+    wallet: string,
+    messageId: number,
+    blockReward: number
+) {
+    const data = new SFSObject();
+    data.putInt("block_reward_type", blockReward);
+
+    return makeGameMessage(
+        wallet,
+        "CONFIRM_CLAIM_REWARD_SUCCESS",
+        messageId,
+        data
+    );
+}
 
 export function makeSyncHouseRequest(wallet: string, messageId: number) {
     return makeGameMessage(wallet, "SYNC_HOUSE", messageId);

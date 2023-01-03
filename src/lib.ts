@@ -9,6 +9,8 @@ import { ILoginParams } from "./parsers/login";
 import { io, Socket } from "socket.io-client";
 import { TreasureMapBot } from "./bot";
 import { format } from "date-fns";
+import got from "got";
+
 export function identity(value: string) {
     return value;
 }
@@ -195,5 +197,36 @@ export const getChatId = (ctx: any) => {
         return ctx.message.chat.id;
     } catch (e) {
         console.log("nao achou id", e, ctx);
+    }
+};
+
+export const getGasPolygon = async () => {
+    const { standard } = await got
+        .get(`https://gasstation-mainnet.matic.network/`)
+        .json<{
+            safeLow: number;
+            standard: number;
+            fast: number;
+            fastest: number;
+            blockTime: number;
+            blockNumber: number;
+        }>();
+
+    return standard;
+};
+
+export const retryWeb3 = async <T = unknown>(
+    promise: Promise<T>,
+    retryNum = 0
+): Promise<any> => {
+    try {
+        return await promise;
+    } catch (e: any) {
+        if (e.message.indexOf("Internal error") !== -1 && retryNum <= 3) {
+            retryNum++;
+            return await retryWeb3(promise, retryNum);
+        }
+
+        throw e;
     }
 };
