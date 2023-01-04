@@ -11,6 +11,8 @@ export const WEB3_RPC = "https://polygon-rpc.com";
 export const BLOCK_REWARD_TYPE_BCOIN_POLYGON = 1;
 export const CONTRACT_APPROVE_CLAIM =
     "0x83b5e78c10257bb4990eba73e00bbc20c5581745";
+export const CONTRACT_RESET_SHIELD =
+    "0x27313635e6b7aa3cc8436e24be2317d4a0e56beb";
 export const ABI_APPROVE_CLAIM: any = [
     {
         inputs: [
@@ -44,21 +46,30 @@ export const ABI_APPROVE_CLAIM: any = [
         type: "function",
     },
 ];
+// polygon: [1,2,4,6,8,10]
 export const ABI_RESET_SHIELD_HERO: any = [
     {
+        inputs: [{ internalType: "address", name: "user", type: "address" }],
+        name: "getTotalRockByUser",
+        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
         inputs: [
-            {
-                internalType: "uint256",
-                name: "idHeroS",
-                type: "uint256",
-            },
-            {
-                internalType: "uint256",
-                name: "numRock",
-                type: "uint256",
-            },
+            { internalType: "uint256", name: "idHeroS", type: "uint256" },
+            { internalType: "uint256", name: "numRock", type: "uint256" },
         ],
         name: "resetShieldHeroS",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [{ internalType: "uint8[6]", name: "value", type: "uint8[6]" }],
+        name: "setNumRockResetShield",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
 ];

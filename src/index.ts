@@ -5,6 +5,7 @@ import {
     identity,
     parseBoolean,
     parseLogin,
+    parseNumber,
     requireAndParseEnv,
 } from "./lib";
 
@@ -21,6 +22,11 @@ async function main() {
         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
+        resetShieldAuto: askAndParseEnv(
+            "RESET_SHIELD_AUTO",
+            parseBoolean,
+            false
+        ),
         rede: askAndParseEnv("NETWORK", identity, "BSC"),
         version: parseInt(
             askAndParseEnv("VERSION", identity, VERSION_CODE.toString())
@@ -35,6 +41,12 @@ async function main() {
         ),
         reportRewards: report,
         server: askAndParseEnv("SERVER", identity, "sea"),
+        maxGasRepairShield: askAndParseEnv(
+            "MAX_GAS_REPAIR_SHIELD",
+            parseNumber,
+            0
+        ),
+        alertMaterial: askAndParseEnv("ALERT_MATERIAL", parseNumber, 0),
     });
 
     let intervalReport: NodeJS.Timer;

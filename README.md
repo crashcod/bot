@@ -253,6 +253,9 @@ As variáveis são:
 | TELEGRAM_CHAT_ID_CHECK     | Não         | Caso seja informado com o valor 1 e tamém seja informado o telegram chat id, a pessoa que náo é dona do telegram bot, não irá conseguir acionar os comandos do telegram                      | 1                                                     |
 | REPORT_REWARDS             | Não         | caso seja informado, e também seja informado TELEGRAM_CHAT_ID, o bot irá enviar os rewards automaticamente para o chat, o valor é em minutos, exemplo 30 é 30 minutos, 120, é duas horas     | 30                                                    |
 | TELEGRAM_CHAT_ID           | Não         | chat id do telegram para funcionar as notificações                                                                                                                                           |                                                       |
+| MAX_GAS_REPAIR_SHIELD | Não | Valor máximo que pode ser gasto para reparar o shield | 0.004 |
+| ALERT_MATERIAL | Não | Somente quando for logado com wallet, alerta quando chegar o material no valor informado | 5 | 
+| RESET_SHIELD_AUTO | Não | Somente quando for logado com wallet, irá da reset automaticamente quando chegar a zero | 1
 
 ## Comandos telegram
 
@@ -267,3 +270,5 @@ As variáveis são:
 | /start_calc_farm   | Comando para iniciar o calculo do farm por hora                                                                   |
 | /stop_calc_farm    | Comando para da stop no calculo do farm por hora e mostra os resultados                                           |
 | /current_calc_farm | Mostra o relatório atual do cáculo de farm, mas não da stop                                                       |
+| /gas_polygon | Retona quanto custaria uma transação na polygon no momento |
+| /withdraw | Faz o claim caso tenha mais de 40 bombs |

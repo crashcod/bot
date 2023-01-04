@@ -83,12 +83,15 @@ export interface IMoreOptions {
     modeAdventure?: boolean;
     saveRewardsCsv?: boolean;
     telegramChatIdCheck?: boolean;
+    resetShieldAuto?: boolean;
     reportRewards?: number;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
     adventureHeroes?: string;
     rede?: string;
     version?: number;
+    maxGasRepairShield?: number;
+    alertMaterial?: number;
     alertShield?: number;
     numHeroWork?: number;
     telegramChatId?: string;
@@ -125,6 +128,7 @@ export class TreasureMapBot {
     public loginParams: ILoginParams;
     public notification: Notification;
     public db: Database;
+    public isResettingShield = false;
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
@@ -135,11 +139,14 @@ export class TreasureMapBot {
             adventureHeroes = "",
             modeAdventure = false,
             saveRewardsCsv = false,
+            resetShieldAuto = false,
             telegramChatIdCheck = false,
             reportRewards = 0,
             rede = "BSC",
             version = VERSION_CODE,
             alertShield = 0,
+            alertMaterial = 0,
+            maxGasRepairShield = 0,
             numHeroWork = 15,
             server = "sea",
             telegramChatId = "",
@@ -162,6 +169,9 @@ export class TreasureMapBot {
             telegramChatId,
             telegramKey,
             telegramChatIdCheck,
+            resetShieldAuto,
+            maxGasRepairShield,
+            alertMaterial,
             reportRewards,
         };
         this.loginParams = loginParams;
@@ -489,6 +499,12 @@ export class TreasureMapBot {
             this.notification.setHeroShield(hero.id, this.getSumShield(hero));
         }
         logger.info(`Hero ${hero.id} needs shield repair`);
+    }
+    async alertMaterial(material: number) {
+        if (!(await this.notification.hasMaterial())) {
+            this.telegram.sendMessageChat(`You need more material`);
+            this.notification.setMaterial(material);
+        }
     }
     async alertShielZerodHero(hero: Hero) {
         if (!(await this.notification.hasHeroZeroShield(hero.id))) {
@@ -1011,6 +1027,56 @@ export class TreasureMapBot {
         } while (this.shouldRun);
     }
 
+    async resetShield(hero: Hero) {
+        try {
+            const { maxGasRepairShield, alertMaterial, resetShieldAuto } =
+                this.params;
+            console.log("maxGasRepairShield", maxGasRepairShield);
+            console.log("resetShieldAuto", resetShieldAuto);
+
+            if (
+                this.isResettingShield ||
+                this.loginParams.type == "user" ||
+                !resetShieldAuto
+            ) {
+                return false;
+            }
+
+            let currentRock = await this.client.web3GetRock();
+            console.log("currentRock", currentRock);
+            const gas = await this.getAverageWeb3Transaction();
+            console.log("gas", gas);
+
+            if (alertMaterial > 0 && currentRock <= alertMaterial) {
+                this.alertMaterial(currentRock);
+            }
+
+            if (
+                hero.rockRepairShield > currentRock ||
+                (maxGasRepairShield > 0 && gas.resetShield > maxGasRepairShield)
+            ) {
+                return;
+            }
+
+            this.isResettingShield = true;
+
+            const result = await this.client.web3ResetShield(hero);
+            console.log("result", result);
+            currentRock = await this.client.web3GetRock();
+            await this.client.syncBomberman();
+
+            await this.telegram.sendMessageChat(
+                `Hero ${hero.id} shield has been repaired\n\nYou have ${currentRock} of material`
+            );
+            this.isResettingShield = false;
+        } catch (e: any) {
+            this.isResettingShield = false;
+            this.telegram.sendMessageChat(
+                `Error repair shield\n\n${e.message}`
+            );
+        }
+    }
+
     private resetState() {
         this.history = [];
         this.explosionByHero = new Map();
@@ -1114,6 +1180,7 @@ export class TreasureMapBot {
                     this.getSumShield(hero) === 0
                 ) {
                     await this.alertShielZerodHero(hero);
+                    await this.resetShield(hero);
                 }
             }
             await this.notification.checkHeroShield(

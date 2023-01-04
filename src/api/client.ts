@@ -13,7 +13,9 @@ import UserAgent from "user-agents";
 import { IMoreOptions } from "../bot";
 import {
     ABI_APPROVE_CLAIM,
+    ABI_RESET_SHIELD_HERO,
     CONTRACT_APPROVE_CLAIM,
+    CONTRACT_RESET_SHIELD,
     PORT,
     WEB3_RPC,
     ZONE,
@@ -67,7 +69,7 @@ import {
     IWeb3ApproveClaimParams,
     parseRewardType,
 } from "../parsers/reward";
-import { EGameAction } from "./base";
+import { EGameAction, ISendTransactionWeb3 } from "./base";
 import {
     ISerializedRequestController,
     IUniqueRequestController,
@@ -207,6 +209,7 @@ export class Client {
     private apiBaseHeaders;
     private modeAmazon = false;
     private moreParams;
+    private web3;
 
     constructor(
         loginParams: ILoginParams,
@@ -229,6 +232,7 @@ export class Client {
             "content-type": "application/json",
             "user-agent": userAgent.toString(),
         };
+        this.web3 = new Web3(WEB3_RPC);
         this.sfs = {} as SmartFox;
         // this.sfs = new SmartFox({
         //     host: HOST,
@@ -680,13 +684,11 @@ export class Client {
         this.sfs.send(request);
     }
 
-    async web3ApproveClaim({
-        amount,
-        details,
-        nonce,
-        signature,
-        tokenType,
-    }: IWeb3ApproveClaimParams) {
+    async sendTransactionWeb3({
+        contract,
+        dataTransaction,
+        gasLimit,
+    }: ISendTransactionWeb3) {
         const promise = new Promise<TransactionReceipt>(
             async (resolve, error) => {
                 try {
@@ -697,43 +699,33 @@ export class Client {
                         return false;
                     }
 
-                    const web3 = new Web3(WEB3_RPC);
-
-                    const contract = new web3.eth.Contract(
-                        ABI_APPROVE_CLAIM,
-                        web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
-                    );
-                    const account = web3.eth.accounts.privateKeyToAccount(
+                    const account = this.web3.eth.accounts.privateKeyToAccount(
                         this.loginParams.privateKey
                     );
 
-                    const transactionCount = await web3.eth.getTransactionCount(
-                        account.address
-                    );
+                    const transactionCount =
+                        await this.web3.eth.getTransactionCount(
+                            account.address
+                        );
 
-                    const temp = contract.methods.claimTokens(
-                        web3.utils.toBN(tokenType),
-                        web3.utils.toWei(amount.toString(), "ether"),
-                        web3.utils.toBN(nonce),
-                        details,
-                        signature
-                    );
                     const gasPolygon = await getGasPolygon();
 
                     const txObject = {
-                        nonce: parseInt(web3.utils.toHex(transactionCount)),
-                        to: contract.options.address,
-                        gasLimit: web3.utils.toHex(300000),
-                        gasPrice: web3.utils.toHex(
-                            web3.utils.toWei(gasPolygon.toString(), "gwei")
+                        nonce: parseInt(
+                            this.web3.utils.toHex(transactionCount)
                         ),
-                        data: temp.encodeABI(),
+                        to: contract.options.address,
+                        gasLimit: this.web3.utils.toHex(gasLimit),
+                        gasPrice: this.web3.utils.toHex(
+                            this.web3.utils.toWei(gasPolygon.toString(), "gwei")
+                        ),
+                        data: dataTransaction.encodeABI(),
                     };
 
                     const sign = await account.signTransaction(txObject);
 
                     if (sign.rawTransaction) {
-                        web3.eth.sendSignedTransaction(
+                        this.web3.eth.sendSignedTransaction(
                             sign.rawTransaction,
                             (e, hash) => {
                                 if (e) {
@@ -741,7 +733,7 @@ export class Client {
                                 }
 
                                 const interval = setInterval(() => {
-                                    web3.eth.getTransactionReceipt(
+                                    this.web3.eth.getTransactionReceipt(
                                         hash,
                                         (e, obj) => {
                                             try {
@@ -770,6 +762,141 @@ export class Client {
         );
 
         return retryWeb3(promise);
+    }
+
+    async web3GetRock() {
+        const contract = new this.web3.eth.Contract(
+            ABI_RESET_SHIELD_HERO,
+            this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
+        );
+        const data = await contract.methods
+            .getTotalRockByUser(this.loginParams.wallet)
+            .call();
+        return data;
+    }
+    async web3ResetShield({ id, rockRepairShield }: Hero) {
+        const contract = new this.web3.eth.Contract(
+            ABI_RESET_SHIELD_HERO,
+            this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
+        );
+        const data = await contract.methods.resetShieldHeroS(
+            this.web3.utils.toBN(id),
+            this.web3.utils.toBN(rockRepairShield)
+        );
+
+        return this.sendTransactionWeb3({
+            contract: contract,
+            dataTransaction: data,
+            gasLimit: 200000,
+        });
+    }
+    async web3ApproveClaim({
+        amount,
+        details,
+        nonce,
+        signature,
+        tokenType,
+    }: IWeb3ApproveClaimParams) {
+        const contract = new this.web3.eth.Contract(
+            ABI_APPROVE_CLAIM,
+            this.web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
+        );
+        const data = contract.methods.claimTokens(
+            this.web3.utils.toBN(tokenType),
+            this.web3.utils.toWei(amount.toString(), "ether"),
+            this.web3.utils.toBN(nonce),
+            details,
+            signature
+        );
+
+        return this.sendTransactionWeb3({
+            contract: contract,
+            dataTransaction: data,
+            gasLimit: 300000,
+        });
+        // const promise = new Promise<TransactionReceipt>(
+        //     async (resolve, error) => {
+        //         try {
+        //             if (
+        //                 !("privateKey" in this.loginParams) ||
+        //                 !this.loginParams?.privateKey
+        //             ) {
+        //                 return false;
+        //             }
+
+        //             const web3 = new Web3(WEB3_RPC);
+
+        //             const contract = new web3.eth.Contract(
+        //                 ABI_APPROVE_CLAIM,
+        //                 web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
+        //             );
+        //             const account = web3.eth.accounts.privateKeyToAccount(
+        //                 this.loginParams.privateKey
+        //             );
+
+        //             const transactionCount = await web3.eth.getTransactionCount(
+        //                 account.address
+        //             );
+
+        //             const temp = contract.methods.claimTokens(
+        //                 web3.utils.toBN(tokenType),
+        //                 web3.utils.toWei(amount.toString(), "ether"),
+        //                 web3.utils.toBN(nonce),
+        //                 details,
+        //                 signature
+        //             );
+        //             const gasPolygon = await getGasPolygon();
+
+        //             const txObject = {
+        //                 nonce: parseInt(web3.utils.toHex(transactionCount)),
+        //                 to: contract.options.address,
+        //                 gasLimit: web3.utils.toHex(300000),
+        //                 gasPrice: web3.utils.toHex(
+        //                     web3.utils.toWei(gasPolygon.toString(), "gwei")
+        //                 ),
+        //                 data: temp.encodeABI(),
+        //             };
+
+        //             const sign = await account.signTransaction(txObject);
+
+        //             if (sign.rawTransaction) {
+        //                 web3.eth.sendSignedTransaction(
+        //                     sign.rawTransaction,
+        //                     (e, hash) => {
+        //                         if (e) {
+        //                             return error(e);
+        //                         }
+
+        //                         const interval = setInterval(() => {
+        //                             web3.eth.getTransactionReceipt(
+        //                                 hash,
+        //                                 (e, obj) => {
+        //                                     try {
+        //                                         if (e) {
+        //                                             return error(e);
+        //                                         }
+        //                                         if (obj) {
+        //                                             clearInterval(interval);
+        //                                             resolve(obj);
+        //                                             return;
+        //                                         }
+        //                                     } catch (e) {
+        //                                         clearInterval(interval);
+        //                                         return error(e);
+        //                                     }
+        //                                 }
+        //                             );
+        //                         }, 1000);
+        //                     }
+        //                 );
+        //             }
+        //         } catch (e) {
+        //             error(e);
+        //         }
+        //     }
+        // );
+
+        // return retryWeb3(promise);
     }
 
     goSleep(hero: Hero, timeout = 0) {

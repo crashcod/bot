@@ -18,11 +18,17 @@ export class Notification {
     setHeroShield(heroId: number, shield: number) {
         return this.db.set(`heroShield${heroId}`, shield);
     }
+    setMaterial(material: number) {
+        return this.db.set(`materialAlert`, material);
+    }
     setHeroZeroShield(heroId: number, shield: number) {
         return this.db.set(`heroZeroShield${heroId}`, shield);
     }
     async hasHeroShield(heroId: number) {
         return (await this.db.get(`heroShield${heroId}`)) !== null;
+    }
+    async hasMaterial() {
+        return (await this.db.get(`materialAlert`)) !== null;
     }
     async hasHeroZeroShield(heroId: number) {
         return (await this.db.get(`heroZeroShield${heroId}`)) !== null;
@@ -35,6 +41,12 @@ export class Notification {
         const existsZero = await this.db.get(`heroZeroShield${heroId}`);
         if (existsZero !== null && shield > 0) {
             await this.db.delete(`heroZeroShield${heroId}`);
+        }
+    }
+    async chetMaterial(material: number) {
+        const exists = await this.db.get(`material`);
+        if (exists !== null && material > exists) {
+            await this.db.delete(`materialAlert`);
         }
     }
 }

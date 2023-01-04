@@ -60,6 +60,14 @@ export type IHeroStats = {
     skillCount: number;
     skills: EHeroSkill[];
 };
+const ROCK_REPAIR_SHIELD: any = {
+    1: 1,
+    2: 2,
+    3: 4,
+    4: 6,
+    5: 8,
+    6: 10,
+};
 
 export type IHeroParams = IHeroStats & {
     id: number;
@@ -160,6 +168,10 @@ export class Hero {
 
     get skills() {
         return this.params.skills;
+    }
+
+    get rockRepairShield() {
+        return ROCK_REPAIR_SHIELD[this.rarityIndex + 1];
     }
 
     toJSON() {

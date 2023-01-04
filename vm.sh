@@ -2,7 +2,7 @@
 
 cd ~
 sudo apt update
-sudo apt install git nano -y
+sudo apt install git nano htop -y
 
 curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh

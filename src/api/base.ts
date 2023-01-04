@@ -7,7 +7,7 @@ import {
 
 import { LC, SALT_KEY } from "../constants";
 import { currentTimeSinceAD, hashMD5 } from "../lib";
-
+import { Contract } from "web3-eth-contract";
 export type EGameAction =
     | "USER_LOGIN"
     | "GET_BLOCK_MAP"
@@ -33,6 +33,12 @@ export type EGameAction =
     | "START_STORY_EXPLODE"
     | "ENEMY_TAKE_DAMAGE"
     | "ENTER_DOOR";
+
+export interface ISendTransactionWeb3 {
+    dataTransaction: any;
+    gasLimit: number;
+    contract: Contract;
+}
 
 export function hashGameMessage(
     wallet: string,
