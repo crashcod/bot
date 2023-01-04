@@ -1037,6 +1037,7 @@ export class TreasureMapBot {
             if (
                 this.isResettingShield ||
                 this.loginParams.type == "user" ||
+                this.loginParams.rede == "BSC" ||
                 !resetShieldAuto
             ) {
                 return false;

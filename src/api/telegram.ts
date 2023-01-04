@@ -275,8 +275,9 @@ ${resultDb
 
     async telegramRewards(context: Context) {
         try {
+            const material = await this.bot.client.web3GetRock();
             const message = await this.getRewardAccount();
-            await context.replyWithHTML(message);
+            await context.replyWithHTML(`${message}\nMaterial: ${material}`);
         } catch (e) {
             await context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nNot connected, please wait`

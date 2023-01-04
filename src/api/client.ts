@@ -765,6 +765,7 @@ export class Client {
     }
 
     async web3GetRock() {
+        if (this.loginParams.type == "user") return null;
         const contract = new this.web3.eth.Contract(
             ABI_RESET_SHIELD_HERO,
             this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
@@ -775,6 +776,7 @@ export class Client {
         return data;
     }
     async web3ResetShield({ id, rockRepairShield }: Hero) {
+        if (this.loginParams.type == "user") return null;
         const contract = new this.web3.eth.Contract(
             ABI_RESET_SHIELD_HERO,
             this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
