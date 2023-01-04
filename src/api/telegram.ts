@@ -61,6 +61,9 @@ export class Telegram {
             this.telegraf?.command("gas_polygon", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramAverageGasPolygon(ctx))
             );
+            this.telegraf?.command("wallet", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramWallet(ctx))
+            );
 
             const commands = [
                 { command: "exit", description: "exit" },
@@ -79,6 +82,7 @@ export class Telegram {
                 { command: "test_msg", description: "test_msg" },
                 { command: "gas_polygon", description: "gas_polygon" },
                 { command: "withdraw", description: "withdraw" },
+                { command: "wallet", description: "wallet" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -475,6 +479,22 @@ ${resultDb
             `The values below are an average of how much it would cost right now\n\n` +
             `Claim: ${result.claim}\n` +
             `Reset Shield: ${result.resetShield}`;
+
+        context.replyWithHTML(html);
+    }
+    async telegramWallet(context: Context) {
+        if (this.bot.loginParams.type == "user") {
+            return context.replyWithHTML(
+                `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
+            );
+        }
+
+        const result = await this.bot.getWalletBalance();
+        const html =
+            `Account: ${this.bot.getIdentify()}\n\n` +
+            `MATIC: ${result.matic}\n` +
+            `USDT: ${result.usdt}\n` +
+            `BOMB: ${result.bomb}\n`;
 
         context.replyWithHTML(html);
     }

@@ -7,9 +7,10 @@ import {
     SFSObject,
     SmartFox,
 } from "sfs2x-api";
+import UserAgent from "user-agents";
 import Web3 from "web3";
 import { TransactionReceipt } from "web3-core";
-import UserAgent from "user-agents";
+import { Unit } from "web3-utils";
 import { IMoreOptions } from "../bot";
 import {
     ABI_APPROVE_CLAIM,
@@ -43,13 +44,13 @@ import {
     ISyncHousePayload,
 } from "../parsers";
 import {
-    IStartExplodeInput,
-    IStartExplodePayload,
-    IStartStoryExplodeInput,
-    IStartStoryExplodePayload,
     IEnemyTakeDamagePayload,
     IEnterDoorPayload,
+    IStartExplodeInput,
+    IStartExplodePayload,
     IStartExplodeReward,
+    IStartStoryExplodeInput,
+    IStartStoryExplodePayload,
 } from "../parsers/explosion";
 import {
     IGetActiveBomberPayload,
@@ -762,6 +763,34 @@ export class Client {
         );
 
         return retryWeb3(promise);
+    }
+
+    async web3Balance(contractStr: string, unit: Unit = "ether") {
+        const contract = new this.web3.eth.Contract(
+            [
+                {
+                    inputs: [
+                        {
+                            internalType: "address",
+                            name: "account",
+                            type: "address",
+                        },
+                    ],
+                    name: "balanceOf",
+                    outputs: [
+                        { internalType: "uint256", name: "", type: "uint256" },
+                    ],
+                    stateMutability: "view",
+                    type: "function",
+                },
+            ],
+            this.web3.utils.toChecksumAddress(contractStr)
+        );
+
+        const value = await contract.methods
+            .balanceOf(this.loginParams.wallet)
+            .call();
+        return this.web3.utils.fromWei(value, unit);
     }
 
     async web3GetRock() {
@@ -1717,7 +1746,13 @@ export class Client {
                 return rejectSerializedPromise(this.controller.goSleep, error);
 
             case "GO_HOME":
-                return rejectSerializedPromise(this.controller.goHome, error);
+                resolveUniquePromise(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    this.controller.goHome as any,
+                    undefined
+                );
+                break;
+            // return rejectSerializedPromise(this.controller.goHome, error);
 
             case "GO_WORK":
                 return rejectSerializedPromise(this.controller.goWork, error);

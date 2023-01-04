@@ -1,7 +1,12 @@
 import { ObjectHeaderItem } from "csv-writer/src/lib/record";
 import got from "got";
 import { Client } from "./api";
-import { VERSION_CODE } from "./constants";
+import {
+    CONTRACT_BOMB,
+    CONTRACT_MATIC,
+    CONTRACT_USDT,
+    VERSION_CODE,
+} from "./constants";
 import {
     connectWebSocketAnalytics,
     getFromCsv,
@@ -433,6 +438,15 @@ export class TreasureMapBot {
             claim: 107115 * gasMatic * 0.000000001,
             resetShield: 61983 * gasMatic * 0.000000001,
         };
+    }
+    async getWalletBalance() {
+        const [bomb, matic, usdt] = await Promise.all([
+            this.client.web3Balance(CONTRACT_BOMB),
+            this.client.web3Balance(CONTRACT_MATIC),
+            this.client.web3Balance(CONTRACT_USDT, "mwei"),
+        ]);
+
+        return { bomb, matic, usdt };
     }
 
     async refreshHeroAtHome() {
@@ -1057,7 +1071,7 @@ export class TreasureMapBot {
 
             this.isResettingShield = true;
 
-            const result = await this.client.web3ResetShield(hero);
+            await this.client.web3ResetShield(hero);
             currentRock = await this.client.web3GetRock();
             await this.client.syncBomberman();
             await this.client.getActiveHeroes();
