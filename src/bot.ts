@@ -1031,8 +1031,6 @@ export class TreasureMapBot {
         try {
             const { maxGasRepairShield, alertMaterial, resetShieldAuto } =
                 this.params;
-            console.log("maxGasRepairShield", maxGasRepairShield);
-            console.log("resetShieldAuto", resetShieldAuto);
 
             if (
                 this.isResettingShield ||
@@ -1044,9 +1042,7 @@ export class TreasureMapBot {
             }
 
             let currentRock = await this.client.web3GetRock();
-            console.log("currentRock", currentRock);
             const gas = await this.getAverageWeb3Transaction();
-            console.log("gas", gas);
 
             if (alertMaterial > 0 && currentRock <= alertMaterial) {
                 this.alertMaterial(currentRock);
@@ -1062,7 +1058,6 @@ export class TreasureMapBot {
             this.isResettingShield = true;
 
             const result = await this.client.web3ResetShield(hero);
-            console.log("result", result);
             currentRock = await this.client.web3GetRock();
             await this.client.syncBomberman();
 
