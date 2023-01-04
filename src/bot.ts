@@ -1060,6 +1060,7 @@ export class TreasureMapBot {
             const result = await this.client.web3ResetShield(hero);
             currentRock = await this.client.web3GetRock();
             await this.client.syncBomberman();
+            await this.client.getActiveHeroes();
 
             await this.telegram.sendMessageChat(
                 `Hero ${hero.id} shield has been repaired\n\nYou have ${currentRock} of material`
