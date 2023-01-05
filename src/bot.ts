@@ -134,6 +134,7 @@ export class TreasureMapBot {
     public notification: Notification;
     public db: Database;
     public isResettingShield = false;
+    public lastTransactionWeb3 = "";
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
         const {
@@ -1060,15 +1061,24 @@ export class TreasureMapBot {
         } while (this.shouldRun);
     }
 
+    async web3Ready() {
+        if (this.lastTransactionWeb3) {
+            return this.client.checkTransaction(this.lastTransactionWeb3);
+        }
+        return true;
+    }
+
     async resetShield(hero: Hero) {
         try {
             const { maxGasRepairShield, alertMaterial, resetShieldAuto } =
                 this.params;
+            const lastTransactionWeb3 = await this.web3Ready();
 
             if (
                 this.isResettingShield ||
                 this.loginParams.type == "user" ||
                 this.loginParams.rede == "BSC" ||
+                !lastTransactionWeb3 ||
                 !resetShieldAuto
             ) {
                 return false;
@@ -1092,7 +1102,9 @@ export class TreasureMapBot {
             await this.telegram.sendMessageChat(
                 `Repairing shield hero ${hero.id}...`
             );
-            await this.client.web3ResetShield(hero);
+            const transaction = await this.client.web3ResetShield(hero);
+            this.lastTransactionWeb3 = transaction.transactionHash;
+
             currentRock = await this.client.web3GetRock();
 
             await this.telegram.sendMessageChat(

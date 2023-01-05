@@ -220,7 +220,7 @@ export const getGasPolygon = async () => {
 export const retryWeb3 = async <T = unknown>(
     promise: Promise<T>,
     retryNum = 0
-): Promise<any> => {
+): Promise<T> => {
     try {
         return await promise;
     } catch (e: any) {

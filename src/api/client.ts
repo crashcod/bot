@@ -768,7 +768,7 @@ export class Client {
             }
         );
 
-        return retryWeb3(promise);
+        return retryWeb3<TransactionReceipt>(promise);
     }
 
     async web3Balance(contractStr: string, unit: Unit = "ether") {
@@ -811,7 +811,6 @@ export class Client {
         return data;
     }
     async web3ResetShield({ id, rockRepairShield }: Hero) {
-        if (this.loginParams.type == "user") return null;
         const contract = new this.web3.eth.Contract(
             ABI_RESET_SHIELD_HERO,
             this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
@@ -825,6 +824,16 @@ export class Client {
             contract: contract,
             dataTransaction: data,
             gasLimit: 200000,
+        });
+    }
+    async checkTransaction(hash: string) {
+        return new Promise<boolean>((resolve) => {
+            this.web3.eth.getTransactionReceipt(hash, (e, obj) => {
+                if (obj) {
+                    return resolve(true);
+                }
+                return resolve(false);
+            });
         });
     }
     async web3ApproveClaim({
@@ -851,89 +860,6 @@ export class Client {
             dataTransaction: data,
             gasLimit: 300000,
         });
-        // const promise = new Promise<TransactionReceipt>(
-        //     async (resolve, error) => {
-        //         try {
-        //             if (
-        //                 !("privateKey" in this.loginParams) ||
-        //                 !this.loginParams?.privateKey
-        //             ) {
-        //                 return false;
-        //             }
-
-        //             const web3 = new Web3(WEB3_RPC);
-
-        //             const contract = new web3.eth.Contract(
-        //                 ABI_APPROVE_CLAIM,
-        //                 web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
-        //             );
-        //             const account = web3.eth.accounts.privateKeyToAccount(
-        //                 this.loginParams.privateKey
-        //             );
-
-        //             const transactionCount = await web3.eth.getTransactionCount(
-        //                 account.address
-        //             );
-
-        //             const temp = contract.methods.claimTokens(
-        //                 web3.utils.toBN(tokenType),
-        //                 web3.utils.toWei(amount.toString(), "ether"),
-        //                 web3.utils.toBN(nonce),
-        //                 details,
-        //                 signature
-        //             );
-        //             const gasPolygon = await getGasPolygon();
-
-        //             const txObject = {
-        //                 nonce: parseInt(web3.utils.toHex(transactionCount)),
-        //                 to: contract.options.address,
-        //                 gasLimit: web3.utils.toHex(300000),
-        //                 gasPrice: web3.utils.toHex(
-        //                     web3.utils.toWei(gasPolygon.toString(), "gwei")
-        //                 ),
-        //                 data: temp.encodeABI(),
-        //             };
-
-        //             const sign = await account.signTransaction(txObject);
-
-        //             if (sign.rawTransaction) {
-        //                 web3.eth.sendSignedTransaction(
-        //                     sign.rawTransaction,
-        //                     (e, hash) => {
-        //                         if (e) {
-        //                             return error(e);
-        //                         }
-
-        //                         const interval = setInterval(() => {
-        //                             web3.eth.getTransactionReceipt(
-        //                                 hash,
-        //                                 (e, obj) => {
-        //                                     try {
-        //                                         if (e) {
-        //                                             return error(e);
-        //                                         }
-        //                                         if (obj) {
-        //                                             clearInterval(interval);
-        //                                             resolve(obj);
-        //                                             return;
-        //                                         }
-        //                                     } catch (e) {
-        //                                         clearInterval(interval);
-        //                                         return error(e);
-        //                                     }
-        //                                 }
-        //                             );
-        //                         }, 1000);
-        //                     }
-        //                 );
-        //             }
-        //         } catch (e) {
-        //             error(e);
-        //         }
-        //     }
-        // );
-
-        // return retryWeb3(promise);
     }
 
     goSleep(hero: Hero, timeout = 0) {

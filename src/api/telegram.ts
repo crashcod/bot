@@ -519,6 +519,14 @@ ${resultDb
                 );
             }
 
+            const lastTransactionWeb3 = await this.bot.web3Ready();
+
+            if (!lastTransactionWeb3) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nyou currently have an ongoing transaction in your wallet`
+                );
+            }
+
             const rewards = await this.bot.getReward();
             const bcoin = rewards.find(
                 (v) =>
