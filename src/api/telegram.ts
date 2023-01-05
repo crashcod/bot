@@ -335,8 +335,15 @@ ${resultDb
         }
     }
     async telegramExit(context: Context) {
+        if (this.bot.isResettingShield) {
+            await context.replyWithHTML(
+                `Account: ${this.bot.getIdentify()}\n\nIt is not possible to finalize at the moment, there is a web3 transaction being executed at the moment`
+            );
+            return;
+        }
+
         await context.replyWithHTML(
-            `Account: ${this.bot.getIdentify()}\n\nExiting in 5 seconds...`
+            `Account: ${this.bot.getIdentify()}\n\nExiting in 10 seconds...`
         );
         await this.bot.sleepAllHeroes();
         this.bot.shouldRun = false;
@@ -549,7 +556,8 @@ ${resultDb
                     `Account: ${this.bot.getIdentify()}\n\nfailed`
                 );
             }
-            this.telegramRewards(context);
+            await this.telegramStopCalcFarm(context, true);
+            await this.telegramStartCalcFarm(context);
         } catch (e: any) {
             return context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nError: ${e.message}`

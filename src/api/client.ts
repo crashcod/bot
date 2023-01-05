@@ -742,9 +742,15 @@ export class Client {
                                                     return error(e);
                                                 }
                                                 if (obj) {
-                                                    clearInterval(interval);
-                                                    resolve(obj);
-                                                    return;
+                                                    if (obj.status) {
+                                                        clearInterval(interval);
+                                                        resolve(obj);
+                                                        return;
+                                                    } else {
+                                                        return error(
+                                                            "error transaction"
+                                                        );
+                                                    }
                                                 }
                                             } catch (e) {
                                                 clearInterval(interval);

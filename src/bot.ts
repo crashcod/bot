@@ -992,6 +992,24 @@ export class TreasureMapBot {
         } catch (_: any) {}
     }
 
+    async checkShields() {
+        logger.info(`Cheking shields...`);
+        const payload = await this.client.getActiveHeroes();
+        const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
+
+        for (const hero of heroes) {
+            if (
+                !hero.shields ||
+                hero.shields.length === 0 ||
+                this.getSumShield(hero) === 0
+            ) {
+                await this.resetShield(hero);
+            }
+        }
+        await this.client.syncBomberman();
+        await this.client.getActiveHeroes();
+    }
+
     async loop() {
         this.shouldRun = true;
         connectWebSocketAnalytics(this).catch((e) => {
@@ -1005,6 +1023,7 @@ export class TreasureMapBot {
         await this.refreshMap();
         do {
             await this.checkVersion();
+            await this.checkShields();
             if (this.map.totalLife <= 0) {
                 await this.loadHouses();
                 await this.refreshMap();
@@ -1070,11 +1089,11 @@ export class TreasureMapBot {
             }
 
             this.isResettingShield = true;
-
+            await this.telegram.sendMessageChat(
+                `Repairing shield hero ${hero.id}...`
+            );
             await this.client.web3ResetShield(hero);
             currentRock = await this.client.web3GetRock();
-            await this.client.syncBomberman();
-            await this.client.getActiveHeroes();
 
             await this.telegram.sendMessageChat(
                 `Hero ${hero.id} shield has been repaired\n\nYou have ${currentRock} of material`
@@ -1161,7 +1180,6 @@ export class TreasureMapBot {
 
     private handleSquadLoad(payload: IGetActiveBomberPayload[]) {
         const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
-
         heroes.map(async (hero) => {
             if (
                 this.params.modeAmazon &&
@@ -1191,7 +1209,6 @@ export class TreasureMapBot {
                     this.getSumShield(hero) === 0
                 ) {
                     await this.alertShielZerodHero(hero);
-                    await this.resetShield(hero);
                 }
             }
             await this.notification.checkHeroShield(
@@ -1199,7 +1216,6 @@ export class TreasureMapBot {
                 this.getSumShield(hero)
             );
         });
-
         this.squad.update({ heroes });
     }
 
