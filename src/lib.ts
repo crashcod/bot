@@ -202,7 +202,9 @@ export const getChatId = (ctx: any) => {
 
 export const getGasPolygon = async () => {
     const { standard } = await got
-        .get(`https://gasstation-mainnet.matic.network/`)
+        .get(`https://gasstation-mainnet.matic.network/?data=${Date.now()}`, {
+            headers: { "cache-control": "no-cache" },
+        })
         .json<{
             safeLow: number;
             standard: number;
