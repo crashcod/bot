@@ -551,6 +551,8 @@ ${resultDb
             );
             const result = await this.bot.client.web3ApproveClaim(approve);
             if (result.status) {
+                await this.telegramStopCalcFarm(context, true);
+
                 const { received } =
                     await this.bot.client.confirmClaimRewardSuccess(
                         BLOCK_REWARD_TYPE_BCOIN_POLYGON
@@ -559,13 +561,12 @@ ${resultDb
                 context.replyWithHTML(
                     `Account: ${this.bot.getIdentify()}\n\nYou withdraw ${received} Bcoin`
                 );
+                await this.telegramStartCalcFarm(context);
             } else {
                 context.replyWithHTML(
                     `Account: ${this.bot.getIdentify()}\n\nfailed`
                 );
             }
-            await this.telegramStopCalcFarm(context, true);
-            await this.telegramStartCalcFarm(context);
         } catch (e: any) {
             return context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nError: ${e.message}`
