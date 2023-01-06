@@ -995,8 +995,7 @@ export class TreasureMapBot {
 
     async checkShields() {
         logger.info(`Cheking shields...`);
-        const payload = await this.client.getActiveHeroes();
-        const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
+        const heroes = this.squad.heroes;
 
         for (const hero of heroes) {
             if (
