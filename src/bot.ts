@@ -1025,7 +1025,9 @@ export class TreasureMapBot {
         await this.refreshMap();
         do {
             await this.checkVersion();
-            await this.checkShields();
+            this.checkShields().catch((e) => {
+                console.log(e);
+            });
             if (this.map.totalLife <= 0) {
                 await this.loadHouses();
                 await this.refreshMap();
