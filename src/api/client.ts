@@ -729,6 +729,7 @@ export class Client {
                         this.web3.eth.sendSignedTransaction(
                             sign.rawTransaction,
                             (e, hash) => {
+                                logger.info("transaction hash: " + hash);
                                 if (e) {
                                     return error(e);
                                 }
