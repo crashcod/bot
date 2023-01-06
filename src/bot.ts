@@ -1008,6 +1008,7 @@ export class TreasureMapBot {
             }
         }
         await this.client.syncBomberman();
+        await sleep(2000);
         await this.client.getActiveHeroes();
     }
 
