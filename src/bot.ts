@@ -996,6 +996,7 @@ export class TreasureMapBot {
     async checkShields() {
         logger.info(`Cheking shields...`);
         const heroes = this.squad.heroes;
+        let shieldRepaired = false;
 
         for (const hero of heroes) {
             if (
@@ -1004,11 +1005,16 @@ export class TreasureMapBot {
                 this.getSumShield(hero) === 0
             ) {
                 await this.resetShield(hero);
+                shieldRepaired = true;
             }
         }
-        await this.client.syncBomberman();
-        await sleep(2000);
-        await this.client.getActiveHeroes();
+        if (shieldRepaired) {
+            const result = await this.client.syncBomberman();
+            console.log("result", result);
+            await sleep(2000);
+            const result1 = await this.client.getActiveHeroes();
+            console.log("result1", result1);
+        }
     }
 
     async loop() {
