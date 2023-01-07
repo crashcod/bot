@@ -64,6 +64,9 @@ export class Telegram {
             this.telegraf?.command("wallet", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramWallet(ctx))
             );
+            this.telegraf?.command("reset_shield", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramResetShield(ctx))
+            );
 
             const commands = [
                 { command: "exit", description: "exit" },
@@ -504,6 +507,25 @@ ${resultDb
             `BOMB: ${result.bomb}\n`;
 
         context.replyWithHTML(html);
+    }
+    async telegramResetShield(context: any) {
+        try {
+            console.log(context);
+            const [, heroId] = context?.message.text.split(" ") as any;
+            console.log(heroId);
+            const hero = this.bot.squad.heroes.find((h) => h.id == heroId);
+
+            if (!hero) return;
+            await this.bot.resetShield(hero);
+            const result = await this.bot.client.syncBomberman();
+            console.log("result", result);
+            await sleep(2000);
+            const result1 = await this.bot.client.getActiveHeroes();
+            console.log("result1", result1);
+            context.replyWithHTML("foi");
+        } catch (e: any) {
+            context.replyWithHTML(e.message);
+        }
     }
 
     async telegramWithdraw(context: Context) {

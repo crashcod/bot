@@ -1009,11 +1009,9 @@ export class TreasureMapBot {
             }
         }
         if (shieldRepaired) {
-            const result = await this.client.syncBomberman();
-            console.log("result", result);
-            await sleep(2000);
-            const result1 = await this.client.getActiveHeroes();
-            console.log("result1", result1);
+            await this.client.syncBomberman();
+            await sleep(5000);
+            await this.client.getActiveHeroes();
         }
     }
 
@@ -1030,9 +1028,7 @@ export class TreasureMapBot {
         await this.refreshMap();
         do {
             await this.checkVersion();
-            this.checkShields().catch((e) => {
-                console.log(e);
-            });
+
             if (this.map.totalLife <= 0) {
                 await this.loadHouses();
                 await this.refreshMap();
@@ -1064,6 +1060,9 @@ export class TreasureMapBot {
                 this.lastAdventure = Date.now();
             }
             this.playing = "sleep";
+            this.checkShields().catch((e) => {
+                console.log(e);
+            });
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
         } while (this.shouldRun);

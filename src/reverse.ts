@@ -958,3 +958,449 @@ console.log(
 //                 (int) ec: 0
 
 //         (utf_string) c: SYNC_BOMBERMAN
+
+// const data = {};
+// function setProvider(_provider) {
+//     data["provider"] = _provider;
+// }
+// function setData(key, value) {
+//     data[key] = value;
+// }
+// function setUserAddress(userAddress) {
+//     data["userAddress"] = userAddress;
+// }
+// function getSigner() {
+//     return getProvider().getSigner();
+// }
+// function getProvider() {
+//     return data["provider"];
+// }
+// function getData(type) {
+//     return data[type];
+// }
+// function getUserAddress() {
+//     return data["userAddress"];
+// }
+// export {
+//     setProvider,
+//     setData,
+//     setUserAddress,
+//     getSigner,
+//     getProvider,
+//     getData,
+//     getUserAddress,
+// };
+
+// import * as Storage from "./Storage.js";
+// function createReadContract(address, abi) {
+//     if (address) {
+//         const provider = Storage.getProvider();
+//         const contract = new ethers.Contract(address, abi, provider);
+//         return contract;
+//     }
+//     console.warn("Empty abi and address");
+//     return null;
+// }
+// function createWriteContract(address, abi) {
+//     if (address) {
+//         const userAddress = Storage.getUserAddress();
+//         const provider = Storage.getProvider();
+//         const signer = provider.getSigner(userAddress);
+//         const contract = new ethers.Contract(address, abi, signer);
+//         return contract;
+//     }
+//     console.warn("Empty abi and address");
+//     return null;
+// }
+// export { createReadContract, createWriteContract };
+
+// import * as ContractUtils from "./ContractUtils.js";
+// export default class GeneralContract {
+//     constructor(address, abi) {
+//         this._address = address;
+//         this._abi = abi;
+//     }
+//     getContract() {
+//         if (!this._contract) {
+//             this._contract = ContractUtils.createWriteContract(
+//                 this._address,
+//                 this._abi
+//             );
+//         }
+//         return this._contract;
+//     }
+// }
+
+// import GeneralContract from "./Utils/GeneralContract.js";
+// import { getDoubleGasFeeOption, waitForReceipt } from "./Utils/NetworkUtils.js";
+// export default class BHeroSToken extends GeneralContract {
+//     constructor(bcoinToken, sensparkToken, bheroToken, address, abi) {
+//         super(address, abi);
+//         this._bheroToken = bheroToken;
+//         this._bcoinToken = bcoinToken;
+//         this._sensparkToken = sensparkToken;
+//     }
+//     async getDesignContract() {
+//         return this._bheroToken.getDesignContract();
+//     }
+//     async checkAllowance(category, userAddress, amount) {
+//         const address = this._bheroToken._address;
+//         let coinToken;
+//         if (category === 0) {
+//             coinToken = this._bcoinToken;
+//         } else if (category === 1) {
+//             coinToken = this._sensparkToken;
+//         } else {
+//             throw "Invalid request";
+//         }
+//         await coinToken.checkAllowance(userAddress, address, amount);
+//     }
+//     async getHeroPrice(category) {
+//         if (category === 0) {
+//             return this.getMintCost();
+//         } else if (category === 1) {
+//             return this.getSenMintCost();
+//         } else {
+//             throw "Invalid request";
+//         }
+//     }
+//     async getMintCost() {
+//         const contract = await this.getDesignContract();
+//         const value = await contract.getMintCostHeroS();
+//         return value.toString();
+//     }
+//     async getSenMintCost() {
+//         const contract = await this.getDesignContract();
+//         const value = await contract.getSenMintCostHeroS();
+//         return value.toString();
+//     }
+//     async getAmountRock(walletAddress) {
+//         const contract = await this.getContract();
+//         const value = await contract.getTotalRockByUser(walletAddress);
+//         return value.toNumber();
+//     }
+//     async mint(userAddress, count, category) {
+//         try {
+//             let cost = await this.getHeroPrice(category);
+//             const countBN = ethers.BigNumber.from(count);
+//             const costBN = ethers.BigNumber.from(cost);
+//             await this.checkAllowance(
+//                 category,
+//                 userAddress,
+//                 costBN.mul(countBN).toString()
+//             );
+//             const contract = this.getContract();
+//             const estimateGas = await contract.estimateGas.mint(
+//                 count,
+//                 category
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.mint(count, category, options);
+//             await waitForReceipt(transaction);
+//             return true;
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//     }
+//     async burnFusion(heroIds) {
+//         try {
+//             const contract = await this.getContract();
+//             const estimateGas = await contract.estimateGas.burnListToken(
+//                 heroIds
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.burnListToken(heroIds, options);
+//             await waitForReceipt(transaction);
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//         return true;
+//     }
+//     async fusion(mainMaterials, buffMaterialst) {
+//         try {
+//             const contract = await this.getContract();
+//             const estimateGas = await contract.estimateGas.fusion(
+//                 mainMaterials,
+//                 buffMaterialst
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.fusion(
+//                 mainMaterials,
+//                 buffMaterialst,
+//                 options
+//             );
+//             await waitForReceipt(transaction);
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//         return true;
+//     }
+//     async burnRepairShield(idHeroS, listHeroIds) {
+//         try {
+//             const contract = this.getContract();
+//             const estimateGas = await contract.estimateGas.burnResetShield(
+//                 idHeroS,
+//                 listHeroIds
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.burnResetShield(
+//                 idHeroS,
+//                 listHeroIds,
+//                 options
+//             );
+//             await waitForReceipt(transaction);
+//             return true;
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//     }
+//     async createRock(listHeroIds) {
+//         try {
+//             const contract = this.getContract();
+//             const estimateGas = await contract.estimateGas.createRock(
+//                 listHeroIds
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.createRock(listHeroIds, options);
+//             await waitForReceipt(transaction);
+//             return true;
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//     }
+//     async resetShieldHeroS(idHero, amountRock) {
+//         try {
+//             const contract = this.getContract();
+//             const estimateGas = await contract.estimateGas.resetShieldHeroS(
+//                 idHero,
+//                 amountRock
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.resetShieldHeroS(
+//                 idHero,
+//                 amountRock,
+//                 options
+//             );
+//             await waitForReceipt(transaction);
+//             return true;
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//     }
+//     async upgradeShieldLevel(idHero, amountRock) {
+//         try {
+//             const contract = this.getContract();
+//             const estimateGas = await contract.estimateGas.upgradeShieldLevel(
+//                 idHero,
+//                 amountRock
+//             );
+//             const options = getDoubleGasFeeOption(estimateGas);
+//             const transaction = await contract.upgradeShieldLevel(
+//                 idHero,
+//                 amountRock,
+//                 options
+//             );
+//             await waitForReceipt(transaction);
+//             return true;
+//         } catch (ex) {
+//             console.error(`exception ${ex}`);
+//             return false;
+//         }
+//     }
+// }
+
+// import * as Utils from "./Utils.js";
+// import * as Message from "./Message.js";
+// import * as Storage from "./Storage.js";
+// import CoinToken from "../CoinToken.js";
+// const MIN_CONFIRMATIONS = 6;
+// const GAS_LIMIT_MULTIPLIER = 2;
+// class NetworkData {
+//     constructor(chainId, chainName, currency, rpcUrl, scanUrl) {
+//         this.chainId = chainId;
+//         this.chainName = chainName;
+//         this.nativeCurrency = {
+//             name: currency,
+//             symbol: currency,
+//             decimals: 18,
+//         };
+//         this.rpcUrls = [rpcUrl];
+//         this.blockExplorerUrls = [scanUrl];
+//     }
+// }
+// const NetworkMap = new Map([
+//     [
+//         56,
+//         new NetworkData(
+//             "0x38",
+//             "Binance Smart Chain",
+//             "BNB",
+//             "https://bsc-dataseed.binance.org/",
+//             "https://bscscan.com"
+//         ),
+//     ],
+//     [
+//         97,
+//         new NetworkData(
+//             "0x61",
+//             "BSC Test Net",
+//             "BNB",
+//             "https://data-seed-prebsc-1-s1.binance.org:8545/",
+//             "https://testnet.bscscan.com"
+//         ),
+//     ],
+//     [
+//         137,
+//         new NetworkData(
+//             "0x89",
+//             "Matic Mainnet",
+//             "MATIC",
+//             "https://polygon-rpc.com/",
+//             "https://polygonscan.com/"
+//         ),
+//     ],
+//     [
+//         80001,
+//         new NetworkData(
+//             "0x13881",
+//             "Polygon Test Net",
+//             "MATIC",
+//             "https://rpc-mumbai.maticvigil.com/",
+//             "https://mumbai.polygonscan.com/"
+//         ),
+//     ],
+// ]);
+// async function connectAccount() {
+//     const eth = Storage.getData("ethereum");
+//     if (eth !== undefined) {
+//         try {
+//             let addresses;
+//             if (eth["qrcode"] === true) {
+//                 addresses = eth.accounts;
+//             } else {
+//                 addresses = await eth.request({
+//                     method: "eth_requestAccounts",
+//                     params: [],
+//                 });
+//             }
+//             if (addresses.length > 0) {
+//                 const userAddress = addresses[0].toLowerCase();
+//                 Storage.setUserAddress(userAddress);
+//                 return Message.Info(userAddress);
+//             }
+//         } catch (ex) {
+//             console.error(ex);
+//         }
+//     }
+//     return Message.Error("Cannot connect wallet");
+// }
+// async function isValidChainId(validChainId) {
+//     try {
+//         const eth = Storage.getData("ethereum");
+//         const useWalletConnect = eth["qrcode"] === true;
+//         if (useWalletConnect) {
+//             await eth.enable();
+//         }
+//         const provider = Storage.getProvider();
+//         const network = await provider.getNetwork();
+//         let result = network.chainId === validChainId;
+//         if (!result) {
+//             if (useWalletConnect) {
+//                 eth.disable();
+//             } else {
+//                 const eth = Storage.getData("ethereum");
+//                 const networkData = getNetwork(validChainId);
+//                 let switched = true;
+//                 try {
+//                     await eth.request({
+//                         method: "wallet_switchEthereumChain",
+//                         params: [{ chainId: networkData.chainId }],
+//                     });
+//                 } catch (error) {
+//                     switched = false;
+//                 }
+//                 if (!switched) {
+//                     await eth.request({
+//                         method: "wallet_addEthereumChain",
+//                         params: [networkData],
+//                     });
+//                 }
+//             }
+//             return Message.Error("Wrong network");
+//         }
+//     } catch (ex) {
+//         console.error(`exception ${ex}`);
+//         return Message.Error(ex.message);
+//     }
+//     return Message.Info();
+// }
+// async function sign(message, userAddress) {
+//     await Utils.sleep(1500);
+//     let result = { ec: 1, signature: "" };
+//     try {
+//         const signer = Storage.getProvider().getSigner(userAddress);
+//         result.signature = await signer.signMessage(message);
+//         result.ec = 0;
+//     } catch (ex) {
+//         console.error(`exception ${ex}`);
+//     }
+//     return result;
+// }
+// function getNetwork(chainId) {
+//     if (!NetworkMap.has(chainId)) {
+//         throw new Error("Invalid chain id");
+//     }
+//     return NetworkMap.get(chainId);
+// }
+// async function waitForBlock(block) {
+//     while (true) {
+//         const provider = Storage.getProvider();
+//         const currentBlock = await provider.getBlockNumber();
+//         if (currentBlock >= block) {
+//             return;
+//         }
+//         await sleep(2000);
+//     }
+// }
+// function getDoubleGasFeeOption(estimateGas) {
+//     const gasMultiplyer = ethers.BigNumber.from(GAS_LIMIT_MULTIPLIER);
+//     const option = { gasLimit: estimateGas.mul(gasMultiplyer) };
+//     return option;
+// }
+// async function waitForReceipt(transaction) {
+//     const receipt = await transaction.wait(MIN_CONFIRMATIONS);
+//     return receipt;
+// }
+// function getAllNetworkRpc() {
+//     let rpc = {};
+//     NetworkMap.forEach((value, key) => {
+//         rpc[key] = value.rpcUrls[0];
+//     });
+//     return rpc;
+// }
+// function getCoinTokenByBuyHeroCategory(category) {
+//     let coinToken;
+//     if (category === 0) {
+//         coinToken = getData("bcoin");
+//     } else if (category === 1 || category === 2) {
+//         coinToken = getData("sen");
+//     } else {
+//         throw `Invalid category ${category}`;
+//     }
+//     return coinToken;
+// }
+// export {
+//     connectAccount,
+//     isValidChainId,
+//     sign,
+//     getDoubleGasFeeOption,
+//     waitForReceipt,
+//     getAllNetworkRpc,
+//     getCoinTokenByBuyHeroCategory,
+// };
