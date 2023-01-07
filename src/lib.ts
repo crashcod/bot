@@ -10,6 +10,7 @@ import { io, Socket } from "socket.io-client";
 import { TreasureMapBot } from "./bot";
 import { format } from "date-fns";
 import got from "got";
+import { Markup } from "telegraf";
 
 export function identity(value: string) {
     return value;
@@ -230,5 +231,20 @@ export const retryWeb3 = async <T = unknown>(
         }
 
         throw e;
+    }
+};
+
+export const sendMessageWithButtonsTelegram = async (
+    ctx: any,
+    text: string,
+    buttons: any[]
+) => {
+    const chunkSize = 100;
+    for (let i = 0; i < buttons.length; i += chunkSize) {
+        const chunk = buttons.slice(i, i + chunkSize);
+        await ctx.replyWithMarkdown(
+            text,
+            Markup.inlineKeyboard(chunk, { columns: 3 })
+        );
     }
 };

@@ -1,11 +1,13 @@
 import { differenceInMinutes } from "date-fns";
-import { Context, Telegraf } from "telegraf";
+import { Context, Scenes, session, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
 import { BLOCK_REWARD_TYPE_BCOIN_POLYGON } from "../constants";
 import { formatDate, getChatId, sleep } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
+import { SCENE_RESET_SHIELD } from "../scenes/list";
+import { sceneResetShield } from "../scenes/reset-shield";
 
 export class Telegram {
     bot;
@@ -19,6 +21,12 @@ export class Telegram {
             if (!this.bot.params.telegramKey) return;
             logger.info("Starting telegraf...");
             this.telegraf = new Telegraf(this.bot.params.telegramKey);
+
+            const stage: any = new Scenes.Stage<Scenes.WizardContext>([
+                sceneResetShield,
+            ]);
+            this.telegraf.use(session());
+            this.telegraf.use(stage.middleware());
 
             this.telegraf?.command("stats", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramStats(ctx))
@@ -64,8 +72,8 @@ export class Telegram {
             this.telegraf?.command("wallet", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramWallet(ctx))
             );
-            this.telegraf?.command("reset_shield", (ctx) =>
-                this.checkChatId(ctx, () => this.telegramResetShield(ctx))
+            this.telegraf?.command("reset_shield", (ctx: any) =>
+                this.checkChatId(ctx, () => ctx.scene.enter(SCENE_RESET_SHIELD))
             );
 
             const commands = [
@@ -86,6 +94,7 @@ export class Telegram {
                 { command: "gas_polygon", description: "gas_polygon" },
                 { command: "withdraw", description: "withdraw" },
                 { command: "wallet", description: "wallet" },
+                { command: "reset_shield", description: "reset_shield" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -508,19 +517,70 @@ ${resultDb
 
         context.replyWithHTML(html);
     }
-    async telegramResetShield(context: any) {
+    async telegramResetShield(context: any, heroId: number) {
         try {
-            console.log(context);
-            const [, heroId] = context?.message.text.split(" ") as any;
-            console.log(heroId);
-            const hero = this.bot.squad.heroes.find((h) => h.id == heroId);
+            const { maxGasRepairShield } = this.bot.params;
 
+            const hero = this.bot.squad.heroes.find((h) => h.id == heroId);
             if (!hero) return;
+
+            if (!this.bot.client.isConnected) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nAccount not connected, please wait`
+                );
+            }
+
+            if (this.bot.isResettingShield) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nThere is already another hero resetting the shield at the moment`
+                );
+            }
+            if (this.bot.loginParams.type == "user") {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed when logging in with the wallet`
+                );
+            }
+
+            if (this.bot.loginParams.rede != "POLYGON") {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nFunctionality only allowed for POLYGON`
+                );
+            }
+
+            const lastTransactionWeb3 = await this.bot.web3Ready();
+
+            if (!lastTransactionWeb3) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nyou currently have an ongoing transaction in your wallet`
+                );
+            }
+
+            const currentRock = await this.bot.client.web3GetRock();
+            const gas = await this.bot.getAverageWeb3Transaction();
+
+            if (hero.rockRepairShield > currentRock) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nNot enough material, needed ${
+                        hero.rockRepairShield
+                    }, you have ${currentRock}`
+                );
+            }
+
+            if (
+                maxGasRepairShield > 0 &&
+                gas.resetShield > maxGasRepairShield
+            ) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nYou configured to spend a maximum of ${maxGasRepairShield} on the transaction, at the moment ${
+                        gas.resetShield
+                    } is being charged`
+                );
+            }
+
             await this.bot.resetShield(hero);
             await this.bot.client.syncBomberman();
             await sleep(5000);
             await this.bot.client.getActiveHeroes();
-            context.replyWithHTML("foi");
         } catch (e: any) {
             context.replyWithHTML(e.message);
         }

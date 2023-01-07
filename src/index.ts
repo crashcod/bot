@@ -9,10 +9,12 @@ import {
     requireAndParseEnv,
 } from "./lib";
 
+export let bot: TreasureMapBot;
+
 async function main() {
     const params = requireAndParseEnv("LOGIN", parseLogin);
     const report = askAndParseEnv("REPORT_REWARDS", parseInt, 0);
-    const bot = new TreasureMapBot(params, {
+    bot = new TreasureMapBot(params, {
         telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
         minHeroEnergyPercentage: parseInt(
             askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
@@ -80,5 +82,4 @@ async function main() {
         await bot.loop();
     }
 }
-
 main();

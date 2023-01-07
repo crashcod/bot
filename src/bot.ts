@@ -998,6 +998,8 @@ export class TreasureMapBot {
         const heroes = this.squad.heroes;
         let shieldRepaired = false;
 
+        if (!this.params.resetShieldAuto) return false;
+
         for (const hero of heroes) {
             if (
                 !hero.shields ||
@@ -1077,16 +1079,14 @@ export class TreasureMapBot {
 
     async resetShield(hero: Hero) {
         try {
-            const { maxGasRepairShield, alertMaterial, resetShieldAuto } =
-                this.params;
+            const { maxGasRepairShield, alertMaterial } = this.params;
             const lastTransactionWeb3 = await this.web3Ready();
 
             if (
                 this.isResettingShield ||
                 this.loginParams.type == "user" ||
                 this.loginParams.rede == "BSC" ||
-                !lastTransactionWeb3 ||
-                !resetShieldAuto
+                !lastTransactionWeb3
             ) {
                 return false;
             }
@@ -1102,6 +1102,7 @@ export class TreasureMapBot {
                 hero.rockRepairShield > currentRock ||
                 (maxGasRepairShield > 0 && gas.resetShield > maxGasRepairShield)
             ) {
+                logger.info(`current gas reset shield: ${gas.resetShield}`);
                 return;
             }
 

@@ -68,6 +68,44 @@ const ROCK_REPAIR_SHIELD: any = {
     5: 8,
     6: 10,
 };
+const SHIELD_LEVEL: any = {
+    1: {
+        1000: 1,
+        2000: 2,
+        3000: 3,
+        4000: 4,
+    },
+    2: {
+        1125: 1,
+        2250: 2,
+        3375: 3,
+        4500: 4,
+    },
+    3: {
+        1250: 1,
+        2500: 2,
+        3750: 3,
+        5000: 4,
+    },
+    4: {
+        1500: 1,
+        3000: 2,
+        4500: 3,
+        6000: 4,
+    },
+    5: {
+        1750: 1,
+        3500: 2,
+        5250: 3,
+        7000: 4,
+    },
+    6: {
+        2000: 1,
+        4000: 2,
+        6000: 3,
+        8000: 4,
+    },
+};
 
 export type IHeroParams = IHeroStats & {
     id: number;
@@ -171,7 +209,15 @@ export class Hero {
     }
 
     get rockRepairShield() {
-        return ROCK_REPAIR_SHIELD[this.rarityIndex + 1];
+        const sumShield =
+            this.shields
+                ?.map((hero) => hero.total)
+                .reduce((p, r) => p + r, 0) || 0;
+        const rarity = this.rarityIndex + 1;
+        const material = ROCK_REPAIR_SHIELD[rarity];
+        const lvlShield = SHIELD_LEVEL[rarity][sumShield];
+
+        return material * lvlShield;
     }
 
     toJSON() {
