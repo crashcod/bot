@@ -409,11 +409,12 @@ ${resultDb
             message =
                 `Account: ${this.bot.getIdentify()}\n\n` +
                 `Shield heroes (${result.length}): \n\n${heroes}`;
+
+            if (material !== null) {
+                message += `\n\nMaterial:${material}`;
+            }
         }
 
-        if (material !== null) {
-            message += `\n\nMaterial"${material}`;
-        }
         context.replyWithHTML(message);
     }
 
