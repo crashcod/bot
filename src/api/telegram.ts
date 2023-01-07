@@ -517,11 +517,9 @@ ${resultDb
 
             if (!hero) return;
             await this.bot.resetShield(hero);
-            const result = await this.bot.client.syncBomberman();
-            console.log("result", result);
-            await sleep(2000);
-            const result1 = await this.bot.client.getActiveHeroes();
-            console.log("result1", result1);
+            await this.bot.client.syncBomberman();
+            await sleep(5000);
+            await this.bot.client.getActiveHeroes();
             context.replyWithHTML("foi");
         } catch (e: any) {
             context.replyWithHTML(e.message);
