@@ -383,6 +383,8 @@ ${resultDb
             return;
         }
 
+        const material = await this.bot.client.web3GetRock();
+
         const formatMsg = (hero: Hero) => {
             const shield = hero.shields?.length
                 ? `${hero.shields[0].current}/${hero.shields[0].total}`
@@ -409,6 +411,9 @@ ${resultDb
                 `Shield heroes (${result.length}): \n\n${heroes}`;
         }
 
+        if (material !== null) {
+            message += `\n\nMaterial"${material}`;
+        }
         context.replyWithHTML(message);
     }
 
