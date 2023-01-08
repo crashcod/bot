@@ -36,6 +36,7 @@ async function main() {
         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
         numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
         telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
+        identify: askAndParseEnv("IDENTIFY", identity, ""),
         telegramChatIdCheck: askAndParseEnv(
             "TELEGRAM_CHAT_ID_CHECK",
             parseBoolean,

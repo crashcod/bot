@@ -94,6 +94,7 @@ export interface IMoreOptions {
     houseHeroes?: string;
     adventureHeroes?: string;
     rede?: string;
+    identify?: string;
     version?: number;
     maxGasRepairShield?: number;
     alertMaterial?: number;
@@ -157,6 +158,7 @@ export class TreasureMapBot {
             server = "sea",
             telegramChatId = "",
             telegramKey = "",
+            identify = "",
         } = moreParams;
 
         this.params = {
@@ -179,6 +181,7 @@ export class TreasureMapBot {
             maxGasRepairShield,
             alertMaterial,
             reportRewards,
+            identify,
         };
         this.loginParams = loginParams;
         loginParams.rede = rede;
@@ -976,6 +979,8 @@ export class TreasureMapBot {
     }
 
     getIdentify() {
+        if (this.params.identify) return this.params.identify;
+
         return "username" in this.loginParams
             ? this.loginParams.username
             : this.loginParams.wallet;
@@ -1307,6 +1312,7 @@ export class TreasureMapBot {
                 "ENEMY_TAKE_DAMAGE",
                 "START_EXPLODE",
                 "START_EXPLODE_V2",
+                "GO_HOME",
                 "START_STORY_EXPLODE",
             ].includes(command)
         ) {
