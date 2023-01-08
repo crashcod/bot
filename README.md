@@ -273,3 +273,4 @@ As variáveis são:
 | /gas_polygon       | Retona quanto custaria uma transação na polygon no momento                                                        |
 | /withdraw          | Faz o claim caso tenha mais de 40 bombs                                                                           |
 | /wallet            | Mostra o saldo da sua carteira                                                                                    |
+| /reset_shield      | Restaura shield do hero                                                                                           |
