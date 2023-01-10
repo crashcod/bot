@@ -24,6 +24,11 @@ async function main() {
         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
         saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
+        ignoreNumHeroWork: askAndParseEnv(
+            "IGNORE_NUM_HERO_WORK",
+            parseBoolean,
+            false
+        ),
         resetShieldAuto: askAndParseEnv(
             "RESET_SHIELD_AUTO",
             parseBoolean,

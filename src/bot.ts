@@ -89,6 +89,7 @@ export interface IMoreOptions {
     saveRewardsCsv?: boolean;
     telegramChatIdCheck?: boolean;
     resetShieldAuto?: boolean;
+    ignoreNumHeroWork?: boolean;
     reportRewards?: number;
     minHeroEnergyPercentage?: number;
     houseHeroes?: string;
@@ -148,6 +149,7 @@ export class TreasureMapBot {
             saveRewardsCsv = false,
             resetShieldAuto = false,
             telegramChatIdCheck = false,
+            ignoreNumHeroWork = false,
             reportRewards = 0,
             rede = "BSC",
             version = VERSION_CODE,
@@ -179,6 +181,7 @@ export class TreasureMapBot {
             telegramChatIdCheck,
             resetShieldAuto,
             maxGasRepairShield,
+            ignoreNumHeroWork,
             alertMaterial,
             reportRewards,
             identify,
@@ -534,6 +537,7 @@ export class TreasureMapBot {
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
         await this.client.getActiveHeroes();
+        const { ignoreNumHeroWork } = this.params;
 
         this.selection = this.squad.byState("Work");
         const heroes = this.squad.notWorking.sort((a, b) => {
@@ -554,7 +558,10 @@ export class TreasureMapBot {
                 continue;
             }
 
-            if (this.workingSelection.length <= this.params.numHeroWork - 1) {
+            if (
+                this.workingSelection.length <= this.params.numHeroWork - 1 ||
+                (ignoreNumHeroWork && percent >= 100)
+            ) {
                 logger.info(`Sending hero ${hero.id} to work`);
                 await this.client.goWork(hero);
                 this.selection.push(hero);
@@ -1033,6 +1040,10 @@ export class TreasureMapBot {
         this.sendPing();
         await this.loadHouses();
         await this.refreshMap();
+
+        logger.info("Opening map...");
+        this.playing = this.params.modeAmazon ? "Amazon" : "Treasure";
+        await this.client.startPVE(0, this.params.modeAmazon);
         do {
             await this.checkVersion();
 
@@ -1042,37 +1053,34 @@ export class TreasureMapBot {
                 this.registerNewMap();
             }
 
-            logger.info("Opening map...");
-            this.playing = this.params.modeAmazon ? "Amazon" : "Treasure";
-            await this.client.startPVE(0, this.params.modeAmazon);
-
             await this.refreshHeroSelection();
             await this.placeBombs();
-            await this.sleepAllHeroes();
-            await this.refreshHeroAtHome();
 
-            logger.info("Closing map...");
-            await this.client.stopPVE();
             logger.info("There are no heroes to work now.");
 
-            if (
-                (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
-                    this.lastAdventure === 0) &&
-                this.params.modeAdventure
-            ) {
-                this.resetStateAdventure();
-                this.playing = "Adventure";
+            // if (
+            //     (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
+            //         this.lastAdventure === 0) &&
+            //     this.params.modeAdventure
+            // ) {
+            //     this.resetStateAdventure();
+            //     this.playing = "Adventure";
 
-                await this.adventure();
-                this.lastAdventure = Date.now();
-            }
+            //     await this.adventure();
+            //     this.lastAdventure = Date.now();
+            // }
             this.playing = "sleep";
-            this.checkShields().catch((e) => {
-                console.log(e);
-            });
+            // this.checkShields().catch((e) => {
+            //     console.log(e);
+            // });
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
         } while (this.shouldRun);
+
+        await this.sleepAllHeroes();
+        await this.refreshHeroAtHome();
+        logger.info("Closing map...");
+        await this.client.stopPVE();
     }
 
     async web3Ready() {

@@ -154,19 +154,41 @@ export class Telegram {
             server,
             telegramChatId,
             telegramKey,
+            resetShieldAuto,
+            ignoreNumHeroWork,
+            alertMaterial,
             version,
+            maxGasRepairShield,
+            reportRewards,
+            telegramChatIdCheck,
         } = this.bot.params;
+
+        const { type } = this.bot.loginParams;
+
+        const getbool = (value: boolean) => (value ? "Yes" : "No");
+
         const html =
             `Account: ${this.bot.getIdentify()}\n\n` +
-            `Network: ${rede}\n` +
-            `Alert shield: ${alertShield}\n` +
-            `Heroes select at home: ${houseHeroes.split(":").join(", ")}\n` +
-            `Percentage of hero life to work: ${minHeroEnergyPercentage}%\n` +
-            `Amount of heroes to work: ${numHeroWork}\n` +
-            `Server: ${server}\n` +
-            `Telegram chat ID: ${telegramChatId}\n` +
-            `Telegram key: ${telegramKey}\n` +
-            `Bomb version: ${version}`;
+            `<b>Network</b>: ${rede}\n` +
+            `<b>Alert shield</b>: ${alertShield}\n` +
+            `<b>Heroes select at home</b>: ${houseHeroes
+                .split(":")
+                .join(", ")}\n` +
+            `<b>Percentage of hero life to work</b>: ${minHeroEnergyPercentage}%\n` +
+            `<b>Qty of heroes to work</b>: ${numHeroWork}\n` +
+            `<b>Server</b>: ${server}\n` +
+            `<b>Telegram chat ID</b>: ${telegramChatId}\n` +
+            `<b>Telegram KEY</b>: ${telegramKey}\n` +
+            `<b>Check telegram chat id</b>: ${getbool(telegramChatIdCheck)}\n` +
+            `<b>Alert material</b>: ${alertMaterial}\n` +
+            `<b>Max gas reset shield</b>: ${maxGasRepairShield || "No"}\n` +
+            `<b>Report rewards</b>: ${
+                reportRewards ? reportRewards + " min" : "No"
+            }\n` +
+            `<b>Auto reset shield</b>: ${getbool(resetShieldAuto)}\n` +
+            `<b>Ignore qty hero work</b>: ${getbool(ignoreNumHeroWork)}\n` +
+            `<b>Type login</b>: ${type}\n` +
+            `<b>Bomb version</b>: ${version}`;
 
         context.replyWithHTML(html);
     }
@@ -632,13 +654,13 @@ ${resultDb
                 }`
             );
 
+            await this.telegramStopCalcFarm(context, true);
+
             const approve = await this.bot.client.approveClaim(
                 BLOCK_REWARD_TYPE_BCOIN_POLYGON
             );
             const result = await this.bot.client.web3ApproveClaim(approve);
             if (result.status) {
-                await this.telegramStopCalcFarm(context, true);
-
                 const { received } =
                     await this.bot.client.confirmClaimRewardSuccess(
                         BLOCK_REWARD_TYPE_BCOIN_POLYGON
