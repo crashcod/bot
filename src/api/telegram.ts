@@ -486,7 +486,7 @@ ${resultDb
         let description =
             `Total minutes: ${diffmin.toFixed(2)}\n` +
             `Average per minute: ${totalAverageHour.toFixed(2)}\n` +
-            `Average map per minute: ${totalAverageMap.toFixed(2)}` +
+            `Average map per minute: ${totalAverageMap.toFixed(2)}\n` +
             `Average map per day: ${(totalAverageMap * 1440).toFixed(2)}`;
         if (diffHours > 1) {
             totalAverageHour = totalBcoin / diffHours;
@@ -494,7 +494,7 @@ ${resultDb
             description =
                 `Total hours: ${diffHours.toFixed(2)}\n` +
                 `Average per hour: ${totalAverageHour.toFixed(2)}\n` +
-                `Average map per hour: ${totalAverageMap.toFixed(2)}` +
+                `Average map per hour: ${totalAverageMap.toFixed(2)}\n` +
                 `Average map per day: ${(totalAverageMap * 24).toFixed(2)}`;
         }
 
