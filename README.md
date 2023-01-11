@@ -258,6 +258,7 @@ As variáveis são:
 | RESET_SHIELD_AUTO          | Não         | Somente quando for logado com wallet, irá da reset automaticamente quando chegar a zero                                                                                                                 | 1                                                     |
 | IDENTIFY                   | Não         | Identificador da sua conta                                                                                                                                                                              |
 | IGNORE_NUM_HERO_WORK       | Não         | Caso seja informado essa config, e ja tem a quantidade de heroes trabalhando conforme a configuração NUM_HERO_WORK, quando algum hero chegar a 100% de vida, ele irá colocar para trabalhar mesmo assim | 1                                                     |
+| IGNORE_REWARD_CURRENCY     | Não         | [Clique aqui para ver mais detalhes ](#sobre-ignore_reward_currency)                                                                                                                                    |                                                       |
 
 ## Comandos telegram
 
@@ -276,3 +277,48 @@ As variáveis são:
 | /withdraw          | Faz o claim caso tenha mais de 40 bombs                                                                           |
 | /wallet            | Mostra o saldo da sua carteira                                                                                    |
 | /reset_shield      | Restaura shield do hero                                                                                           |
+
+## Sobre IGNORE_REWARD_CURRENCY
+
+Hoje quando você rodar o comando /rewards será apresentado algo como isso:
+
+```
+Account:
+
+Rewards:
+TR-Unknown: 0
+TR-COIN: 212.18
+BSC-BCoin: 1.25
+BSC-Bomberman: 0
+BSC-Key: 0
+BSC-BCoin Deposited: 0
+BSC-Senspark: 0
+BSC-MSPc: 0
+BSC-WOFM: 6.58
+BSC-NFT PVP: 1
+```
+
+Caso você queira que não apareça alguma dessas moedas, voçê pode usar a configuração IGNORE_REWARD_CURRENCY para ignorar elas e não serem apresentadas. Vamos dizer que eu queira ignorar 3 moedas: BSC-Senspark, BSC-MSPc e BSC-WOFM
+
+Basta voçê colocar o nome dessas moedas entre elas com o caracter :
+
+segue exemplo
+
+```
+IGNORE_REWARD_CURRENCY: "Senspark:MSPc:WOFM"
+```
+
+precisa ser exatamente igual o nome, e o resultado será:
+
+```
+Account:
+
+Rewards:
+TR-Unknown: 0
+TR-COIN: 212.18
+BSC-BCoin: 1.25
+BSC-Bomberman: 0
+BSC-Key: 0
+BSC-BCoin Deposited: 0
+BSC-NFT PVP: 1
+```

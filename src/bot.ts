@@ -101,6 +101,7 @@ export interface IMoreOptions {
     alertMaterial?: number;
     alertShield?: number;
     numHeroWork?: number;
+    ignoreRewardCurrency?: string[];
     telegramChatId?: string;
     server?: string;
 }
@@ -161,6 +162,7 @@ export class TreasureMapBot {
             telegramChatId = "",
             telegramKey = "",
             identify = "",
+            ignoreRewardCurrency = [],
         } = moreParams;
 
         this.params = {
@@ -185,6 +187,7 @@ export class TreasureMapBot {
             alertMaterial,
             reportRewards,
             identify,
+            ignoreRewardCurrency,
         };
         this.loginParams = loginParams;
         loginParams.rede = rede;
@@ -1125,7 +1128,7 @@ export class TreasureMapBot {
             );
             const transaction = await this.client.web3ResetShield(hero);
             this.lastTransactionWeb3 = transaction.transactionHash;
-
+            await sleep(1000);
             currentRock = await this.client.web3GetRock();
 
             await this.telegram.sendMessageChat(

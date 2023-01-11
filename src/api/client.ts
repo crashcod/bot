@@ -753,9 +753,11 @@ export class Client {
                                                         );
                                                     }
                                                 }
-                                            } catch (e) {
+                                            } catch (e: any) {
                                                 clearInterval(interval);
-                                                return error(e);
+                                                return error(
+                                                    `${e.message}\n\nHash: ${hash}`
+                                                );
                                             }
                                         }
                                     );

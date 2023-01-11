@@ -315,7 +315,12 @@ ${resultDb
         try {
             const material = await this.bot.client.web3GetRock();
             const message = await this.getRewardAccount();
-            await context.replyWithHTML(`${message}\nMaterial: ${material}`);
+            let html = message;
+            if (this.bot.loginParams.type == `wallet`) {
+                html += `\nMaterial: ${material}`;
+            }
+
+            await context.replyWithHTML(html);
         } catch (e) {
             await context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nNot connected, please wait`
@@ -338,6 +343,7 @@ ${resultDb
         if (this.bot.client.isConnected) {
             const rewards = await this.bot.client.getReward();
             // const detail = await this.client.coinDetail();
+            const { ignoreRewardCurrency } = this.bot.params;
 
             const message =
                 "Account: " +
@@ -352,6 +358,7 @@ ${resultDb
                             v.network == this.bot.params.rede ||
                             v.network == "TR"
                     )
+                    .filter((v) => !ignoreRewardCurrency.includes(v.type))
                     .sort((a, b) => (a.network > b.network ? -1 : 1))
                     .map(
                         (reward) =>

@@ -3,6 +3,7 @@ import { VERSION_CODE } from "./constants";
 import {
     askAndParseEnv,
     identity,
+    parseArray,
     parseBoolean,
     parseLogin,
     parseNumber,
@@ -55,6 +56,11 @@ async function main() {
             0
         ),
         alertMaterial: askAndParseEnv("ALERT_MATERIAL", parseNumber, 0),
+        ignoreRewardCurrency: askAndParseEnv(
+            "IGNORE_REWARD_CURRENCY",
+            parseArray,
+            []
+        ),
     });
 
     let intervalReport: NodeJS.Timer;

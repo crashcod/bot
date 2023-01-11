@@ -15,6 +15,10 @@ import { Markup } from "telegraf";
 export function identity(value: string) {
     return value;
 }
+export function parseArray(value: string, delimiter = ":") {
+    if (!value) return undefined;
+    return value.split(delimiter);
+}
 
 export function parseNumber(value: string) {
     const parsed = Number(value);
