@@ -403,7 +403,7 @@ ${resultDb
 
         await this.bot.db.set("start", true);
         await context.replyWithHTML(
-            `Account: ${this.bot.getIdentify()}\n\nstating...`
+            `Account: ${this.bot.getIdentify()}\n\nstarting...`
         );
         await sleep(10000);
         await this.telegraf?.stop("SIGINT");
@@ -555,9 +555,9 @@ ${resultDb
         const result = await this.bot.getWalletBalance();
         const html =
             `Account: ${this.bot.getIdentify()}\n\n` +
-            `MATIC: ${result.matic}\n` +
-            `USDT: ${result.usdt}\n` +
-            `BOMB: ${result.bomb}\n`;
+            `MATIC: ${parseFloat(result.matic).toFixed(2)}\n` +
+            `USDT: ${parseFloat(result.usdt).toFixed(2)}\n` +
+            `BOMB: ${parseFloat(result.bomb).toFixed(2)}\n`;
 
         context.replyWithHTML(html);
     }
