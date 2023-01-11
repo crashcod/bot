@@ -1070,9 +1070,9 @@ export class TreasureMapBot {
             //     this.lastAdventure = Date.now();
             // }
             this.playing = "sleep";
-            // this.checkShields().catch((e) => {
-            //     console.log(e);
-            // });
+            this.checkShields().catch((e) => {
+                console.log(e);
+            });
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
         } while (this.shouldRun);
