@@ -397,7 +397,7 @@ ${resultDb
         const start = await this.bot.db.get("start");
         if (start === true) {
             return await context.replyWithHTML(
-                `Account: ${this.bot.getIdentify()}\n\nsYour account is already working, nothing will be done`
+                `Account: ${this.bot.getIdentify()}\n\nYour account is already working, nothing will be done`
             );
         }
 
