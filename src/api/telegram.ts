@@ -394,6 +394,13 @@ ${resultDb
         throw new Error("exit");
     }
     async telegramStart(context: Context) {
+        const start = await this.bot.db.get("start");
+        if (start === true) {
+            return await context.replyWithHTML(
+                `Account: ${this.bot.getIdentify()}\n\nsYour account is already working, nothing will be done`
+            );
+        }
+
         await this.bot.db.set("start", true);
         await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nstating...`
@@ -684,6 +691,9 @@ ${resultDb
                     `Account: ${this.bot.getIdentify()}\n\nfailed`
                 );
             }
+            context.replyWithAnimation(
+                "https://lh6.ggpht.com/_Iaq7cCYNnH4/TY-ZmL3uLII/AAAAAAAAAFY/cbB7U-W7F_M/s740/Kog1K.gif"
+            );
         } catch (e: any) {
             return context.replyWithHTML(
                 `Account: ${this.bot.getIdentify()}\n\nError: ${e.message}`

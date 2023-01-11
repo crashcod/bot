@@ -298,9 +298,9 @@ BSC-WOFM: 6.58
 BSC-NFT PVP: 1
 ```
 
-Caso você queira que não apareça alguma dessas moedas, voçê pode usar a configuração IGNORE_REWARD_CURRENCY para ignorar elas e não serem apresentadas. Vamos dizer que eu queira ignorar 3 moedas: BSC-Senspark, BSC-MSPc e BSC-WOFM
+Caso você queira que não apareça alguma dessas moedas, você pode usar a configuração IGNORE_REWARD_CURRENCY para ignorar elas e não serem apresentadas. Vamos dizer que eu queira ignorar 3 moedas: BSC-Senspark, BSC-MSPc e BSC-WOFM
 
-Basta voçê colocar o nome dessas moedas entre elas com o caracter :
+Basta você colocar o nome dessas moedas entre elas com o caracter :
 
 segue exemplo
 
