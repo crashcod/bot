@@ -14,6 +14,8 @@ telegram do grupo https://t.me/+tQcb45U9MwAxYWMx
 
 -   Farm Treasure Hunt
 -   Lida com o recurso Home se uma casa estiver disponível
+-   Auto reset shield
+-   Claim
 
 # Início do zero
 
