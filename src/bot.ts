@@ -1286,8 +1286,18 @@ export class TreasureMapBot {
                 this.notificationBlockCage();
             }
             if (block.rewards?.length) {
+                const heroes = this.squad.getTotalHeroes();
+                const houseSlots = this.homeSlots;
+
                 block.rewards.map((reward) => {
-                    sendEventSockect("explosion-rewards", reward);
+                    sendEventSockect("explosion-rewards", {
+                        reward,
+                        heroes,
+                        houseSlots,
+                        minHeroEnergyPercentage:
+                            this.params.minHeroEnergyPercentage,
+                        numHeroWork: this.params.numHeroWork,
+                    });
                 });
             }
         }
