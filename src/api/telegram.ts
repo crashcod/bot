@@ -632,6 +632,7 @@ ${resultDb
             await this.bot.client.syncBomberman();
             await sleep(5000);
             await this.bot.client.getActiveHeroes();
+            this.bot.isFarming = true;
         } catch (e: any) {
             context.replyWithHTML(e.message);
         }

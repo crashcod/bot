@@ -1648,10 +1648,14 @@ export class Client {
                 );
                 break;
             case "START_EXPLODE_V2":
-                resolveUniquePromise(
+                resolveSerializedPromise(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     this.controller.startExplodeV2 as any,
                     undefined
+                );
+                this.callHandler(
+                    this.handlers.startExplodeV2,
+                    undefined as any
                 );
                 break;
             case "START_STORY_EXPLODE":

@@ -124,6 +124,8 @@ export class TreasureMapBot {
     public history: IMapTile[];
     public index: number;
     public shouldRun: boolean;
+    public isFarming: boolean;
+    public isHeroFarming: boolean;
     public lastAdventure: number;
     public alertShield: number;
     public forceExit = true;
@@ -221,6 +223,8 @@ export class TreasureMapBot {
         this.history = [];
         this.index = 0;
         this.shouldRun = false;
+        this.isFarming = false;
+        this.isHeroFarming = false;
         this.lastAdventure = 0;
         this.alertShield = alertShield;
         if ("username" in loginParams) {
@@ -753,8 +757,10 @@ export class TreasureMapBot {
         while (
             this.map.totalLife > 0 &&
             this.workingSelection.length > 0 &&
-            this.shouldRun
+            this.shouldRun &&
+            this.isFarming
         ) {
+            this.isHeroFarming = true;
             for (const hero of this.workingSelection) {
                 await sleep(70);
 
@@ -767,6 +773,7 @@ export class TreasureMapBot {
         }
 
         await Promise.all(promises);
+        this.isHeroFarming = false;
     }
 
     async getHeroesAdventure() {
@@ -1011,32 +1018,45 @@ export class TreasureMapBot {
         } catch (_: any) {}
     }
 
+    async awaitHeroFarm() {
+        return new Promise((resolve) => {
+            const interval = setInterval(() => {
+                if (!this.isHeroFarming) {
+                    resolve(true);
+                    clearInterval(interval);
+                }
+            }, 1000);
+        });
+    }
+
     async checkShields() {
         logger.info(`Cheking shields...`);
-        const heroes = this.squad.heroes;
+        const heroes = this.squad.heroes.filter(
+            (hero) =>
+                !hero.shields ||
+                hero.shields.length === 0 ||
+                this.getSumShield(hero) === 0
+        );
         let shieldRepaired = false;
 
         if (!this.params.resetShieldAuto) return false;
 
         for (const hero of heroes) {
-            if (
-                !hero.shields ||
-                hero.shields.length === 0 ||
-                this.getSumShield(hero) === 0
-            ) {
-                await this.resetShield(hero);
-                shieldRepaired = true;
-            }
+            await this.resetShield(hero);
+            shieldRepaired = true;
         }
+
         if (shieldRepaired) {
             await this.client.syncBomberman();
             await sleep(5000);
             await this.client.getActiveHeroes();
+            this.isFarming = true;
         }
     }
 
     async loop() {
         this.shouldRun = true;
+        this.isFarming = true;
         connectWebSocketAnalytics(this).catch((e) => {
             console.log(e);
         });
@@ -1051,6 +1071,7 @@ export class TreasureMapBot {
         this.playing = this.params.modeAmazon ? "Amazon" : "Treasure";
         await this.client.startPVE(0, this.params.modeAmazon);
         do {
+            this.playing = "Amazon";
             await this.checkVersion();
 
             if (this.map.totalLife <= 0) {
@@ -1076,9 +1097,7 @@ export class TreasureMapBot {
             //     this.lastAdventure = Date.now();
             // }
             this.playing = "sleep";
-            this.checkShields().catch((e) => {
-                console.log(e);
-            });
+            await this.checkShields();
             logger.info("Will sleep for 10 seconds");
             await sleep(10 * 1000);
         } while (this.shouldRun);
@@ -1116,7 +1135,6 @@ export class TreasureMapBot {
             if (alertMaterial > 0 && currentRock <= alertMaterial) {
                 this.alertMaterial(currentRock);
             }
-
             if (
                 hero.rockRepairShield > currentRock ||
                 (maxGasRepairShield > 0 && gas.resetShield > maxGasRepairShield)
@@ -1128,7 +1146,18 @@ export class TreasureMapBot {
                 return;
             }
 
+            this.isFarming = false;
             this.isResettingShield = true;
+
+            if (this.isHeroFarming) {
+                logger.info(`Waiting for the heroes to finish farming`);
+                await this.telegram.sendMessageChat(
+                    `Waiting for the heroes to finish farming`
+                );
+            }
+
+            await this.awaitHeroFarm();
+
             await this.telegram.sendMessageChat(
                 `Repairing shield hero ${hero.id}...`
             );
@@ -1281,6 +1310,8 @@ export class TreasureMapBot {
     }
 
     private handleExplosion(payload: IStartExplodePayload) {
+        if (!payload) return;
+
         const [mapParams, heroParams] = parseStartExplodePayload(payload);
         this.squad.updateHeroEnergy(heroParams);
 
