@@ -271,6 +271,7 @@ export class Telegram {
 
     async telegramRewardsAll(context: Context) {
         if (!(await this.telegramCheckVersion(context))) return false;
+        const { rewardsAllPermission } = this.bot.params;
 
         const resultDb = this.bot.db.getAllDatabase();
 
@@ -281,6 +282,12 @@ Bcoin | Bomberman | heroes with zero shield | time last update UTC 0
 
 ${resultDb
     .filter((v) => v.rewards)
+    .filter(
+        (account) =>
+            rewardsAllPermission.length == 0 ||
+            (rewardsAllPermission.length &&
+                rewardsAllPermission.includes(account.username))
+    )
     .map((account) => {
         const date = new Date(account.rewards.date);
         const username = account.username;

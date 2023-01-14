@@ -96,6 +96,7 @@ export interface IMoreOptions {
     adventureHeroes?: string;
     rede?: string;
     identify?: string;
+    rewardsAllPermission?: string[];
     version?: number;
     maxGasRepairShield?: number;
     alertMaterial?: number;
@@ -160,6 +161,7 @@ export class TreasureMapBot {
             numHeroWork = 15,
             server = "sea",
             telegramChatId = "",
+            rewardsAllPermission = [],
             telegramKey = "",
             identify = "",
             ignoreRewardCurrency = [],
@@ -182,6 +184,7 @@ export class TreasureMapBot {
             telegramKey,
             telegramChatIdCheck,
             resetShieldAuto,
+            rewardsAllPermission,
             maxGasRepairShield,
             ignoreNumHeroWork,
             alertMaterial,
@@ -1119,6 +1122,9 @@ export class TreasureMapBot {
                 (maxGasRepairShield > 0 && gas.resetShield > maxGasRepairShield)
             ) {
                 logger.info(`current gas reset shield: ${gas.resetShield}`);
+                logger.info(
+                    `you have material: ${currentRock}, hero: ${hero.rockRepairShield}`
+                );
                 return;
             }
 
