@@ -550,7 +550,7 @@ export class TreasureMapBot {
             const apercent = (a.energy / a.maxEnergy) * 100;
             const bpercent = (b.energy / b.maxEnergy) * 100;
 
-            return bpercent - apercent;
+            return bpercent - apercent || b.rarityIndex - a.rarityIndex;
         });
         for (const hero of heroes) {
             const percent = (hero.energy / hero.maxEnergy) * 100;
