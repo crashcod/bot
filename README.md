@@ -280,6 +280,8 @@ As variáveis são:
 | /withdraw          | Faz o claim caso tenha mais de 40 bombs                                                                           |
 | /wallet            | Mostra o saldo da sua carteira                                                                                    |
 | /reset_shield      | Restaura shield do hero                                                                                           |
+| /deactivate_hero   | Desativar um hero                                                                                                 |
+| /activate_hero     | Ativar um hero                                                                                                    |
 
 ## Sobre IGNORE_REWARD_CURRENCY
 

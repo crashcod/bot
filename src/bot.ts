@@ -140,6 +140,7 @@ export class TreasureMapBot {
     public notification: Notification;
     public db: Database;
     public isResettingShield = false;
+    public isActivateHero = false;
     public lastTransactionWeb3 = "";
 
     constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
@@ -977,11 +978,11 @@ export class TreasureMapBot {
         this.houses = payloads.map(parseSyncHousePayload).map(buildHouse);
         if (this.houses.length) {
             const isActive = this.home;
-            if (!isActive) {
-                const [house] = this.houses
-                    .sort((a, b) => b.slots - a.slots)
-                    .slice(0, 1);
+            const [house] = this.houses
+                .sort((a, b) => b.slots - a.slots)
+                .slice(0, 1);
 
+            if (!isActive || isActive.slots < house.slots) {
                 logger.info(`Activing house (${house.slots}) slots`);
                 await this.client.activeHouse(house.id);
 
@@ -1030,6 +1031,8 @@ export class TreasureMapBot {
     }
 
     async checkShields() {
+        if (!this.shouldRun) return;
+
         logger.info(`Cheking shields...`);
         const heroes = this.squad.heroes.filter(
             (hero) =>
@@ -1058,7 +1061,7 @@ export class TreasureMapBot {
             // await sleep(3000);
             // await this.client.getActiveHeroes();
             // await sleep(3000);
-            this.isFarming = true;
+            this.setIsFarmTrue();
         }
     }
 
@@ -1123,6 +1126,16 @@ export class TreasureMapBot {
         return true;
     }
 
+    async syncBomberman() {
+        const heroesParse = await this.client.syncBomberman();
+        return heroesParse.map(parseGetActiveBomberPayload).map(buildHero);
+    }
+
+    setIsFarmTrue() {
+        if (!this.isResettingShield && !this.isActivateHero) {
+            this.isFarming = true;
+        }
+    }
     async resetShield(hero: Hero) {
         try {
             const { maxGasRepairShield, alertMaterial } = this.params;
@@ -1132,6 +1145,7 @@ export class TreasureMapBot {
                 this.isResettingShield ||
                 this.loginParams.type == "user" ||
                 this.loginParams.rede == "BSC" ||
+                !this.shouldRun ||
                 !lastTransactionWeb3
             ) {
                 return false;
@@ -1176,18 +1190,11 @@ export class TreasureMapBot {
 
             this.db.set(`lastResetShield/${hero.id}`, Date.now());
 
-            const heroesParse = await this.client.syncBomberman();
-            const heroes = heroesParse
-                .map(parseGetActiveBomberPayload)
-                .map(buildHero);
+            const heroes = await this.syncBomberman();
             const heroUpdated = heroes.find((h) => h.id == hero.id);
-            console.log("hero id", hero.id);
-            console.log("heroUpdated", heroUpdated);
             if (heroUpdated) {
                 this.squad.updateHeroShield(heroUpdated);
             }
-
-            console.log(this.squad.heroes);
 
             await this.telegram.sendMessageChat(
                 `Hero ${hero.id} shield has been repaired\n\nYou have ${currentRock} of material`

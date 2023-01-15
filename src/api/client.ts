@@ -82,6 +82,7 @@ import {
     resolveUniquePromise,
 } from "./promise";
 import {
+    makeActiveBomber,
     makeActiveHouseRequest,
     makeApproveClaim,
     makeApproveConfirmClaimRewardSuccess,
@@ -128,6 +129,7 @@ type EventHandlerMap = {
     connectionLost: () => void;
     login: () => void;
     approveClaim: (params: IApproveClaimPayload) => void;
+    activeBomber: () => void;
     confirmClaimRewardSuccess: (
         params: ISuccessClaimRewardSuccessPayload
     ) => void;
@@ -173,6 +175,7 @@ type IClientController = {
     disconnect: IUniqueRequestController<void>;
     login: IUniqueRequestController<void>;
     approveClaim: IUniqueRequestController<IApproveClaimPayload>;
+    activeBomber: IUniqueRequestController<void>;
     confirmClaimRewardSuccess: IUniqueRequestController<ISuccessClaimRewardSuccessPayload>;
     getHeroUpgradePower: IUniqueRequestController<void>;
     logout: IUniqueRequestController<void>;
@@ -426,6 +429,18 @@ export class Client {
             () =>
                 this.sfs.send(
                     makeApproveClaim(this.walletId, this.nextId(), blockReward)
+                ),
+            timeout || this.timeout
+        );
+    }
+    async activeBomber(hero: Hero, active: number, timeout = 0) {
+        this.ensureLoggedIn();
+
+        return await makeUniquePromise(
+            this.controller.activeBomber,
+            () =>
+                this.sfs.send(
+                    makeActiveBomber(this.walletId, this.nextId(), hero, active)
                 ),
             timeout || this.timeout
         );
@@ -1007,6 +1022,7 @@ export class Client {
             connectionLost: [],
             login: [],
             approveClaim: [],
+            activeBomber: [],
             confirmClaimRewardSuccess: [],
             loginError: [],
             logout: [],
@@ -1045,6 +1061,9 @@ export class Client {
                 current: undefined,
             },
             approveClaim: {
+                current: undefined,
+            },
+            activeBomber: {
                 current: undefined,
             },
             confirmClaimRewardSuccess: {
@@ -1610,6 +1629,10 @@ export class Client {
         resolveUniquePromise(this.controller.activeHouse, undefined);
         this.callHandler(this.handlers.activeHouse);
     }
+    private handleActiveBomber() {
+        resolveUniquePromise(this.controller.activeBomber, undefined);
+        this.callHandler(this.handlers.activeBomber);
+    }
 
     private handleEnterDoor(params: SFSObject) {
         const result = {
@@ -1803,6 +1826,8 @@ export class Client {
                 return this.handleSyncHouse(response.params);
             case "ACTIVE_HOUSE":
                 return this.handleActiveHouse();
+            case "ACTIVE_BOMBER":
+                return this.handleActiveBomber();
 
             case "GET_ACTIVE_BOMBER":
                 return this.handleGetActiveHeroes(response.params);

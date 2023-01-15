@@ -94,6 +94,20 @@ export function makeApproveClaim(
     data.putInt("block_reward_type", blockReward);
     return makeGameMessage(wallet, "APPROVE_CLAIM", messageId, data);
 }
+export function makeActiveBomber(
+    wallet: string,
+    messageId: number,
+    hero: Hero,
+    active: number
+) {
+    const data = new SFSObject();
+    data.putLong("id", hero.id);
+    data.putInt("active", active);
+    data.putInt("account_type", 0);
+    data.putInt("hero_type", hero.heroType);
+    return makeGameMessage(wallet, "ACTIVE_BOMBER", messageId, data);
+}
+
 export function makeApproveConfirmClaimRewardSuccess(
     wallet: string,
     messageId: number,

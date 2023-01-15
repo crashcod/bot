@@ -15,6 +15,7 @@ export type EGameAction =
     | "PING_PONG"
     | "SYNC_BOMBERMAN"
     | "SYNC_HOUSE"
+    | "ACTIVE_BOMBER"
     | "ACTIVE_HOUSE"
     | "START_PVE"
     | "STOP_PVE"

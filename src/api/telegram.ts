@@ -6,7 +6,13 @@ import { formatDate, getChatId, sleep } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
-import { SCENE_RESET_SHIELD } from "../scenes/list";
+import { sceneActivateHero } from "../scenes/activate-hero";
+import { sceneDeactivateHero } from "../scenes/deactivate-hero";
+import {
+    SCENE_ACTIVATE_HERO,
+    SCENE_DEACTIVATE_HERO,
+    SCENE_RESET_SHIELD,
+} from "../scenes/list";
 import { sceneResetShield } from "../scenes/reset-shield";
 
 export class Telegram {
@@ -24,6 +30,8 @@ export class Telegram {
 
             const stage: any = new Scenes.Stage<Scenes.WizardContext>([
                 sceneResetShield,
+                sceneDeactivateHero,
+                sceneActivateHero,
             ]);
             this.telegraf.use(session());
             this.telegraf.use(stage.middleware());
@@ -75,6 +83,16 @@ export class Telegram {
             this.telegraf?.command("reset_shield", (ctx: any) =>
                 this.checkChatId(ctx, () => ctx.scene.enter(SCENE_RESET_SHIELD))
             );
+            this.telegraf?.command("deactivate_hero", (ctx: any) =>
+                this.checkChatId(ctx, () =>
+                    ctx.scene.enter(SCENE_DEACTIVATE_HERO)
+                )
+            );
+            this.telegraf?.command("activate_hero", (ctx: any) =>
+                this.checkChatId(ctx, () =>
+                    ctx.scene.enter(SCENE_ACTIVATE_HERO)
+                )
+            );
 
             const commands = [
                 { command: "exit", description: "exit" },
@@ -95,6 +113,8 @@ export class Telegram {
                 { command: "withdraw", description: "withdraw" },
                 { command: "wallet", description: "wallet" },
                 { command: "reset_shield", description: "reset_shield" },
+                { command: "deactivate_hero", description: "deactivate_hero" },
+                { command: "activate_hero", description: "activate_hero" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -568,7 +588,42 @@ ${resultDb
 
         context.replyWithHTML(html);
     }
-    async telegramResetShield(context: any, heroId: number) {
+
+    async telegramDeactivateHero(context: Context, hero: Hero) {
+        this.bot.isFarming = false;
+        await context.replyWithHTML(`Deactivating hero ${hero.id}`);
+
+        if (this.bot.isHeroFarming) {
+            logger.info(`Waiting for the heroes to finish farming`);
+            await context.replyWithHTML(
+                `Waiting for the heroes to finish farming`
+            );
+        }
+        await this.bot.awaitHeroFarm();
+
+        await this.bot.client.activeBomber(hero, 0);
+        await this.bot.client.getActiveHeroes();
+        await context.replyWithHTML(`Deactivated hero ${hero.id}`);
+        this.bot.setIsFarmTrue();
+    }
+    async telegramActivateHero(context: Context, hero: Hero) {
+        this.bot.isFarming = false;
+        await context.replyWithHTML(`Activating hero ${hero.id}`);
+
+        if (this.bot.isHeroFarming) {
+            logger.info(`Waiting for the heroes to finish farming`);
+            await context.replyWithHTML(
+                `Waiting for the heroes to finish farming`
+            );
+        }
+        await this.bot.awaitHeroFarm();
+
+        await this.bot.client.activeBomber(hero, 1);
+        await this.bot.client.getActiveHeroes();
+        await context.replyWithHTML(`Activated hero ${hero.id}`);
+        this.bot.setIsFarmTrue();
+    }
+    async telegramResetShield(context: Context, heroId: number) {
         try {
             const { maxGasRepairShield } = this.bot.params;
 
@@ -633,7 +688,7 @@ ${resultDb
             // await sleep(3000);
             // await this.bot.client.getActiveHeroes();
             // await sleep(3000);
-            this.bot.isFarming = true;
+            this.bot.setIsFarmTrue();
         } catch (e: any) {
             context.replyWithHTML(e.message);
         }

@@ -241,14 +241,15 @@ export const retryWeb3 = async <T = unknown>(
 export const sendMessageWithButtonsTelegram = async (
     ctx: any,
     text: string,
-    buttons: any[]
+    buttons: any[],
+    columns = 3
 ) => {
     const chunkSize = 100;
     for (let i = 0; i < buttons.length; i += chunkSize) {
         const chunk = buttons.slice(i, i + chunkSize);
         await ctx.replyWithMarkdown(
             text,
-            Markup.inlineKeyboard(chunk, { columns: 3 })
+            Markup.inlineKeyboard(chunk, { columns })
         );
     }
 };
