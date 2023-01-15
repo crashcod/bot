@@ -1665,6 +1665,8 @@ export class Client {
                     this.controller.getActiveHeroes,
                     error
                 );
+            case "ACTIVE_BOMBER":
+                return rejectUniquePromise(this.controller.activeBomber, error);
             case "APPROVE_CLAIM":
                 return rejectUniquePromise(this.controller.approveClaim, error);
 
