@@ -1177,7 +1177,7 @@ export class TreasureMapBot {
             this.db.set(`lastResetShield/${hero.id}`, Date.now());
 
             const heroesParse = await this.client.syncBomberman();
-            const heroes = heroesParse.map(h => h.)
+            const heroes = heroesParse
                 .map(parseGetActiveBomberPayload)
                 .map(buildHero);
             const heroUpdated = heroes.find((h) => h.id == hero.id);
