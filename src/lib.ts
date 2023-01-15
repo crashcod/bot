@@ -11,6 +11,7 @@ import { TreasureMapBot } from "./bot";
 import { format } from "date-fns";
 import got from "got";
 import { Markup } from "telegraf";
+import { Hero } from "./model";
 
 export function identity(value: string) {
     return value;
@@ -253,3 +254,8 @@ export const sendMessageWithButtonsTelegram = async (
         );
     }
 };
+
+export const sortByRarityDesc = (heroes: Hero[]) =>
+    heroes.sort((a, b) => b.rarityIndex - a.rarityIndex);
+export const sortByEnergyAsc = (heroes: Hero[]) =>
+    heroes.sort((a, b) => a.energy - b.energy);

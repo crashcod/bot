@@ -301,9 +301,12 @@ export class TreasureMap {
                 return r;
             }, Object.create(null));
 
-        return Object.keys(blocks).map(
-            (type) => `${type}: ${blocks[type].length}`
-        );
+        return Object.keys(blocks).map((type, index) => {
+            const isLast = index == Object.keys(blocks).length - 1;
+            const caracter = !isLast ? "┣" : "┗";
+
+            return `${caracter} ${type}: ${blocks[type].length}`;
+        });
     }
 }
 

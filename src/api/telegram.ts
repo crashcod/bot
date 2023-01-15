@@ -2,7 +2,7 @@ import { differenceInMinutes } from "date-fns";
 import { Context, Scenes, session, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
 import { BLOCK_REWARD_TYPE_BCOIN_POLYGON } from "../constants";
-import { formatDate, getChatId, sleep } from "../lib";
+import { formatDate, getChatId, sleep, sortByEnergyAsc } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
@@ -227,29 +227,40 @@ export class Telegram {
     }
 
     public async getStatsAccount() {
-        const formatMsg = (hero: Hero) => {
+        const formatMsg = (hero: Hero, index: number, total: number) => {
+            const isLast = index == total - 1;
             const isSelectedAtHome = this.bot.houseHeroes.includes(
                 hero.id.toString()
             );
             const shield = hero.shields?.length
                 ? `${hero.shields[0].current}/${hero.shields[0].total}`
                 : "empty shield";
+
+            const caracter = !isLast ? "┣" : "┗";
             if (isSelectedAtHome) {
-                return `<b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
+                return `${caracter} <b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
             } else {
-                return `${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+                return `${caracter} ${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
             }
         };
 
         // const heroesAdventure = await this.getHeroesAdventure();
 
-        const workingHeroesLife = this.bot.workingSelection
-            .map(formatMsg)
+        const workingHeroesLife = sortByEnergyAsc(this.bot.workingSelection)
+            .map((hero, index) =>
+                formatMsg(hero, index, this.bot.workingSelection.length)
+            )
             .join("\n");
-        const notWorkingHeroesLife = this.bot.sleepingSelection
-            .map(formatMsg)
+        const notWorkingHeroesLife = sortByEnergyAsc(this.bot.sleepingSelection)
+            .map((hero, index) =>
+                formatMsg(hero, index, this.bot.sleepingSelection.length)
+            )
             .join("\n");
-        const homeHeroesLife = this.bot.homeSelection.map(formatMsg).join("\n");
+        const homeHeroesLife = sortByEnergyAsc(this.bot.homeSelection)
+            .map((hero, index) =>
+                formatMsg(hero, index, this.bot.homeSelection.length)
+            )
+            .join("\n");
         let msgEnemies = "\n";
 
         if (this.bot.playing === "Adventure") {
@@ -262,6 +273,8 @@ export class Telegram {
         // const heroesAdventureSelected = this.adventureHeroes.join(", ");
         const houseHeroesIds = this.bot.houseHeroes.join(", ");
 
+        const blocks = this.bot.map.formatMsgBlock().join("\n");
+
         const message =
             `Account: ${this.bot.getIdentify()}\n\n` +
             `Playing mode: ${this.bot.getStatusPlaying()}\n\n` +
@@ -271,14 +284,11 @@ export class Telegram {
             `Network: ${this.bot.client.loginParams.rede}\n` +
             `Treasure/Amazon:\n` +
             `${this.bot.map.toString()}\n` +
-            `Heroes selected for home(${this.bot.houseHeroes.length}): ${houseHeroesIds}\n` +
-            `Remaining chest (Amazon): \n${this.bot.map
-                .formatMsgBlock()
-                .join("\n")}\n\n` +
-            `INFO: LIFE HERO | SHIELD HERO\n` +
-            `Working heroes (${this.bot.workingSelection.length}): \n${workingHeroesLife}\n\n` +
-            `Resting heroes (${this.bot.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
-            `Resting heroes at home (${this.bot.homeSelection.length}): \n${homeHeroesLife}`;
+            `Heroes selected for home(${this.bot.houseHeroes.length}): ${houseHeroesIds}\n\n` +
+            `📦 Remaining chest: \n${blocks}\n\n` +
+            `👷‍♂️ Working heroes (${this.bot.workingSelection.length}): \n${workingHeroesLife}\n\n` +
+            `🛌 Resting heroes (${this.bot.sleepingSelection.length}): \n${notWorkingHeroesLife}\n\n` +
+            `🏘 Resting heroes at home (${this.bot.homeSelection.length}): \n${homeHeroesLife}`;
 
         return message;
     }
