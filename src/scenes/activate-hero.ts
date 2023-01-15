@@ -45,9 +45,14 @@ export const sceneActivateHero: any = new Scenes.WizardScene(
 
                 return ctx.scene.leave();
             }
+            const activeHerosIds = bot.squad.heroes.map((h) => h.id);
+            if (activeHerosIds.length == 15) {
+                ctx.replyWithHTML(`You already have 15 active heroes`);
+                return ctx.scene.leave();
+            }
+
             await ctx.replyWithHTML("Looking for heroes list");
 
-            const activeHerosIds = bot.squad.heroes.map((h) => h.id);
             const heroes = (await bot.syncBomberman())
                 .filter((h) => !activeHerosIds.includes(h.id))
                 .sort((a, b) => b.rarityIndex - a.rarityIndex);
