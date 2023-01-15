@@ -455,6 +455,18 @@ export class TreasureMapBot {
         return {
             claim: 107115 * gasMatic * 0.000000001,
             resetShield: 61983 * gasMatic * 0.000000001,
+            mint1:
+                376802 * gasMatic * 0.000000001 +
+                219016 * gasMatic * 0.000000001,
+            mint5:
+                578116 * gasMatic * 0.000000001 +
+                181996 * gasMatic * 0.000000001,
+            mint10:
+                1111150 * gasMatic * 0.000000001 +
+                181996 * gasMatic * 0.000000001,
+            mint15:
+                1584771 * gasMatic * 0.000000001 +
+                181996 * gasMatic * 0.000000001,
         };
     }
     async getWalletBalance() {

@@ -567,8 +567,12 @@ ${resultDb
         const html =
             `Account: ${this.bot.getIdentify()}\n\n` +
             `The values below are an average of how much it would cost right now\n\n` +
-            `Claim: ${result.claim}\n` +
-            `Reset Shield: ${result.resetShield}`;
+            `Claim: ${result.claim.toFixed(4)}\n` +
+            `Reset Shield: ${result.resetShield.toFixed(4)}\n` +
+            `Mint 1 hero: ${result.mint1.toFixed(4)}\n` +
+            `Mint 5 heroes: ${result.mint5.toFixed(4)}\n` +
+            `Mint 10 heroes: ${result.mint10.toFixed(4)}\n` +
+            `Mint 15 heroes: ${result.mint15.toFixed(4)}`;
 
         context.replyWithHTML(html);
     }
