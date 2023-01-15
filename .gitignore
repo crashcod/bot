@@ -9,3 +9,4 @@ docker-compose-local.yml
 src/ecosystem.config.js
 database*
 yarn.lock
+src/reverse.ts

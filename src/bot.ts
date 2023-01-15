@@ -1042,14 +1042,22 @@ export class TreasureMapBot {
         if (!this.params.resetShieldAuto) return false;
 
         for (const hero of heroes) {
-            await this.resetShield(hero);
-            shieldRepaired = true;
+            const lastReset = await this.db.get(`lastResetShield/${hero.id}`);
+
+            if (
+                lastReset === null ||
+                Date.now() > lastReset + 6 + 60 * 60 * 1000 //6hrs
+            ) {
+                await this.resetShield(hero);
+                shieldRepaired = true;
+            }
         }
 
         if (shieldRepaired) {
-            await this.client.syncBomberman();
-            await sleep(5000);
-            await this.client.getActiveHeroes();
+            // await this.client.syncBomberman();
+            // await sleep(3000);
+            // await this.client.getActiveHeroes();
+            // await sleep(3000);
             this.isFarming = true;
         }
     }
@@ -1165,6 +1173,21 @@ export class TreasureMapBot {
             this.lastTransactionWeb3 = transaction.transactionHash;
             await sleep(1000);
             currentRock = await this.client.web3GetRock();
+
+            this.db.set(`lastResetShield/${hero.id}`, Date.now());
+
+            const heroesParse = await this.client.syncBomberman();
+            const heroes = heroesParse
+                .map(parseGetActiveBomberPayload)
+                .map(buildHero);
+            const heroUpdated = heroes.find((h) => h.id == hero.id);
+            console.log("hero id", hero.id);
+            console.log("heroUpdated", heroUpdated);
+            if (heroUpdated) {
+                this.squad.updateHeroShield(heroUpdated);
+            }
+
+            console.log(this.squad.heroes);
 
             await this.telegram.sendMessageChat(
                 `Hero ${hero.id} shield has been repaired\n\nYou have ${currentRock} of material`

@@ -629,9 +629,10 @@ ${resultDb
             }
 
             await this.bot.resetShield(hero);
-            await this.bot.client.syncBomberman();
-            await sleep(5000);
-            await this.bot.client.getActiveHeroes();
+            // await this.bot.client.syncBomberman();
+            // await sleep(3000);
+            // await this.bot.client.getActiveHeroes();
+            // await sleep(3000);
             this.bot.isFarming = true;
         } catch (e: any) {
             context.replyWithHTML(e.message);

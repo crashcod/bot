@@ -258,6 +258,9 @@ export class Hero {
     updateEnergy(energy: number) {
         this.params.energy = energy;
     }
+    updateShields(shield?: IShield[]) {
+        this.params.shields = shield;
+    }
 
     setState(state: EHeroState) {
         this.params.state = state;

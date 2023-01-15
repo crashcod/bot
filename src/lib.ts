@@ -229,7 +229,7 @@ export const retryWeb3 = async <T = unknown>(
     try {
         return await promise;
     } catch (e: any) {
-        if (e.message.indexOf("Internal error") !== -1 && retryNum <= 3) {
+        if (e.message.indexOf("Internal error") !== -1 && retryNum <= 5) {
             retryNum++;
             return await retryWeb3(promise, retryNum);
         }
