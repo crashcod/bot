@@ -579,10 +579,6 @@ export class TreasureMapBot {
             ) {
                 continue;
             }
-            if (hero.id == 956407) {
-                await this.client.goWork(hero);
-                this.selection.push(hero);
-            }
 
             if (
                 this.workingSelection.length <= this.params.numHeroWork - 1 ||
