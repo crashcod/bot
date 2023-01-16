@@ -107,12 +107,12 @@ export type IGetActiveBomberPayload = {
 };
 
 export function parseGetActiveBomberPayload(
-    payload: IGetActiveBomberPayload | ISyncBombermanPayload
+    payload: ISyncBombermanPayload
 ): IHeroParams {
     return {
         id: payload["id"],
         state: parseHeroState(payload["stage"]),
-        energy: payload["energy"],
+        energy: payload["energy"] + payload["restore_hp"],
         shields: payload?.shields,
         heroType: payload.heroType,
         active: Boolean(payload.active),

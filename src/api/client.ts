@@ -1250,7 +1250,7 @@ export class Client {
                     stage: payload.getInt("stage"),
                     id: payload.getLong("id"),
                     gen_id: payload.getUtfString("gen_id"),
-                    energy: payload.getInt("restore_hp"),
+                    energy: payload.getInt("energy"),
                     active: payload.getInt("active"),
                     heroType: dataObj.getInt("hero_type"),
                     restore_hp: payload.getInt("restore_hp"),

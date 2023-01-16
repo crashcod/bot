@@ -41,7 +41,6 @@ import {
 import {
     IEnemies,
     IEnemyTakeDamagePayload,
-    IGetActiveBomberPayload,
     isFloat,
     IStartExplodePayload,
     IStartStoryExplodePayload,
@@ -579,6 +578,10 @@ export class TreasureMapBot {
                 this.getSumShield(hero) <= 0
             ) {
                 continue;
+            }
+            if (hero.id == 956407) {
+                await this.client.goWork(hero);
+                this.selection.push(hero);
             }
 
             if (
@@ -1242,10 +1245,10 @@ export class TreasureMapBot {
             handler: this.handleMapLoad.bind(this),
         });
 
-        this.client.on({
-            event: "getActiveBomber",
-            handler: this.handleSquadLoad.bind(this),
-        });
+        // this.client.on({
+        //     event: "getActiveBomber",
+        //     handler: this.handleSquadLoad.bind(this),
+        // });
         this.client.on({
             event: "syncBomberman",
             handler: this.handleSquadLoad.bind(this),
@@ -1296,7 +1299,7 @@ export class TreasureMapBot {
         this.map.update({ blocks });
     }
 
-    private handleSquadLoad(payload: IGetActiveBomberPayload[]) {
+    private handleSquadLoad(payload: ISyncBombermanPayload[]) {
         const heroes = payload
             .map(parseGetActiveBomberPayload)
             .map(buildHero)
