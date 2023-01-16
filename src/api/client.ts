@@ -1236,6 +1236,8 @@ export class Client {
                 const dataShields = payload.getSFSArray("shields");
                 const shields = Array(dataShields.size());
 
+                const dataObj = payload.getSFSObject("data");
+
                 return {
                     shields: shields.fill(null).map((_, i) => {
                         const shield = dataShields.getSFSObject(i);
@@ -1248,9 +1250,11 @@ export class Client {
                     stage: payload.getInt("stage"),
                     id: payload.getLong("id"),
                     gen_id: payload.getUtfString("gen_id"),
-                    energy: payload.getInt("energy"),
+                    energy:
+                        payload.getInt("energy") ||
+                        payload.getInt("restore_hp"),
                     active: payload.getInt("active"),
-                    heroType: payload.getInt("hero_type"),
+                    heroType: dataObj.getInt("hero_type"),
                     restore_hp: payload.getInt("restore_hp"),
                 };
             });
