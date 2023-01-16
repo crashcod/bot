@@ -156,6 +156,14 @@ export class Telegram {
         }
     }
     checkChatId(context: Context, fn: any) {
+        const now = Date.now() / 1000;
+        const timedelta = now - (context.message?.date || 0);
+
+        if (timedelta >= 30) {
+            logger.info(`Ignoring message ${context.message?.message_id}`);
+            return;
+        }
+
         if (this.bot.params.telegramChatId) {
             const chatId = getChatId(context);
             if (
