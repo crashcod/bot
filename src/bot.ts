@@ -559,7 +559,7 @@ export class TreasureMapBot {
 
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
-        await this.client.getActiveHeroes();
+        await this.client.syncBomberman();
         const { ignoreNumHeroWork } = this.params;
 
         this.selection = this.squad.byState("Work");
@@ -1078,6 +1078,7 @@ export class TreasureMapBot {
     }
 
     async loop() {
+        logger.info("Starting bot...");
         this.shouldRun = true;
         this.isFarming = true;
         connectWebSocketAnalytics(this).catch((e) => {
@@ -1245,6 +1246,10 @@ export class TreasureMapBot {
             event: "getActiveBomber",
             handler: this.handleSquadLoad.bind(this),
         });
+        this.client.on({
+            event: "syncBomberman",
+            handler: this.handleSquadLoad.bind(this),
+        });
 
         this.client.on({
             event: "goSleep",
@@ -1292,7 +1297,11 @@ export class TreasureMapBot {
     }
 
     private handleSquadLoad(payload: IGetActiveBomberPayload[]) {
-        const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
+        const heroes = payload
+            .map(parseGetActiveBomberPayload)
+            .map(buildHero)
+            .filter((hero) => hero.active);
+        console.log(heroes);
         heroes.map(async (hero) => {
             if (
                 this.params.modeAmazon &&

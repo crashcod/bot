@@ -21,6 +21,12 @@ export class Telegram {
     constructor(bot: TreasureMapBot) {
         this.bot = bot;
     }
+    subItem = "┃  ┣";
+    subLastItem = "      ┣";
+    subItemLast = "┃  ┗";
+    subLastItemLast = "      ┗";
+    item = "┣";
+    lastItem = "┗";
 
     async init() {
         try {
@@ -226,6 +232,11 @@ export class Telegram {
         await context.replyWithHTML(message);
     }
 
+    getColor({ rarityIndex }: Hero) {
+        const types = ["⚪", "🟢", "🔵", "🟣", "🟡", "🔴"];
+        return types[rarityIndex];
+    }
+
     public async getStatsAccount() {
         const formatMsg = (hero: Hero, index: number, total: number) => {
             const isLast = index == total - 1;
@@ -236,11 +247,17 @@ export class Telegram {
                 ? `${hero.shields[0].current}/${hero.shields[0].total}`
                 : "empty shield";
 
-            const caracter = !isLast ? "┣" : "┗";
+            const caracter = !isLast ? this.item : this.lastItem;
             if (isSelectedAtHome) {
-                return `${caracter} <b>${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}</b>`;
+                return `${caracter} ${this.getColor(hero)} <b>${
+                    hero.raritySimbol
+                } [${hero.id}] ${hero.energy}/${
+                    hero.maxEnergy
+                } | ${shield}</b>`;
             } else {
-                return `${caracter} ${hero.rarity} [${hero.id}]: ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+                return `${caracter} ${this.getColor(hero)} ${hero.rarity} [${
+                    hero.id
+                }] ${hero.energy}/${hero.maxEnergy} | ${shield}`;
             }
         };
 
@@ -318,7 +335,7 @@ ${resultDb
             (rewardsAllPermission.length &&
                 rewardsAllPermission.includes(account.username))
     )
-    .map((account) => {
+    .map((account, index: number) => {
         const date = new Date(account.rewards.date);
         const username = account.username;
         const zeroShield = this.getTotalHeroZeroShield(account);
@@ -341,7 +358,18 @@ ${resultDb
             .toString()
             .padStart(2, "0")}`;
 
-        return `<b>${username}</b>:  ${bcoin} | ${bomberman} | ${zeroShield} | ${dateStr}`;
+        const lastItem = resultDb.length - 1 == index;
+        const caracter = lastItem ? this.lastItem : this.item;
+        const subItem = lastItem ? this.subLastItem : this.subItem;
+        const subItemLast = lastItem ? this.subLastItemLast : this.subItemLast;
+
+        return (
+            `${caracter} <b>${username}</b>\n` +
+            `${subItem} Bomb: ${bcoin}\n` +
+            `${subItem} Bomberman: ${bomberman}\n` +
+            `${subItem} Zero Shield: ${zeroShield}\n` +
+            `${subItemLast} Date: ${dateStr}`
+        );
     })
     .join("\n")}`;
 
@@ -457,16 +485,21 @@ ${resultDb
         }
 
         const material = await this.bot.client.web3GetRock();
+        const result = this.bot.squad.heroes;
 
-        const formatMsg = (hero: Hero) => {
+        const formatMsg = (hero: Hero, index: number) => {
             const shield = hero.shields?.length
                 ? `${hero.shields[0].current}/${hero.shields[0].total}`
                 : "empty shield";
-            return `${hero.rarity} [${hero.id}]: ${shield}`;
+            const isLast = index == result.length - 1;
+            const caracter = isLast ? this.lastItem : this.item;
+
+            return `${caracter} ${this.getColor(hero)} ${hero.raritySimbol} [${
+                hero.id
+            }]: ${shield}`;
         };
         let message =
             "Account not connected, wait the bot will try to connect again";
-        const result = this.bot.squad.heroes;
 
         if (result && result.length) {
             const heroes = result
@@ -481,7 +514,7 @@ ${resultDb
 
             message =
                 `Account: ${this.bot.getIdentify()}\n\n` +
-                `Shield heroes (${result.length}): \n\n${heroes}`;
+                `🛡Shield heroes (${result.length}): \n${heroes}`;
 
             if (material !== null) {
                 message += `\n\nMaterial:${material}`;
@@ -616,7 +649,7 @@ ${resultDb
         await this.bot.awaitHeroFarm();
 
         await this.bot.client.activeBomber(hero, 0);
-        await this.bot.client.getActiveHeroes();
+        await this.bot.client.syncBomberman();
         await context.replyWithHTML(`Deactivated hero ${hero.id}`);
         this.bot.setIsFarmTrue();
     }
@@ -633,7 +666,7 @@ ${resultDb
         await this.bot.awaitHeroFarm();
 
         await this.bot.client.activeBomber(hero, 1);
-        await this.bot.client.getActiveHeroes();
+        await this.bot.client.syncBomberman();
         await context.replyWithHTML(`Activated hero ${hero.id}`);
         this.bot.setIsFarmTrue();
     }

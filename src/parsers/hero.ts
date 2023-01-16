@@ -11,6 +11,8 @@ import {
     HERO_RARITY_ARRAY,
     HERO_SKILL_MAP,
     HERO_SKIN_MAP,
+    HERO_RARITY_SIMBOL,
+    EHeroRaritySimbol,
 } from "../model";
 
 function parseHeroState(stage: number): EHeroState {
@@ -19,6 +21,9 @@ function parseHeroState(stage: number): EHeroState {
 
 export function parseHeroRarity(rarity: number): EHeroRarity {
     return HERO_RARITY_ARRAY[rarity] || "Unknown";
+}
+export function parseHeroRaritySimbol(rarity: number): EHeroRaritySimbol {
+    return HERO_RARITY_SIMBOL[rarity] || "Unknown";
 }
 
 function parseHeroSkin(skin: number): EHeroSkin {
@@ -67,6 +72,9 @@ export function parseHeroStats(genId: string): IHeroStats {
     return {
         index: parseRevBin(binRevGenId, GI_INDEX, GI_RARITY),
         rarity: parseHeroRarity(parseRevBin(binRevGenId, GI_RARITY, GI_LEVEL)),
+        raritySimbol: parseHeroRaritySimbol(
+            parseRevBin(binRevGenId, GI_RARITY, GI_LEVEL)
+        ),
         rarityIndex: parseRevBin(binRevGenId, GI_RARITY, GI_LEVEL),
         level: parseRevBin(binRevGenId, GI_LEVEL, GI_VARIANT),
         variant: parseRevBin(binRevGenId, GI_VARIANT, GI_SKIN),

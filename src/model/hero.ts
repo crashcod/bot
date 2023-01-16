@@ -12,8 +12,10 @@ export const HERO_RARITY_ARRAY = [
     "Legend",
     "SuperLegend",
 ] as const;
+export const HERO_RARITY_SIMBOL = ["C", "R", "SR", "E", "L", "SL"] as const;
 
 export type EHeroRarity = typeof HERO_RARITY_ARRAY[number] | "Unknown";
+export type EHeroRaritySimbol = typeof HERO_RARITY_SIMBOL[number] | "Unknown";
 
 export const HERO_SKILL_MAP = {
     1: "ADOnChestExplosion",
@@ -47,6 +49,7 @@ export type EHeroSkin =
 export type IHeroStats = {
     index: number;
     rarity: EHeroRarity;
+    raritySimbol: EHeroRaritySimbol;
     rarityIndex: number;
     skin: EHeroSkin;
     variant: number;
@@ -155,6 +158,9 @@ export class Hero {
 
     get rarityIndex() {
         return this.params.rarityIndex;
+    }
+    get raritySimbol() {
+        return this.params.raritySimbol;
     }
 
     get rarity() {

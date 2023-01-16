@@ -579,6 +579,7 @@ export class Client {
     }
 
     syncBomberman(timeout = 0) {
+        logger.info("Update list heroes...");
         this.ensureLoggedIn();
 
         return makeUniquePromise(
