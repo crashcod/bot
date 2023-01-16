@@ -103,6 +103,7 @@ export type IGetActiveBomberPayload = {
     gen_id: string;
     energy: number;
     heroType: number;
+    active: number;
 };
 
 export function parseGetActiveBomberPayload(
@@ -114,7 +115,7 @@ export function parseGetActiveBomberPayload(
         energy: payload["energy"],
         shields: payload?.shields,
         heroType: payload.heroType,
-        active: true,
+        active: Boolean(payload.active),
         ...parseHeroStats(payload["gen_id"]),
     };
 }

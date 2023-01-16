@@ -1301,7 +1301,7 @@ export class TreasureMapBot {
             .map(parseGetActiveBomberPayload)
             .map(buildHero)
             .filter((hero) => hero.active);
-        console.log(heroes);
+
         heroes.map(async (hero) => {
             if (
                 this.params.modeAmazon &&
