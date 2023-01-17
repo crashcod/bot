@@ -2,7 +2,13 @@ import { differenceInMinutes } from "date-fns";
 import { Context, Scenes, session, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
 import { BLOCK_REWARD_TYPE_BCOIN_POLYGON } from "../constants";
-import { formatDate, getChatId, sleep, sortByEnergyAsc } from "../lib";
+import {
+    formatDate,
+    getChatId,
+    sleep,
+    sortByEnergyAsc,
+    sortByRarityDesc,
+} from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
@@ -273,8 +279,8 @@ export class Telegram {
             }] Shield: ${shield}`;
         };
 
-        const active = this.bot.squad.activeHeroes;
-        const inactive = this.bot.squad.activeHeroes;
+        const active = sortByRarityDesc(this.bot.squad.activeHeroes);
+        const inactive = sortByRarityDesc(this.bot.squad.inactiveHeroes);
 
         const activeText = active
             .map((hero, index) => formatMsg(hero, index, active.length))
