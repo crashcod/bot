@@ -263,9 +263,9 @@ export class Telegram {
                     hero.maxEnergy
                 } | ${shield}</b>`;
             } else {
-                return `${caracter} ${this.getColor(hero)} ${hero.rarity} [${
-                    hero.id
-                }] ${hero.energy}/${hero.maxEnergy} | ${shield}`;
+                return `${caracter} ${this.getColor(hero)} ${
+                    hero.raritySimbol
+                } [${hero.id}] ${hero.energy}/${hero.maxEnergy} | ${shield}`;
             }
         };
 
