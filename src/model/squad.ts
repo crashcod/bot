@@ -26,6 +26,9 @@ export class Squad {
     get activeHeroes() {
         return this.heroes.filter((hero) => hero.active);
     }
+    get inactiveHeroes() {
+        return this.heroes.filter((hero) => !hero.active);
+    }
 
     get rarest() {
         return this.activeHeroes.sort(

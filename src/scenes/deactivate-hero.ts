@@ -31,10 +31,17 @@ export const sceneDeactivateHero: any = new Scenes.WizardScene(
     async (ctx) => nextStep(ctx),
     async (ctx) => {
         try {
+            if (!bot.shouldRun) {
+                await ctx.replyWithHTML(
+                    `Account: ${bot.getIdentify()}\n\nAccount not working`
+                );
+                return ctx.scene.leave();
+            }
+
             const mode = getValue(ctx);
             if (mode) {
                 const heroId = mode;
-                const hero = bot.squad.heroes.find((h) => h.id == heroId);
+                const hero = bot.squad.activeHeroes.find((h) => h.id == heroId);
                 if (!hero) {
                     ctx.replyWithHTML(`Hero not found: ${hero}`);
                     return ctx.scene.leave();
@@ -44,20 +51,25 @@ export const sceneDeactivateHero: any = new Scenes.WizardScene(
 
                 return ctx.scene.leave();
             }
-            const heroes = bot.squad.heroes.sort(
+            const heroes = bot.squad.activeHeroes.sort(
                 (a, b) => b.rarityIndex - a.rarityIndex
             );
 
             const text = heroes
-                .map((hero) => {
+                .map((hero, index: number) => {
+                    const isLast = index == heroes.length - 1;
                     const shield = hero.shields?.length
                         ? `${hero.shields[0].current}/${hero.shields[0].total}`
                         : "empty shield";
-
-                    return `${hero.id} [${hero.rarity}]: shield: ${shield}`;
+                    const caracter = !isLast
+                        ? bot.telegram.item
+                        : bot.telegram.lastItem;
+                    return `${caracter} ${bot.telegram.getColor(hero)} ${
+                        hero.raritySimbol
+                    } [${hero.id}]: shield: ${shield}`;
                 })
                 .join("\n");
-            await ctx.replyWithHTML(`Heroes: \n\n${text}`);
+            await ctx.replyWithHTML(`Heroes (${heroes.length}): \n${text}`);
 
             await sendMessageWithButtonsTelegram(
                 ctx,

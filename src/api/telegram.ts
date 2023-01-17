@@ -11,8 +11,10 @@ import { sceneDeactivateHero } from "../scenes/deactivate-hero";
 import {
     SCENE_ACTIVATE_HERO,
     SCENE_DEACTIVATE_HERO,
+    SCENE_PUT_HERO_WORK,
     SCENE_RESET_SHIELD,
 } from "../scenes/list";
+import { scenePutHeroWork } from "../scenes/put-hero-work";
 import { sceneResetShield } from "../scenes/reset-shield";
 
 export class Telegram {
@@ -38,6 +40,7 @@ export class Telegram {
                 sceneResetShield,
                 sceneDeactivateHero,
                 sceneActivateHero,
+                scenePutHeroWork,
             ]);
             this.telegraf.use(session());
             this.telegraf.use(stage.middleware());
@@ -99,6 +102,14 @@ export class Telegram {
                     ctx.scene.enter(SCENE_ACTIVATE_HERO)
                 )
             );
+            this.telegraf?.command("put_hero_work", (ctx: any) =>
+                this.checkChatId(ctx, () =>
+                    ctx.scene.enter(SCENE_PUT_HERO_WORK)
+                )
+            );
+            this.telegraf?.command("list_heroes", (ctx: any) =>
+                this.checkChatId(ctx, () => this.telegramListHeroes(ctx))
+            );
 
             const commands = [
                 { command: "exit", description: "exit" },
@@ -121,6 +132,8 @@ export class Telegram {
                 { command: "reset_shield", description: "reset_shield" },
                 { command: "deactivate_hero", description: "deactivate_hero" },
                 { command: "activate_hero", description: "activate_hero" },
+                { command: "list_heroes", description: "list_heroes" },
+                { command: "put_hero_work", description: "put_hero_work" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -243,6 +256,38 @@ export class Telegram {
     getColor({ rarityIndex }: Hero) {
         const types = ["⚪", "🟢", "🔵", "🟣", "🟡", "🔴"];
         return types[rarityIndex];
+    }
+
+    async telegramListHeroes(context: Context) {
+        const formatMsg = (hero: Hero, index: number, total: number) => {
+            const isLast = index == total - 1;
+
+            const shield = hero.shields?.length
+                ? `${hero.shields[0].current}/${hero.shields[0].total}`
+                : "empty shield";
+
+            const caracter = !isLast ? this.item : this.lastItem;
+
+            return `${caracter} ${this.getColor(hero)} ${hero.raritySimbol} [${
+                hero.id
+            }] Shield: ${shield}`;
+        };
+
+        const active = this.bot.squad.activeHeroes;
+        const inactive = this.bot.squad.activeHeroes;
+
+        const activeText = active
+            .map((hero, index) => formatMsg(hero, index, active.length))
+            .join("\n");
+        const inactiveText = inactive
+            .map((hero, index) => formatMsg(hero, index, inactive.length))
+            .join("\n");
+
+        return context.replyWithHTML(
+            `Total heroes: ${active.length + inactive.length}\n\n` +
+                `Active heroes (${active.length}):\n${activeText}\n\n` +
+                `Deactivated heroes (${inactive.length}):\n${inactiveText}`
+        );
     }
 
     public async getStatsAccount() {
@@ -493,7 +538,7 @@ ${resultDb
         }
 
         const material = await this.bot.client.web3GetRock();
-        const result = this.bot.squad.heroes;
+        const result = this.bot.squad.activeHeroes;
 
         const formatMsg = (hero: Hero, index: number) => {
             const shield = hero.shields?.length
@@ -682,7 +727,9 @@ ${resultDb
         try {
             const { maxGasRepairShield } = this.bot.params;
 
-            const hero = this.bot.squad.heroes.find((h) => h.id == heroId);
+            const hero = this.bot.squad.activeHeroes.find(
+                (h) => h.id == heroId
+            );
             if (!hero) return;
 
             if (!this.bot.client.isConnected) {

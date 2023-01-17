@@ -556,10 +556,16 @@ export class TreasureMapBot {
         }
     }
 
+    async toWork(hero: Hero) {
+        logger.info(`Sending hero ${hero.id} to work`);
+        await this.client.goWork(hero);
+        this.selection.push(hero);
+    }
+
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
         await this.client.syncBomberman();
-        const { ignoreNumHeroWork } = this.params;
+        const { ignoreNumHeroWork, numHeroWork } = this.params;
 
         this.selection = this.squad.byState("Work");
         const heroes = this.squad.notWorking.sort((a, b) => {
@@ -569,6 +575,7 @@ export class TreasureMapBot {
             return bpercent - apercent || b.rarityIndex - a.rarityIndex;
         });
         for (const hero of heroes) {
+            await sleep(500);
             const percent = (hero.energy / hero.maxEnergy) * 100;
             if (percent < this.minHeroEnergyPercentage) continue;
 
@@ -579,14 +586,11 @@ export class TreasureMapBot {
             ) {
                 continue;
             }
-
             if (
-                this.workingSelection.length <= this.params.numHeroWork - 1 ||
+                this.workingSelection.length <= numHeroWork - 1 ||
                 (ignoreNumHeroWork && percent >= 100)
             ) {
-                logger.info(`Sending hero ${hero.id} to work`);
-                await this.client.goWork(hero);
-                this.selection.push(hero);
+                this.toWork(hero);
             }
         }
 
@@ -1045,7 +1049,7 @@ export class TreasureMapBot {
         if (!this.shouldRun) return;
 
         logger.info(`Cheking shields...`);
-        const heroes = this.squad.heroes.filter(
+        const heroes = this.squad.activeHeroes.filter(
             (hero) =>
                 !hero.shields ||
                 hero.shields.length === 0 ||
@@ -1296,47 +1300,47 @@ export class TreasureMapBot {
     }
 
     private handleSquadLoad(payload: ISyncBombermanPayload[]) {
-        const heroes = payload
-            .map(parseGetActiveBomberPayload)
-            .map(buildHero)
-            .filter((hero) => hero.active);
+        const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
 
-        heroes.map(async (hero) => {
-            if (
-                this.params.modeAmazon &&
-                (!hero.shields ||
-                    hero.shields.length === 0 ||
-                    this.getSumShield(hero) <= this.alertShield)
-            ) {
-                const lastDate = this.notificationShieldHero.get(
-                    hero.id
-                )?.timestamp;
-                //verifica se faz mais que 24 horas da ultima notificação
+        heroes
+            .filter((h) => h.active)
+            .map(async (hero) => {
                 if (
-                    !lastDate ||
-                    (lastDate &&
-                        Math.abs(
-                            new Date(lastDate).getTime() - new Date().getTime()
-                        ) / 36e5) > 24
+                    this.params.modeAmazon &&
+                    (!hero.shields ||
+                        hero.shields.length === 0 ||
+                        this.getSumShield(hero) <= this.alertShield)
                 ) {
-                    await this.alertShieldHero(hero);
-                    this.notificationShieldHero.set(hero.id, {
-                        timestamp: new Date().getTime(),
-                    });
+                    const lastDate = this.notificationShieldHero.get(
+                        hero.id
+                    )?.timestamp;
+                    //verifica se faz mais que 24 horas da ultima notificação
+                    if (
+                        !lastDate ||
+                        (lastDate &&
+                            Math.abs(
+                                new Date(lastDate).getTime() -
+                                    new Date().getTime()
+                            ) / 36e5) > 24
+                    ) {
+                        await this.alertShieldHero(hero);
+                        this.notificationShieldHero.set(hero.id, {
+                            timestamp: new Date().getTime(),
+                        });
+                    }
+                    if (
+                        !hero.shields ||
+                        hero.shields.length === 0 ||
+                        this.getSumShield(hero) === 0
+                    ) {
+                        await this.alertShielZerodHero(hero);
+                    }
                 }
-                if (
-                    !hero.shields ||
-                    hero.shields.length === 0 ||
-                    this.getSumShield(hero) === 0
-                ) {
-                    await this.alertShielZerodHero(hero);
-                }
-            }
-            await this.notification.checkHeroShield(
-                hero.id,
-                this.getSumShield(hero)
-            );
-        });
+                await this.notification.checkHeroShield(
+                    hero.id,
+                    this.getSumShield(hero)
+                );
+            });
         this.squad.update({ heroes });
     }
 

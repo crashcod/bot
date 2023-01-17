@@ -1,7 +1,7 @@
 import { Markup, Scenes } from "telegraf";
 import { bot } from "..";
 import { sendMessageWithButtonsTelegram } from "../lib";
-import { SCENE_ACTIVATE_HERO } from "./list";
+import { SCENE_PUT_HERO_WORK } from "./list";
 
 const nextStep = (ctx: any, step?: number) => {
     if (ctx.message) {
@@ -26,8 +26,8 @@ const getValue = (ctx: any) => {
     return "";
 };
 
-export const sceneActivateHero: any = new Scenes.WizardScene(
-    SCENE_ACTIVATE_HERO,
+export const scenePutHeroWork: any = new Scenes.WizardScene(
+    SCENE_PUT_HERO_WORK,
     async (ctx) => nextStep(ctx),
     async (ctx) => {
         try {
@@ -41,28 +41,32 @@ export const sceneActivateHero: any = new Scenes.WizardScene(
             const mode = getValue(ctx);
             if (mode) {
                 const heroId = mode;
-                const hero = bot.squad.heroes.find((h) => h.id == heroId);
+                const hero = bot.squad.activeHeroes.find((h) => h.id == heroId);
                 if (!hero) {
                     ctx.replyWithHTML(`Hero not found: ${heroId}`);
                     return ctx.scene.leave();
                 }
+                if (hero.energy <= 0) {
+                    ctx.replyWithHTML(`Hero without power`);
+                    return ctx.scene.leave();
+                }
+                if (bot.getSumShield(hero) <= 0) {
+                    ctx.replyWithHTML(`Hero without shield`);
+                    return ctx.scene.leave();
+                }
 
-                bot.telegram.telegramActivateHero(ctx, hero);
-
+                await ctx.replyWithHTML(`Sending hero ${hero.id} to work`);
+                await bot.toWork(hero);
+                await bot.telegram.telegramStats(ctx);
                 return ctx.scene.leave();
             }
-            const activeHerosIds = bot.squad.activeHeroes.map((h) => h.id);
-            if (activeHerosIds.length == 15) {
-                ctx.replyWithHTML(`You already have 15 active heroes`);
-                return ctx.scene.leave();
-            }
 
-            const heroes = bot.squad.inactiveHeroes.sort(
-                (a, b) => b.rarityIndex - a.rarityIndex
-            );
+            const heroes = bot.squad.activeHeroes
+                .filter((h) => h.state != "Work")
+                .sort((a, b) => b.rarityIndex - a.rarityIndex);
 
             if (!heroes.length) {
-                ctx.replyWithHTML(`There is no disabled hero`);
+                ctx.replyWithHTML(`No heroes found`);
                 return ctx.scene.leave();
             }
 

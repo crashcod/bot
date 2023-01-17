@@ -34,7 +34,7 @@ export const sceneResetShield: any = new Scenes.WizardScene(
             const mode = getValue(ctx);
             if (mode) {
                 const hero = mode;
-                if (!bot.squad.heroes.find((h) => h.id == hero)) {
+                if (!bot.squad.activeHeroes.find((h) => h.id == hero)) {
                     ctx.replyWithHTML(`Hero not found: ${hero}`);
                     return ctx.scene.leave();
                 }
@@ -47,7 +47,7 @@ export const sceneResetShield: any = new Scenes.WizardScene(
             await sendMessageWithButtonsTelegram(
                 ctx,
                 "Select a hero",
-                bot.squad.heroes.map((hero) =>
+                bot.squad.activeHeroes.map((hero) =>
                     Markup.button.callback(
                         hero.id.toString(),
                         hero.id.toString()
