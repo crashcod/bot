@@ -283,6 +283,7 @@ As variáveis são:
 | /reset_shield      | Restaura shield do hero                                                                                           |
 | /deactivate_hero   | Desativar um hero                                                                                                 |
 | /activate_hero     | Ativar um hero                                                                                                    |
+| /pool              | Retorna o valor que tem no bomb rewards pool                                                                      |
 
 ## Sobre IGNORE_REWARD_CURRENCY
 

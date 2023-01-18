@@ -96,6 +96,9 @@ export class Telegram {
             this.telegraf?.command("wallet", (ctx) =>
                 this.checkChatId(ctx, () => this.telegramWallet(ctx))
             );
+            this.telegraf?.command("pool", (ctx) =>
+                this.checkChatId(ctx, () => this.telegramPool(ctx))
+            );
             this.telegraf?.command("reset_shield", (ctx: any) =>
                 this.checkChatId(ctx, () => ctx.scene.enter(SCENE_RESET_SHIELD))
             );
@@ -141,6 +144,7 @@ export class Telegram {
                 { command: "activate_hero", description: "activate_hero" },
                 { command: "list_heroes", description: "list_heroes" },
                 { command: "put_hero_work", description: "put_hero_work" },
+                { command: "pool", description: "pool" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -703,6 +707,14 @@ ${resultDb
 
         context.replyWithHTML(html);
     }
+    async telegramPool(context: Context) {
+        const result = await this.bot.client.poolBomb();
+        const html =
+            `Account : ${this.bot.getIdentify()}\n\n` +
+            `Pool Bomb: ${parseFloat(result).toFixed(2)}`;
+
+        context.replyWithHTML(html);
+    }
 
     async telegramDeactivateHero(context: Context, hero: Hero) {
         this.bot.isFarming = false;
@@ -832,6 +844,7 @@ ${resultDb
                 );
             }
 
+            const pool = await this.bot.client.poolBomb();
             const rewards = await this.bot.getReward();
             const bcoin = rewards.find(
                 (v) =>
@@ -839,16 +852,25 @@ ${resultDb
             );
 
             if (!bcoin) return;
-            if (bcoin.value + bcoin.claimPending < 40) {
+
+            const value = bcoin.value + bcoin.claimPending;
+
+            if (parseFloat(pool) < value) {
+                return context.replyWithHTML(
+                    `Account: ${this.bot.getIdentify()}\n\nBomb reward pool is empty: ${parseFloat(
+                        pool
+                    ).toFixed(4)}`
+                );
+            }
+
+            if (value < 40) {
                 return context.replyWithHTML(
                     `Account: ${this.bot.getIdentify()}\n\nMinimum amount of 40 bcoin`
                 );
             }
 
             context.replyWithHTML(
-                `Account: ${this.bot.getIdentify()}\n\nStarting withdraw ${
-                    bcoin.value + bcoin.claimPending
-                }`
+                `Account: ${this.bot.getIdentify()}\n\nStarting withdraw ${value}`
             );
 
             await this.telegramStopCalcFarm(context, true);
