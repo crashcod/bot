@@ -43,7 +43,9 @@ export class Squad {
     }
     get sleeping() {
         return this.activeHeroes.filter(
-            (hero) => hero.state === "Sleep" || hero.energy === 0
+            (hero) =>
+                hero.state === "Sleep" ||
+                (hero.state === "Work" && hero.energy === 0)
         );
     }
     get home() {
