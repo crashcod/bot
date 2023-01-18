@@ -8,6 +8,7 @@ import {
     sleep,
     sortByEnergyAsc,
     sortByRarityDesc,
+    str_split,
 } from "../lib";
 import { logger } from "../logger";
 import { Hero } from "../model";
@@ -296,6 +297,13 @@ export class Telegram {
         );
     }
 
+    async sendMessage(ctx: any, msg: string) {
+        for (const texto of str_split(msg, 4000)) {
+            if (!texto) return;
+            await ctx.replyWithHTML(texto);
+        }
+    }
+
     public async getStatsAccount() {
         const formatMsg = (hero: Hero, index: number, total: number) => {
             const isLast = index == total - 1;
@@ -432,7 +440,7 @@ ${resultDb
     })
     .join("\n")}`;
 
-        context.replyWithHTML(html);
+        this.sendMessage(context, html);
     }
 
     async telegramRewards(context: Context) {

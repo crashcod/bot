@@ -255,6 +255,24 @@ export const sendMessageWithButtonsTelegram = async (
     }
 };
 
+export const str_split = (string: string, split_length: number) => {
+    if (split_length === null) {
+        split_length = 1;
+    }
+    if (string === null || split_length < 1) {
+        return [];
+    }
+    string += "";
+    const chunks: string[] = [];
+    let pos = 0;
+    const len = string.length;
+    while (pos < len) {
+        chunks.push(string.slice(pos, (pos += split_length)));
+    }
+
+    return chunks;
+};
+
 export const sortByRarityDesc = (heroes: Hero[]) =>
     heroes.sort((a, b) => b.rarityIndex - a.rarityIndex);
 export const sortByEnergyAsc = (heroes: Hero[]) =>
