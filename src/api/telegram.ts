@@ -290,7 +290,8 @@ export class Telegram {
             .map((hero, index) => formatMsg(hero, index, inactive.length))
             .join("\n");
 
-        return context.replyWithHTML(
+        return this.sendMessage(
+            context,
             `Total heroes: ${active.length + inactive.length}\n\n` +
                 `Active heroes (${active.length}):\n${activeText}\n\n` +
                 `Deactivated heroes (${inactive.length}):\n${inactiveText}`
