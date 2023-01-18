@@ -593,7 +593,7 @@ export class TreasureMapBot {
 
             if (
                 workHeroWithShield > 0 &&
-                hero.shields.length <= workHeroWithShield &&
+                this.getSumShield(hero) <= workHeroWithShield &&
                 hero.energy >= 50
             ) {
                 this.toWork(hero);
