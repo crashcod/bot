@@ -61,6 +61,11 @@ async function main() {
             0
         ),
         alertMaterial: askAndParseEnv("ALERT_MATERIAL", parseNumber, 0),
+        workHeroWithShield: askAndParseEnv(
+            "WORK_HERO_WITH_SHIELD",
+            parseNumber,
+            0
+        ),
         ignoreRewardCurrency: askAndParseEnv(
             "IGNORE_REWARD_CURRENCY",
             parseArray,

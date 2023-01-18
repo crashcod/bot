@@ -99,6 +99,7 @@ export interface IMoreOptions {
     version?: number;
     maxGasRepairShield?: number;
     alertMaterial?: number;
+    workHeroWithShield?: number;
     alertShield?: number;
     numHeroWork?: number;
     ignoreRewardCurrency?: string[];
@@ -155,6 +156,7 @@ export class TreasureMapBot {
             telegramChatIdCheck = false,
             ignoreNumHeroWork = false,
             reportRewards = 0,
+            workHeroWithShield = 0,
             rede = "BSC",
             version = VERSION_CODE,
             alertShield = 0,
@@ -182,6 +184,7 @@ export class TreasureMapBot {
             alertShield,
             numHeroWork,
             server,
+            workHeroWithShield,
             telegramChatId,
             telegramKey,
             telegramChatIdCheck,
@@ -565,7 +568,8 @@ export class TreasureMapBot {
     async refreshHeroSelection() {
         logger.info("Refreshing heroes");
         await this.client.syncBomberman();
-        const { ignoreNumHeroWork, numHeroWork } = this.params;
+        const { ignoreNumHeroWork, numHeroWork, workHeroWithShield } =
+            this.params;
 
         this.selection = this.squad.byState("Work");
         const heroes = this.squad.notWorking.sort((a, b) => {
@@ -586,6 +590,16 @@ export class TreasureMapBot {
             ) {
                 continue;
             }
+
+            if (
+                workHeroWithShield > 0 &&
+                hero.shields.length <= workHeroWithShield &&
+                hero.energy >= 50
+            ) {
+                this.toWork(hero);
+                continue;
+            }
+
             if (
                 this.workingSelection.length <= numHeroWork - 1 ||
                 (ignoreNumHeroWork && percent >= 100)
