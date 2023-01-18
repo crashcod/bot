@@ -581,7 +581,6 @@ export class TreasureMapBot {
         for (const hero of heroes) {
             await sleep(500);
             const percent = (hero.energy / hero.maxEnergy) * 100;
-            if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
                 !hero.shields ||
@@ -599,6 +598,8 @@ export class TreasureMapBot {
                 this.toWork(hero);
                 continue;
             }
+
+            if (percent < this.minHeroEnergyPercentage) continue;
 
             if (
                 this.workingSelection.length <= numHeroWork - 1 ||
