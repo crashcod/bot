@@ -109,7 +109,14 @@ const SHIELD_LEVEL: any = {
         8000: 4,
     },
 };
-
+const RECEIVED_MATERIAL: any = {
+    1: 5,
+    2: 10,
+    3: 20,
+    4: 35,
+    5: 55,
+    6: 80,
+};
 export type IHeroParams = IHeroStats & {
     id: number;
     state: EHeroState;
@@ -224,6 +231,11 @@ export class Hero {
         const lvlShield = SHIELD_LEVEL[rarity][sumShield];
 
         return material * lvlShield;
+    }
+    get receivedMaterial() {
+        const rarity = this.rarityIndex + 1;
+        const material = RECEIVED_MATERIAL[rarity];
+        return material;
     }
 
     toJSON() {

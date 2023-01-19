@@ -40,6 +40,15 @@ const createButtonsHero = (heroes: Hero[], heroesSelected: string[]) => {
     });
 };
 
+const getTotalMaterial = (ids: string[], list: Hero[]) => {
+    return ids.reduce((current, id) => {
+        const hero = list.find((h) => h.id.toString() == id);
+        if (hero) {
+            return current + hero.receivedMaterial;
+        }
+    }, 0);
+};
+
 export const sceneCreateMaterial: any = new Scenes.WizardScene(
     SCENE_CREATE_MATERIAL,
     async (context) => {
@@ -108,7 +117,10 @@ export const sceneCreateMaterial: any = new Scenes.WizardScene(
 
                 ctx.wizard.state.heroesSelected = selected;
                 const button = ctx.wizard.state.button;
+                const materialButton = ctx.wizard.state.material;
                 const heroes = ctx.wizard.state.heroes;
+                const material = getTotalMaterial(selected, heroes);
+                const text = `Qty material: ${material}`;
 
                 const buttons = Markup.inlineKeyboard(
                     [
@@ -118,11 +130,16 @@ export const sceneCreateMaterial: any = new Scenes.WizardScene(
                     ],
                     { columns: 3 }
                 );
-
-                bot.telegram.telegraf?.telegram.editMessageReplyMarkup(
+                bot.telegram.telegraf?.telegram.editMessageText(
+                    materialButton.chat.id,
+                    materialButton.message_id,
+                    text,
+                    text
+                );
+                await bot.telegram.telegraf?.telegram.editMessageReplyMarkup(
                     button.chat.id,
                     button.message_id,
-                    button.text,
+                    text,
                     {
                         inline_keyboard: buttons.reply_markup.inline_keyboard,
                     }
@@ -152,6 +169,9 @@ export const sceneCreateMaterial: any = new Scenes.WizardScene(
                         ],
                         { columns: 3 }
                     )
+                );
+                ctx.wizard.state.material = await ctx.replyWithHTML(
+                    "Qty material:"
                 );
             }
         } catch (e: any) {
