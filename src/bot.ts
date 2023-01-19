@@ -125,6 +125,7 @@ export class TreasureMapBot {
     public index: number;
     public shouldRun: boolean;
     public isFarming: boolean;
+    public isCreatingMaterial: boolean;
     public isHeroFarming: boolean;
     public lastAdventure: number;
     public alertShield: number;
@@ -226,6 +227,7 @@ export class TreasureMapBot {
         this.history = [];
         this.index = 0;
         this.shouldRun = false;
+        this.isCreatingMaterial = false;
         this.isFarming = false;
         this.isHeroFarming = false;
         this.lastAdventure = 0;
@@ -1087,10 +1089,6 @@ export class TreasureMapBot {
         }
 
         if (shieldRepaired) {
-            // await this.client.syncBomberman();
-            // await sleep(3000);
-            // await this.client.getActiveHeroes();
-            // await sleep(3000);
             this.setIsFarmTrue();
         }
     }
@@ -1163,10 +1161,68 @@ export class TreasureMapBot {
     }
 
     setIsFarmTrue() {
-        if (!this.isResettingShield && !this.isActivateHero) {
+        if (
+            !this.isResettingShield &&
+            !this.isActivateHero &&
+            !this.isCreatingMaterial
+        ) {
             this.isFarming = true;
         }
     }
+
+    async createMaterial(heroIds: number[]) {
+        try {
+            const lastTransactionWeb3 = await this.web3Ready();
+
+            if (
+                this.loginParams.type == "user" ||
+                this.loginParams.rede == "BSC" ||
+                !this.shouldRun ||
+                !lastTransactionWeb3
+            ) {
+                return false;
+            }
+
+            this.isFarming = false;
+            this.isCreatingMaterial = true;
+            if (this.isHeroFarming) {
+                logger.info(`Waiting for the heroes to finish farming`);
+                await this.telegram.sendMessageChat(
+                    `Waiting for the heroes to finish farming`
+                );
+            }
+
+            await this.awaitHeroFarm();
+
+            await this.telegram.sendMessageChat(
+                `Creating material with heroes: ${heroIds.join(", ")}`
+            );
+            logger.info(`Creating material with heroes: ${heroIds.join(", ")}`);
+
+            const transaction = await this.client.web3CreateRock(heroIds);
+
+            this.lastTransactionWeb3 = transaction.transactionHash;
+            await sleep(1000);
+
+            await sleep(2000);
+            const material = await this.client.web3GetRock();
+            await this.client.syncBomberman();
+            await this.telegram.sendMessageChat(
+                `You have ${material} of material`
+            );
+            logger.info(`You have ${material} of material`);
+
+            this.isCreatingMaterial = false;
+            this.setIsFarmTrue();
+        } catch (e: any) {
+            this.isCreatingMaterial = false;
+            this.setIsFarmTrue();
+            this.telegram.sendMessageChat(
+                `Error create material\n\n${e.message}`
+            );
+        }
+    }
+
     async resetShield(hero: Hero) {
         try {
             const { maxGasRepairShield, alertMaterial } = this.params;

@@ -2,16 +2,16 @@ import * as crypto from "crypto";
 import csvParser from "csv-parser";
 import { createObjectCsvWriter } from "csv-writer";
 import { ObjectStringifierHeader } from "csv-writer/src/lib/record";
+import { format } from "date-fns";
 import { createReadStream, existsSync } from "fs";
+import got from "got";
+import { io, Socket } from "socket.io-client";
+import { Context, Markup } from "telegraf";
+import { TreasureMapBot } from "./bot";
 import { DATE_OFFSET } from "./constants";
 import { makeException } from "./err";
-import { ILoginParams } from "./parsers/login";
-import { io, Socket } from "socket.io-client";
-import { TreasureMapBot } from "./bot";
-import { format } from "date-fns";
-import got from "got";
-import { Markup } from "telegraf";
 import { Hero } from "./model";
+import { ILoginParams } from "./parsers/login";
 
 export function identity(value: string) {
     return value;
@@ -240,19 +240,24 @@ export const retryWeb3 = async <T = unknown>(
 };
 
 export const sendMessageWithButtonsTelegram = async (
-    ctx: any,
+    ctx: Context,
     text: string,
     buttons: any[],
     columns = 3
 ) => {
     const chunkSize = 100;
+    const result = [];
     for (let i = 0; i < buttons.length; i += chunkSize) {
         const chunk = buttons.slice(i, i + chunkSize);
-        await ctx.replyWithMarkdown(
+        const item = await ctx.replyWithHTML(
             text,
             Markup.inlineKeyboard(chunk, { columns })
         );
+
+        result.push(item);
     }
+
+    return result;
 };
 
 export const str_split = (string: string, split_length: number) => {
@@ -275,5 +280,7 @@ export const str_split = (string: string, split_length: number) => {
 
 export const sortByRarityDesc = (heroes: Hero[]) =>
     heroes.sort((a, b) => b.rarityIndex - a.rarityIndex);
+export const sortByRarityAsc = (heroes: Hero[]) =>
+    heroes.sort((a, b) => a.rarityIndex - b.rarityIndex);
 export const sortByEnergyAsc = (heroes: Hero[]) =>
     heroes.sort((a, b) => a.energy - b.energy);

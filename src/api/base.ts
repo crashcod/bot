@@ -37,7 +37,7 @@ export type EGameAction =
 
 export interface ISendTransactionWeb3 {
     dataTransaction: any;
-    gasLimit: number;
+    gasLimit?: number;
     contract: Contract;
 }
 

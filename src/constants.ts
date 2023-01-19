@@ -69,6 +69,15 @@ export const ABI_RESET_SHIELD_HERO: any = [
         type: "function",
     },
     {
+        inputs: [
+            { internalType: "uint256", name: "listIdHero", type: "uint256[]" },
+        ],
+        name: "createRock",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
         inputs: [{ internalType: "uint8[6]", name: "value", type: "uint8[6]" }],
         name: "setNumRockResetShield",
         outputs: [],

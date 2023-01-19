@@ -14,9 +14,11 @@ import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
 import { sceneActivateHero } from "../scenes/activate-hero";
+import { sceneCreateMaterial } from "../scenes/create-material";
 import { sceneDeactivateHero } from "../scenes/deactivate-hero";
 import {
     SCENE_ACTIVATE_HERO,
+    SCENE_CREATE_MATERIAL,
     SCENE_DEACTIVATE_HERO,
     SCENE_PUT_HERO_WORK,
     SCENE_RESET_SHIELD,
@@ -48,6 +50,7 @@ export class Telegram {
                 sceneDeactivateHero,
                 sceneActivateHero,
                 scenePutHeroWork,
+                sceneCreateMaterial,
             ]);
             this.telegraf.use(session());
             this.telegraf.use(stage.middleware());
@@ -117,6 +120,11 @@ export class Telegram {
                     ctx.scene.enter(SCENE_PUT_HERO_WORK)
                 )
             );
+            this.telegraf?.command("create_material", (ctx: any) =>
+                this.checkChatId(ctx, () =>
+                    ctx.scene.enter(SCENE_CREATE_MATERIAL)
+                )
+            );
             this.telegraf?.command("list_heroes", (ctx: any) =>
                 this.checkChatId(ctx, () => this.telegramListHeroes(ctx))
             );
@@ -145,6 +153,7 @@ export class Telegram {
                 { command: "list_heroes", description: "list_heroes" },
                 { command: "put_hero_work", description: "put_hero_work" },
                 { command: "pool", description: "pool" },
+                { command: "create_material", description: "create_material" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
@@ -750,6 +759,7 @@ ${resultDb
         await context.replyWithHTML(`Activated hero ${hero.id}`);
         this.bot.setIsFarmTrue();
     }
+
     async telegramResetShield(context: Context, heroId: number) {
         try {
             const { maxGasRepairShield } = this.bot.params;

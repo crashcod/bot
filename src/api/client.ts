@@ -729,17 +729,19 @@ export class Client {
 
                     const gasPolygon = await getGasPolygon();
 
-                    const txObject = {
+                    const txObject: any = {
                         nonce: parseInt(
                             this.web3.utils.toHex(transactionCount)
                         ),
                         to: contract.options.address,
-                        gasLimit: this.web3.utils.toHex(gasLimit),
                         gasPrice: this.web3.utils.toHex(
                             this.web3.utils.toWei(gasPolygon.toString(), "gwei")
                         ),
                         data: dataTransaction.encodeABI(),
                     };
+                    if (gasLimit) {
+                        txObject[`gasLimit`] = this.web3.utils.toHex(gasLimit);
+                    }
 
                     const sign = await account.signTransaction(txObject);
 
@@ -871,6 +873,21 @@ export class Client {
             contract: contract,
             dataTransaction: data,
             gasLimit: 200000,
+        });
+    }
+    async web3CreateRock(heroesIds: number[]) {
+        const contract = new this.web3.eth.Contract(
+            ABI_RESET_SHIELD_HERO,
+            this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
+        );
+        const data = await contract.methods.createRock(
+            heroesIds.map((id) => this.web3.utils.toBN(id))
+        );
+
+        return this.sendTransactionWeb3({
+            contract: contract,
+            gasLimit: 2000000,
+            dataTransaction: data,
         });
     }
     async checkTransaction(hash: string) {
