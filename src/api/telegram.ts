@@ -128,6 +128,11 @@ export class Telegram {
             this.telegraf?.command("list_heroes", (ctx: any) =>
                 this.checkChatId(ctx, () => this.telegramListHeroes(ctx))
             );
+            this.telegraf?.command("mint", (ctx: any) =>
+                ctx.replyWithAnimation(
+                    "https://media.tenor.com/lDyxXRNNDE4AAAAC/sergio-malandro-pranskter.gif"
+                )
+            );
 
             const commands = [
                 { command: "exit", description: "exit" },
@@ -154,6 +159,7 @@ export class Telegram {
                 { command: "put_hero_work", description: "put_hero_work" },
                 { command: "pool", description: "pool" },
                 { command: "create_material", description: "create_material" },
+                { command: "mint", description: "mint" },
             ];
             await this.telegraf.telegram.setMyCommands(commands, {
                 language_code: "en",
