@@ -685,7 +685,7 @@ export class TreasureMapBot {
             Math.abs(location.i - entry.tile.i) +
             Math.abs(location.j - entry.tile.j);
 
-        const timedelta = (distance / hero.speed) * 500;
+        const timedelta = (distance / hero.speed) * 2000;
         const elapsed = Date.now() - entry.timestamp;
 
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
