@@ -59,7 +59,7 @@ import { ILoginParams } from "./parsers/login";
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
 const ADVENTURE_ENABLED = true;
-export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA1MDA=");
+export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA1NTA=");
 type ExplosionByHero = Map<
    number,
    {
@@ -304,8 +304,6 @@ export class TreasureMapBot {
          }
       };
 
-      // const heroesAdventure = await this.getHeroesAdventure();
-
       const workingHeroesLife = this.workingSelection.map(formatMsg).join("\n");
       const notWorkingHeroesLife = this.sleepingSelection
          .map(formatMsg)
@@ -318,14 +316,11 @@ export class TreasureMapBot {
          const AllEnemies = this.adventureEnemies.length;
          msgEnemies = `Total enemies adventure: ${enemies}/${AllEnemies}\n\n`;
       }
-      // const heroesAdventureSelected = this.adventureHeroes.join(", ");
       const houseHeroesIds = this.houseHeroes.join(", ");
 
       const message =
          `Account: ${this.getIdentify()}\n\n` +
          `Playing mode: ${this.getStatusPlaying()}\n\n` +
-         // `Adventure heroes: ${heroesAdventure.usedHeroes.length}/${heroesAdventure.allHeroes.length}\n` +
-         // `Heroes selected for adventure: ${heroesAdventureSelected}\n` +
          msgEnemies +
          `Network: ${this.client.loginParams.rede}\n` +
          `Treasure/Amazon:\n` +
@@ -345,15 +340,11 @@ export class TreasureMapBot {
    public async getRewardAccount() {
       if (this.client.isConnected) {
          const rewards = await this.client.getReward();
-         // const detail = await this.client.coinDetail();
-
          const message =
             "Account: " +
             this.getIdentify() +
             "\n\n" +
             "Rewards:\n" +
-            // `Mined: ${detail.mined} | Invested: ${detail.invested} ` +
-            // `| Rewards: ${detail.rewards}\n` +
             rewards
                .filter(
                   (v) => v.network == this.params.rede || v.network == "TR"
@@ -1099,17 +1090,6 @@ export class TreasureMapBot {
 
          logger.info("There are no heroes to work now.");
 
-         // if (
-         //     (Date.now() > this.lastAdventure + 10 * 60 * 1000 ||
-         //         this.lastAdventure === 0) &&
-         //     this.params.modeAdventure
-         // ) {
-         //     this.resetStateAdventure();
-         //     this.playing = "Adventure";
-
-         //     await this.adventure();
-         //     this.lastAdventure = Date.now();
-         // }
          this.playing = "sleep";
          await this.checkShields();
          logger.info("Will sleep for 10 seconds");
