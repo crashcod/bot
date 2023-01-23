@@ -21,9 +21,11 @@ import {
    SCENE_CREATE_MATERIAL,
    SCENE_DEACTIVATE_HERO,
    SCENE_PUT_HERO_WORK,
+   SCENE_REMOVE_DATABASE,
    SCENE_RESET_SHIELD,
 } from "../scenes/list";
 import { scenePutHeroWork } from "../scenes/put-hero-work";
+import { sceneRemoveDatabase } from "../scenes/remove-database";
 import { sceneResetShield } from "../scenes/reset-shield";
 
 export class Telegram {
@@ -51,6 +53,7 @@ export class Telegram {
             sceneActivateHero,
             scenePutHeroWork,
             sceneCreateMaterial,
+            sceneRemoveDatabase,
          ]);
          this.telegraf.use(session());
          this.telegraf.use(stage.middleware());
@@ -118,6 +121,9 @@ export class Telegram {
          this.telegraf?.command("list_heroes", (ctx: any) =>
             this.checkChatId(ctx, () => this.telegramListHeroes(ctx))
          );
+         this.telegraf?.command("remove_database", (ctx: any) =>
+            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_REMOVE_DATABASE))
+         );
 
          const commands = [
             { command: "exit", description: "exit" },
@@ -144,6 +150,7 @@ export class Telegram {
             { command: "put_hero_work", description: "put_hero_work" },
             { command: "pool", description: "pool" },
             { command: "create_material", description: "create_material" },
+            { command: "remove_database", description: "remove_database" },
          ];
          await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
