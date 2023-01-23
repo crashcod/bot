@@ -1,39 +1,39 @@
 export type IEnemyParams = {
-    damage: number;
-    maxHp: number;
-    skin: number;
-    hp: number;
-    id: number;
-    follow: boolean;
-    bombSkin: number;
-    speed: number;
-    throughBrick: boolean;
+   damage: number;
+   maxHp: number;
+   skin: number;
+   hp: number;
+   id: number;
+   follow: boolean;
+   bombSkin: number;
+   speed: number;
+   throughBrick: boolean;
 };
 
 export function buildEnemy(params: IEnemyParams) {
-    return new Enemy(params);
+   return new Enemy(params);
 }
 
 export class Enemy {
-    private params!: IEnemyParams;
+   private params!: IEnemyParams;
 
-    get id() {
-        return this.params.id;
-    }
+   get id() {
+      return this.params.id;
+   }
 
-    get hp() {
-        return this.params.hp;
-    }
+   get hp() {
+      return this.params.hp;
+   }
 
-    constructor(params: IEnemyParams) {
-        this.update(params);
-    }
+   constructor(params: IEnemyParams) {
+      this.update(params);
+   }
 
-    update(params: IEnemyParams) {
-        this.params = params;
-    }
+   update(params: IEnemyParams) {
+      this.params = params;
+   }
 
-    updateHp(hp: number) {
-        this.params.hp = hp;
-    }
+   updateHp(hp: number) {
+      this.params.hp = hp;
+   }
 }
