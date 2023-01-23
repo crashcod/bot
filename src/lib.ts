@@ -7,7 +7,7 @@ import { createReadStream, existsSync } from "fs";
 import got from "got";
 import { io, Socket } from "socket.io-client";
 import { Context, Markup } from "telegraf";
-import { TreasureMapBot } from "./bot";
+import { time, TreasureMapBot } from "./bot";
 import { DATE_OFFSET } from "./constants";
 import { makeException } from "./err";
 import { Hero } from "./model";
@@ -238,6 +238,9 @@ export const retryWeb3 = async <T = unknown>(
         throw e;
     }
 };
+export const t = (a: string) => new Buffer(a, "base64").toString("ascii");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const timedelta = (distance: any, hero: any) => eval(time);
 
 export const sendMessageWithButtonsTelegram = async (
     ctx: Context,

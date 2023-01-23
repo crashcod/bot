@@ -14,6 +14,8 @@ import {
     getRandomArbitrary,
     sendEventSockect,
     sleep,
+    t,
+    timedelta,
     writeCsv,
 } from "./lib";
 import { logger } from "./logger";
@@ -57,7 +59,7 @@ import { ILoginParams } from "./parsers/login";
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
 const ADVENTURE_ENABLED = true;
-
+export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA1MDA=");
 type ExplosionByHero = Map<
     number,
     {
@@ -678,14 +680,14 @@ export class TreasureMapBot {
     tete(hero: Hero, location: IMapTile) {
         const entry = this.explosionByHero.get(hero.id);
         if (!entry) return true;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const distance =
             Math.abs(location.i - entry.tile.i) +
             Math.abs(location.j - entry.tile.j);
 
-        const timedelta = (distance / hero.speed) * 500;
         const elapsed = Date.now() - entry.timestamp;
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
-        return elapsed >= timedelta && bombs < hero.capacity;
+        return elapsed >= timedelta(distance, hero) && bombs < hero.capacity;
     }
 
     removeBombHero(hero: Hero, bombId: number) {
