@@ -867,6 +867,7 @@ ${resultDb
          );
          const result = await this.bot.client.web3ApproveClaim(approve);
          if (result.status) {
+            await sleep(5000);
             const { received } =
                await this.bot.client.confirmClaimRewardSuccess(
                   BLOCK_REWARD_TYPE_BCOIN_POLYGON
