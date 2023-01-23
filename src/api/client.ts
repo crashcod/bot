@@ -11,6 +11,7 @@ import UserAgent from "user-agents";
 import Web3 from "web3";
 import { TransactionReceipt } from "web3-core";
 import { Unit } from "web3-utils";
+import { bot } from "..";
 import { IMoreOptions } from "../bot";
 import {
    ABI_APPROVE_CLAIM,
@@ -359,12 +360,14 @@ export class Client {
             .json<IVerifyTokenResponse>();
 
          if (!resultVerify.message.address) {
+            await bot.telegram.sendMessageChat(`Wallet not found`);
             throw makeException("LoginFailed", `Wallet not found`);
          }
          logger.info(`Wallet: ${resultVerify.message.address}`);
          logger.info(`User Id: ${resultVerify.message.id}`);
 
          if (resultVerify.message.isDeleted) {
+            await bot.telegram.sendMessageChat(`Account deleted`);
             throw makeException("LoginFailed", `Account deleted`);
          }
 
@@ -372,6 +375,7 @@ export class Client {
          this.loginParams.token = resultToken.message.token;
       } catch (e: any) {
          if (e.message == "Response code 401 (Unauthorized)") {
+            await bot.telegram.sendMessageChat("username or password invalid");
             throw makeException("LoginFailed", "username or password invalid");
          }
          throw makeException("LoginFailed", e.message);
