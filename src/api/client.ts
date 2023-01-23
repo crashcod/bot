@@ -240,14 +240,6 @@ export class Client {
         };
         this.web3 = new Web3(WEB3_RPC);
         this.sfs = {} as SmartFox;
-        // this.sfs = new SmartFox({
-        //     host: HOST,
-        //     port: PORT,
-        //     zone: ZONE,
-        //     debug: askAndParseEnv("DEBUG", parseBoolean, false),
-        //     useSSL: true,
-        // });
-        // this.sfs.setClientDetails("Unity WebGL", "");
 
         this.timeout = timeout;
         this.loginParams = loginParams;
@@ -399,21 +391,6 @@ export class Client {
     async login(timeout = 0) {
         if (this.isLoggedIn) return this.walletId;
 
-        // let message = "";
-
-        // if (this.loginParams.type === "wallet") {
-        //     const data = await got
-        //         .get("https://api.bombcrypto.io/auth/token", {
-        //             searchParams: {
-        //                 address: this.loginParams.wallet,
-        //             },
-        //             headers: this.apiBaseHeaders,
-        //             http2: true,
-        //         })
-        //         .json<{ message: string }>();
-
-        //     message = data.message;
-        // }
         await this.getJwtToken();
         await this.connect();
         logger.info(`Network: ${this.loginParams.rede}`);

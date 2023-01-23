@@ -666,8 +666,6 @@ export class TreasureMapBot {
                     )
             );
             selected = items[0];
-            //random
-            //selected = items[Math.floor(Math.random() * items.length)];
         }
         if (!selected) {
             selected = locations[0];
@@ -677,19 +675,16 @@ export class TreasureMapBot {
         return selected;
     }
 
-    canPlaceBomb(hero: Hero, location: IMapTile) {
+    tete(hero: Hero, location: IMapTile) {
         const entry = this.explosionByHero.get(hero.id);
         if (!entry) return true;
-
         const distance =
             Math.abs(location.i - entry.tile.i) +
             Math.abs(location.j - entry.tile.j);
 
-        const timedelta = (distance / hero.speed) * 2000;
+        const timedelta = (distance / hero.speed) * 500;
         const elapsed = Date.now() - entry.timestamp;
-
         const bombs = this.heroBombs[hero.id]?.ids.length || 0;
-
         return elapsed >= timedelta && bombs < hero.capacity;
     }
 
@@ -744,8 +739,6 @@ export class TreasureMapBot {
             `${hero.rarity} ${hero.id} ${hero.energy}/${hero.maxEnergy} will place ` +
                 `bomb on (${location.i}, ${location.j})`
         );
-        // await sleep(3000);
-        // const method = this.modeAmazon ? "startExplodeV2" : "startExplode";
         const result = await this.client.startExplodeV2({
             heroId: hero.id,
             bombId,
@@ -771,14 +764,12 @@ export class TreasureMapBot {
             await this.refreshHeroSelection();
             await this.refreshHeroAtHome();
         }
-
-        // logger.info(this.map.toString());
     }
 
     async placeBombsHero(hero: Hero) {
         const location = this.nextLocation(hero);
 
-        if (location && this.canPlaceBomb(hero, location.tile)) {
+        if (location && this.tete(hero, location.tile)) {
             await this.placeBomb(hero, location.tile);
         }
     }
