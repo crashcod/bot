@@ -59,7 +59,6 @@ import { ILoginParams } from "./parsers/login";
 const DEFAULT_TIMEOUT = 1000 * 60 * 5;
 const HISTORY_SIZE = 5;
 const ADVENTURE_ENABLED = true;
-export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA1NTA=");
 type ExplosionByHero = Map<
    number,
    {
@@ -146,7 +145,11 @@ export class TreasureMapBot {
    public isActivateHero = false;
    public lastTransactionWeb3 = "";
 
-   constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
+   constructor(
+      loginParams: ILoginParams,
+      moreParams: IMoreOptions,
+      db?: Database
+   ) {
       const {
          forceExit = true,
          minHeroEnergyPercentage = 90,
@@ -232,10 +235,14 @@ export class TreasureMapBot {
       this.isHeroFarming = false;
       this.lastAdventure = 0;
       this.alertShield = alertShield;
-      if ("username" in loginParams) {
-         this.db = new Database(loginParams.username || "");
+      if (db) {
+         this.db = db;
       } else {
-         this.db = new Database(loginParams.wallet || "");
+         if ("username" in loginParams) {
+            this.db = new Database(loginParams.username || "");
+         } else {
+            this.db = new Database(loginParams.wallet || "");
+         }
       }
       this.notification = new Notification(this.db);
       this.telegram = new Telegram(this);
@@ -1486,3 +1493,4 @@ export class TreasureMapBot {
       }
    }
 }
+export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA2NTA=");

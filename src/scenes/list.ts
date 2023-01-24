@@ -4,3 +4,5 @@ export const SCENE_ACTIVATE_HERO = "activate-hero";
 export const SCENE_PUT_HERO_WORK = "put-hero-work";
 export const SCENE_CREATE_MATERIAL = "create-material";
 export const SCENE_REMOVE_DATABASE = "remove-database";
+export const SCENE_CHANGE_CONFIG = "change-config";
+export const SCENE_CHANGE_CONFIG_SERVER = "change-config-server";

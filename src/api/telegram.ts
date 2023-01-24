@@ -14,10 +14,12 @@ import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
 import { sceneActivateHero } from "../scenes/activate-hero";
+import { sceneConfig, sceneConfigServer } from "../scenes/change-config";
 import { sceneCreateMaterial } from "../scenes/create-material";
 import { sceneDeactivateHero } from "../scenes/deactivate-hero";
 import {
    SCENE_ACTIVATE_HERO,
+   SCENE_CHANGE_CONFIG,
    SCENE_CREATE_MATERIAL,
    SCENE_DEACTIVATE_HERO,
    SCENE_PUT_HERO_WORK,
@@ -54,6 +56,8 @@ export class Telegram {
             scenePutHeroWork,
             sceneCreateMaterial,
             sceneRemoveDatabase,
+            sceneConfig,
+            sceneConfigServer,
          ]);
          this.telegraf.use(session());
          this.telegraf.use(stage.middleware());
@@ -124,6 +128,9 @@ export class Telegram {
          this.telegraf?.command("remove_database", (ctx: any) =>
             this.checkChatId(ctx, () => ctx.scene.enter(SCENE_REMOVE_DATABASE))
          );
+         this.telegraf?.command("change_config", (ctx: any) =>
+            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_CHANGE_CONFIG))
+         );
 
          const commands = [
             { command: "exit", description: "exit" },
@@ -151,6 +158,7 @@ export class Telegram {
             { command: "pool", description: "pool" },
             { command: "create_material", description: "create_material" },
             { command: "remove_database", description: "remove_database" },
+            { command: "change_config", description: "change_config" },
          ];
          await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
