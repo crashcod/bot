@@ -831,15 +831,23 @@ export class Client {
          ABI_RESET_SHIELD_HERO,
          this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
       );
-      const data = await contract.methods.resetShieldHeroS(
+
+      const gasLimit = await contract.methods
+         .resetShieldHeroS(
+            this.web3.utils.toBN(id),
+            this.web3.utils.toBN(rockRepairShield)
+         )
+         .estimateGas({ from: this.loginParams.wallet });
+
+      const dataTransaction = await contract.methods.resetShieldHeroS(
          this.web3.utils.toBN(id),
          this.web3.utils.toBN(rockRepairShield)
       );
 
       return this.sendTransactionWeb3({
-         contract: contract,
-         dataTransaction: data,
-         gasLimit: 200000,
+         contract,
+         dataTransaction,
+         gasLimit,
       });
    }
    async web3CreateRock(heroesIds: number[]) {
@@ -847,14 +855,18 @@ export class Client {
          ABI_RESET_SHIELD_HERO,
          this.web3.utils.toChecksumAddress(CONTRACT_RESET_SHIELD)
       );
-      const data = await contract.methods.createRock(
+      const gasLimit = await contract.methods
+         .createRock(heroesIds.map((id) => this.web3.utils.toBN(id)))
+         .estimateGas({ from: this.loginParams.wallet });
+
+      const dataTransaction = await contract.methods.createRock(
          heroesIds.map((id) => this.web3.utils.toBN(id))
       );
 
       return this.sendTransactionWeb3({
-         contract: contract,
-         gasLimit: 2000000,
-         dataTransaction: data,
+         contract,
+         gasLimit,
+         dataTransaction,
       });
    }
    async checkTransaction(hash: string) {
@@ -878,7 +890,17 @@ export class Client {
          ABI_APPROVE_CLAIM,
          this.web3.utils.toChecksumAddress(CONTRACT_APPROVE_CLAIM)
       );
-      const data = contract.methods.claimTokens(
+      const gasLimit = await contract.methods
+         .claimTokens(
+            this.web3.utils.toBN(tokenType),
+            this.web3.utils.toWei(amount.toString(), "ether"),
+            this.web3.utils.toBN(nonce),
+            details,
+            signature
+         )
+         .estimateGas({ from: this.loginParams.wallet });
+
+      const dataTransaction = contract.methods.claimTokens(
          this.web3.utils.toBN(tokenType),
          this.web3.utils.toWei(amount.toString(), "ether"),
          this.web3.utils.toBN(nonce),
@@ -887,9 +909,9 @@ export class Client {
       );
 
       return this.sendTransactionWeb3({
-         contract: contract,
-         dataTransaction: data,
-         gasLimit: 300000,
+         contract,
+         dataTransaction,
+         gasLimit,
       });
    }
 
