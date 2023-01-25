@@ -1,5 +1,4 @@
 import { ObjectHeaderItem } from "csv-writer/src/lib/record";
-import got from "got";
 import { Client } from "./api";
 import {
    CONTRACT_BOMB,
@@ -7,6 +6,7 @@ import {
    CONTRACT_USDT,
    VERSION_CODE,
 } from "./constants";
+import config from "./ecosystem.config";
 import {
    connectWebSocketAnalytics,
    getFromCsv,
@@ -19,13 +19,14 @@ import {
    writeCsv,
 } from "./lib";
 import { logger } from "./logger";
-import { default as version } from "./version.json";
+
+import child_process from "child_process";
+import pm2 from "pm2";
 
 import { EGameAction } from "./api/base";
 import { Database } from "./api/database";
 import { Notification } from "./api/notification";
 import { Telegram } from "./api/telegram";
-import { makeException } from "./err";
 import {
    BLOCK_TYPE_MAP,
    buildBlock,
@@ -1460,37 +1461,52 @@ export class TreasureMapBot {
 
    async checkVersion() {
       logger.info("Checking version...");
-      const currentVersion = await got
-         .get(
-            "http://bombcrypto.lucasvieceli.com.br:8181/version?date=" +
-               new Date().getTime(),
-            {
-               headers: {
-                  "content-type": "application/json",
-                  "Cache-Control": "no-cache",
-               },
-            }
-         )
-         .json<number>()
-         .catch(() => {
-            return undefined;
+
+      const result = child_process.execSync(`git pull`).toString();
+      const isUpdated = !result.includes("Already up to date.\n");
+      if (isUpdated) {
+         logger.info("updating version...");
+         child_process.execSync(`yarn build`);
+         pm2.connect(() => {
+            config.apps.map((app) => {
+               logger.info(`Starting pm2 ${app.name}`);
+               pm2.start(app as any, (e) => {
+                  console.log(e);
+               });
+            });
          });
-
-      if (currentVersion === undefined) return true;
-
-      if (currentVersion != version) {
-         const message =
-            "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
-
-         await this.notification.setUpdateVersion();
-         await this.telegram.sendMessageChat(message);
-
-         await this.db.set("start", false);
-         logger.warning("Disabled because the version");
-         throw makeException("Version", message);
-      } else {
-         await this.notification.unsetUpdateVersion();
       }
+      // const currentVersion = await got
+      //    .get(
+      //       "http://bombcrypto.lucasvieceli.com.br:8181/version?date=" +
+      //          new Date().getTime(),
+      //       {
+      //          headers: {
+      //             "content-type": "application/json",
+      //             "Cache-Control": "no-cache",
+      //          },
+      //       }
+      //    )
+      //    .json<number>()
+      //    .catch(() => {
+      //       return undefined;
+      //    });
+
+      // if (currentVersion === undefined) return true;
+
+      // if (currentVersion != version) {
+      //    const message =
+      //       "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
+
+      //    await this.notification.setUpdateVersion();
+      //    await this.telegram.sendMessageChat(message);
+
+      //    await this.db.set("start", false);
+      //    logger.warning("Disabled because the version");
+      //    throw makeException("Version", message);
+      // } else {
+      //    await this.notification.unsetUpdateVersion();
+      // }
    }
 }
-export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA2NTA=");
+export const time = t("KGRpc3RhbmNlIC8gaGVyby5zcGVlZCkgKiA4MDA=");
