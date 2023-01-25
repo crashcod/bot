@@ -306,7 +306,6 @@ export class Client {
 
    async getJwtToken() {
       try {
-         console.log('teste')
          const { type } = this.loginParams;
          let resultToken: IJwtLoginResponse;
 
