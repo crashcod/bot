@@ -265,8 +265,6 @@ export class Telegram {
       context.replyWithHTML(html);
    }
    async telegramStats(context: Context) {
-      if (!(await this.telegramCheckVersion(context))) return false;
-
       if (!this.bot.shouldRun) {
          await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nAccount not working`
@@ -399,7 +397,6 @@ export class Telegram {
    }
 
    async telegramRewardsAll(context: Context) {
-      if (!(await this.telegramCheckVersion(context))) return false;
       const { rewardsAllPermission } = this.bot.params;
 
       const resultDb = this.bot.db.getAllDatabase();
@@ -552,8 +549,6 @@ ${resultDb
       throw new Error("exit");
    }
    async telegramStatsShield(context: Context) {
-      if (!(await this.telegramCheckVersion(context))) return false;
-
       if (!this.bot.shouldRun) {
          await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nAccount not working`
@@ -608,8 +603,6 @@ ${resultDb
    }
 
    async telegramStopCalcFarm(context: Context, stop = true) {
-      if (!(await this.telegramCheckVersion(context))) return false;
-
       if (!this.bot.shouldRun || !this.bot.client.isLoggedIn) {
          await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nAccount not working`
@@ -671,7 +664,7 @@ ${resultDb
 
       context.replyWithHTML(html);
    }
-   async telegramCheckVersion(context: Context) {
+   async telegramCheckVersion() {
       // const existNotification = await this.bot.notification.hasUpdateVersion();
       // if (existNotification) {
       //    const message =
@@ -908,8 +901,6 @@ ${resultDb
       this.sendMessageChat("ARROMBADO");
    }
    async telegramStartCalcFarm(context: Context) {
-      if (!(await this.telegramCheckVersion(context))) return false;
-
       if (!this.bot.shouldRun || !this.bot.client.isLoggedIn) {
          await context.replyWithHTML(
             `Account: ${this.bot.getIdentify()}\n\nAccount not working`
