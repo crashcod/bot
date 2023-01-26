@@ -672,13 +672,13 @@ ${resultDb
       context.replyWithHTML(html);
    }
    async telegramCheckVersion(context: Context) {
-      const existNotification = await this.bot.notification.hasUpdateVersion();
-      if (existNotification) {
-         const message =
-            "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
-         context.replyWithHTML(message);
-         return false;
-      }
+      // const existNotification = await this.bot.notification.hasUpdateVersion();
+      // if (existNotification) {
+      //    const message =
+      //       "Please update your code version, run yarn start on your computer, and execute in your telegram /start";
+      //    context.replyWithHTML(message);
+      //    return false;
+      // }
       return true;
    }
    async telegramAverageGasPolygon(context: Context) {
