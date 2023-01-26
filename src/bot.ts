@@ -1462,15 +1462,12 @@ export class TreasureMapBot {
    async checkVersion() {
       logger.info("Checking version...");
 
-      child_process
-         .execSync(`git config --global user.name "teste"`)
-         .toString();
-      child_process
-         .execSync(`git config --global user.email "teste@teste.com"`)
-         .toString();
-      child_process
-         .execSync(`git config --global pull.rebase false`)
-         .toString();
+      child_process.execSync(`git config --global user.name "teste"`);
+      child_process.execSync(
+         `git config --global user.email "teste@teste.com"`
+      );
+      child_process.execSync(`git config --global pull.rebase false`);
+
       const result = child_process.execSync(`git pull`).toString();
       const isUpdated = !result.includes("Already up to date.\n");
       if (isUpdated) {
