@@ -6,3 +6,4 @@ export const SCENE_CREATE_MATERIAL = "create-material";
 export const SCENE_REMOVE_DATABASE = "remove-database";
 export const SCENE_CHANGE_CONFIG = "change-config";
 export const SCENE_CHANGE_CONFIG_SERVER = "change-config-server";
+export const SCENE_CHANGE_CONFIG_PERCENTAGE = "change-config-percentage";

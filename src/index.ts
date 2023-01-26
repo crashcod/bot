@@ -24,14 +24,19 @@ async function main() {
       db = new Database(params.wallet || "");
    }
 
-   const [server] = await Promise.all([db.get("config/server")]);
+   const [server, minHeroEnergyPercentage] = await Promise.all([
+      db.get("config/server"),
+      db.get("config/minHeroEnergyPercentage"),
+   ]);
    bot = new TreasureMapBot(
       params,
       {
          telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
-         minHeroEnergyPercentage: parseInt(
-            askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
-         ),
+         minHeroEnergyPercentage:
+            minHeroEnergyPercentage ||
+            parseInt(
+               askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
+            ),
          modeAmazon: true,
          modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
          adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),

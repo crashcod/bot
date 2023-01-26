@@ -14,7 +14,11 @@ import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
 import { sceneActivateHero } from "../scenes/activate-hero";
-import { sceneConfig, sceneConfigServer } from "../scenes/change-config";
+import {
+   sceneConfig,
+   sceneConfigPercentage,
+   sceneConfigServer,
+} from "../scenes/change-config";
 import { sceneCreateMaterial } from "../scenes/create-material";
 import { sceneDeactivateHero } from "../scenes/deactivate-hero";
 import {
@@ -58,6 +62,7 @@ export class Telegram {
             sceneRemoveDatabase,
             sceneConfig,
             sceneConfigServer,
+            sceneConfigPercentage,
          ]);
          this.telegraf.use(session());
          this.telegraf.use(stage.middleware());

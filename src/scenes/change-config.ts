@@ -1,7 +1,11 @@
 import { Markup, Scenes } from "telegraf";
 import { bot } from "..";
 import { sendMessageWithButtonsTelegram } from "../lib";
-import { SCENE_CHANGE_CONFIG, SCENE_CHANGE_CONFIG_SERVER } from "./list";
+import {
+   SCENE_CHANGE_CONFIG,
+   SCENE_CHANGE_CONFIG_PERCENTAGE,
+   SCENE_CHANGE_CONFIG_SERVER,
+} from "./list";
 
 const nextStep = (ctx: any, step?: number) => {
    if (ctx.message) {
@@ -61,6 +65,42 @@ export const sceneConfigServer: any = new Scenes.WizardScene(
    }
 );
 
+const percentage = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+export const sceneConfigPercentage: any = new Scenes.WizardScene(
+   SCENE_CHANGE_CONFIG_PERCENTAGE,
+   async (ctx) => nextStep(ctx),
+   async (ctx: any) => {
+      try {
+         const mode = parseInt(getValue(ctx));
+         if (mode) {
+            if (!percentage.includes(mode)) {
+               await ctx.replyWithHTML("Percentage not found: " + mode);
+               return ctx.scene.leave();
+            }
+
+            await bot.db.set("config/minHeroEnergyPercentage", mode);
+            await ctx.replyWithHTML(
+               `Account: ${bot.getIdentify()}\n\nConfiguration changed, server will restarted`
+            );
+            ctx.scene.leave();
+            throw new Error("exit");
+         }
+
+         await sendMessageWithButtonsTelegram(
+            ctx,
+            "Select a percentage",
+            percentage.map((p) => Markup.button.callback(`${p}%`, p.toString()))
+         );
+      } catch (e: any) {
+         if (e.message == "exit") {
+            throw e;
+         }
+         ctx.scene.leave();
+         ctx.replyWithHTML("ERROR: \n" + e.message);
+      }
+   }
+);
+
 export const sceneConfig: any = new Scenes.WizardScene(
    SCENE_CHANGE_CONFIG,
    async (ctx) => nextStep(ctx),
@@ -78,6 +118,9 @@ export const sceneConfig: any = new Scenes.WizardScene(
             if (mode == "SERVER") {
                await ctx.scene.enter(SCENE_CHANGE_CONFIG_SERVER);
             }
+            if (mode == "MIN_HERO_ENERGY_PERCENTAGE") {
+               await ctx.scene.enter(SCENE_CHANGE_CONFIG_PERCENTAGE);
+            }
 
             return;
          }
@@ -85,7 +128,13 @@ export const sceneConfig: any = new Scenes.WizardScene(
          await sendMessageWithButtonsTelegram(
             ctx,
             "Select a config",
-            [Markup.button.callback("SERVER", "SERVER")],
+            [
+               Markup.button.callback("SERVER", "SERVER"),
+               Markup.button.callback(
+                  "MIN_HERO_ENERGY_PERCENTAGE",
+                  "MIN_HERO_ENERGY_PERCENTAGE"
+               ),
+            ],
             1
          );
       } catch (e: any) {
