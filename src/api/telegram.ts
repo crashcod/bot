@@ -1,5 +1,5 @@
 import { differenceInMinutes } from "date-fns";
-import { Context, Scenes, session, Telegraf } from "telegraf";
+import { Context, Markup, Scenes, session, Telegraf } from "telegraf";
 import { TreasureMapBot } from "../bot";
 import { BLOCK_REWARD_TYPE_BCOIN_POLYGON } from "../constants";
 import {
@@ -930,5 +930,18 @@ ${resultDb
          this.bot.params.telegramChatId,
          `Account: ${this.bot.getIdentify()}\n\n${message}`
       );
+   }
+
+   createButtonsHero(heroes: Hero[], heroesSelected: string[]) {
+      return heroes.map((hero) => {
+         const selected = heroesSelected.includes(hero.id.toString())
+            ? "✅"
+            : "";
+         const text = `${selected} ${this.getColor(hero)} ${
+            hero.raritySimbol
+         } [${hero.id}]`;
+
+         return Markup.button.callback(text, hero.id.toString());
+      });
    }
 }

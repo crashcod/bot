@@ -1,7 +1,7 @@
-import { Markup, Scenes } from "telegraf";
-import { SCENE_RESET_SHIELD } from "./list";
-import { sendMessageWithButtonsTelegram } from "../lib";
+import { Scenes } from "telegraf";
 import { bot } from "..";
+import { sendMessageWithButtonsTelegram } from "../lib";
+import { SCENE_RESET_SHIELD } from "./list";
 
 const nextStep = (ctx: any, step?: number) => {
    if (ctx.message) {
@@ -47,8 +47,9 @@ export const sceneResetShield: any = new Scenes.WizardScene(
          await sendMessageWithButtonsTelegram(
             ctx,
             "Select a hero",
-            bot.squad.activeHeroes.map((hero) =>
-               Markup.button.callback(hero.id.toString(), hero.id.toString())
+            bot.telegram.createButtonsHero(
+               bot.telegram.bot.squad.activeHeroes,
+               []
             )
          );
       } catch (e: any) {
