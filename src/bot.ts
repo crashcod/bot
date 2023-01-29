@@ -22,6 +22,8 @@ import { logger } from "./logger";
 import child_process from "child_process";
 import pm2 from "pm2";
 
+import { writeFileSync } from "fs";
+import path from "path";
 import { EGameAction } from "./api/base";
 import { Database } from "./api/database";
 import { Notification } from "./api/notification";
@@ -96,6 +98,7 @@ export interface IMoreOptions {
    adventureHeroes?: string;
    rede?: string;
    identify?: string;
+   ignoreCommands?: string[];
    rewardsAllPermission?: string[];
    version?: number;
    maxGasRepairShield?: number;
@@ -145,11 +148,7 @@ export class TreasureMapBot {
    public isActivateHero = false;
    public lastTransactionWeb3 = "";
 
-   constructor(
-      loginParams: ILoginParams,
-      moreParams: IMoreOptions,
-      db?: Database
-   ) {
+   constructor(loginParams: ILoginParams, moreParams: IMoreOptions) {
       const {
          forceExit = true,
          minHeroEnergyPercentage = 90,
@@ -162,6 +161,7 @@ export class TreasureMapBot {
          telegramChatIdCheck = false,
          ignoreNumHeroWork = false,
          reportRewards = 0,
+         ignoreCommands = [],
          workHeroWithShield = 0,
          rede = "BSC",
          version = VERSION_CODE,
@@ -190,6 +190,7 @@ export class TreasureMapBot {
          alertShield,
          numHeroWork,
          server,
+         ignoreCommands,
          workHeroWithShield,
          telegramChatId,
          telegramKey,
@@ -235,15 +236,13 @@ export class TreasureMapBot {
       this.isHeroFarming = false;
       this.lastAdventure = 0;
       this.alertShield = alertShield;
-      if (db) {
-         this.db = db;
+
+      if ("username" in loginParams) {
+         this.db = new Database(loginParams.username || "");
       } else {
-         if ("username" in loginParams) {
-            this.db = new Database(loginParams.username || "");
-         } else {
-            this.db = new Database(loginParams.wallet || "");
-         }
+         this.db = new Database(loginParams.wallet || "");
       }
+
       this.notification = new Notification(this.db);
       this.telegram = new Telegram(this);
       this.telegram.init();
@@ -1470,6 +1469,57 @@ export class TreasureMapBot {
       });
    }
 
+   async saveConfig(accountName: string, name: string, value: any) {
+      const config = require("./ecosystem.config");
+
+      const account = config.apps.find(
+         (acc: any) =>
+            acc.name == accountName || acc.env?.IDENTIFY == accountName
+      );
+      if (!account) return;
+      account.env[name] = value;
+
+      await this.pm2SaveFile(config);
+      pm2.connect(() => {
+         pm2.start(account, (e) => console.log(e));
+      });
+   }
+
+   async pm2SaveFile(config: any) {
+      writeFileSync(
+         path.join(__dirname, "ecosystem.config.js"),
+         `module.exports = ${JSON.stringify(config, null, 4)};`
+      );
+      writeFileSync(
+         path.join(__dirname, "..", "src", "ecosystem.config.js"),
+         `module.exports = ${JSON.stringify(config, null, 4)};`
+      );
+   }
+
+   async pm2AddAccount(env: any) {
+      const config = require("./ecosystem.config");
+
+      const newAccount = {
+         name: env.IDENTIFY,
+         instances: "1",
+         exec_mode: "fork",
+         script: "npm run start:bot",
+         env,
+      };
+      config.apps.push(newAccount);
+      await this.pm2SaveFile(config);
+   }
+   async pm2RemoveAccount(name: string) {
+      const config = require("./ecosystem.config");
+
+      config.apps = config.apps.filter((app: any) => app.name != name);
+      pm2.connect(() => {
+         pm2.delete(name as any, (e) => {
+            console.log(e);
+         });
+      });
+      await this.pm2SaveFile(config);
+   }
    async checkVersion() {
       logger.info("Checking version...");
 

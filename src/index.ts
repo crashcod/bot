@@ -17,84 +17,60 @@ async function main() {
    const params = requireAndParseEnv("LOGIN", parseLogin);
    const report = askAndParseEnv("REPORT_REWARDS", parseInt, 0);
 
-   let db: Database;
-   if ("username" in params) {
-      db = new Database(params.username || "");
-   } else {
-      db = new Database(params.wallet || "");
-   }
-
-   const [server, minHeroEnergyPercentage] = await Promise.all([
-      db.get("config/server"),
-      db.get("config/minHeroEnergyPercentage"),
-   ]);
-   bot = new TreasureMapBot(
-      params,
-      {
-         telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
-         minHeroEnergyPercentage:
-            minHeroEnergyPercentage ||
-            parseInt(
-               askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
-            ),
-         modeAmazon: true,
-         modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
-         adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
-         houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
-         saveRewardsCsv: askAndParseEnv(
-            "SAVE_REWARDS_CSV",
-            parseBoolean,
-            false
-         ),
-         ignoreNumHeroWork: askAndParseEnv(
-            "IGNORE_NUM_HERO_WORK",
-            parseBoolean,
-            false
-         ),
-         resetShieldAuto: askAndParseEnv(
-            "RESET_SHIELD_AUTO",
-            parseBoolean,
-            false
-         ),
-         rede: askAndParseEnv("NETWORK", identity, "BSC"),
-         version: parseInt(
-            askAndParseEnv("VERSION", identity, VERSION_CODE.toString())
-         ),
-         alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
-         numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
-         telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
-         identify: askAndParseEnv("IDENTIFY", identity, ""),
-         rewardsAllPermission: askAndParseEnv(
-            "REWARDS_ALL_PERMISSION",
-            parseArray,
-            []
-         ),
-         telegramChatIdCheck: askAndParseEnv(
-            "TELEGRAM_CHAT_ID_CHECK",
-            parseBoolean,
-            false
-         ),
-         reportRewards: report,
-         server: server || askAndParseEnv("SERVER", identity, "sea"),
-         maxGasRepairShield: askAndParseEnv(
-            "MAX_GAS_REPAIR_SHIELD",
-            parseNumber,
-            0
-         ),
-         alertMaterial: askAndParseEnv("ALERT_MATERIAL", parseNumber, 0),
-         workHeroWithShield: askAndParseEnv(
-            "WORK_HERO_WITH_SHIELD",
-            parseNumber,
-            0
-         ),
-         ignoreRewardCurrency: askAndParseEnv(
-            "IGNORE_REWARD_CURRENCY",
-            parseArray,
-            []
-         ),
-      },
-      db
-   );
+   bot = new TreasureMapBot(params, {
+      telegramKey: askAndParseEnv("TELEGRAM_KEY", identity, ""),
+      minHeroEnergyPercentage: parseInt(
+         askAndParseEnv("MIN_HERO_ENERGY_PERCENTAGE", identity, "50")
+      ),
+      modeAmazon: true,
+      modeAdventure: askAndParseEnv("MODE_ADVENTURE", parseBoolean, false),
+      adventureHeroes: askAndParseEnv("ADVENTURE_HEROES", identity, ""),
+      houseHeroes: askAndParseEnv("HOUSE_HEROES", identity, ""),
+      saveRewardsCsv: askAndParseEnv("SAVE_REWARDS_CSV", parseBoolean, false),
+      ignoreNumHeroWork: askAndParseEnv(
+         "IGNORE_NUM_HERO_WORK",
+         parseBoolean,
+         false
+      ),
+      resetShieldAuto: askAndParseEnv("RESET_SHIELD_AUTO", parseBoolean, false),
+      rede: askAndParseEnv("NETWORK", identity, "BSC"),
+      version: parseInt(
+         askAndParseEnv("VERSION", identity, VERSION_CODE.toString())
+      ),
+      alertShield: parseInt(askAndParseEnv("ALERT_SHIELD", identity, "0")),
+      numHeroWork: parseInt(askAndParseEnv("NUM_HERO_WORK", identity, "15")),
+      telegramChatId: askAndParseEnv("TELEGRAM_CHAT_ID", identity, ""),
+      identify: askAndParseEnv("IDENTIFY", identity, ""),
+      rewardsAllPermission: askAndParseEnv(
+         "REWARDS_ALL_PERMISSION",
+         parseArray,
+         []
+      ),
+      telegramChatIdCheck: askAndParseEnv(
+         "TELEGRAM_CHAT_ID_CHECK",
+         parseBoolean,
+         false
+      ),
+      reportRewards: report,
+      server: askAndParseEnv("SERVER", identity, "sea"),
+      maxGasRepairShield: askAndParseEnv(
+         "MAX_GAS_REPAIR_SHIELD",
+         parseNumber,
+         0
+      ),
+      alertMaterial: askAndParseEnv("ALERT_MATERIAL", parseNumber, 0),
+      workHeroWithShield: askAndParseEnv(
+         "WORK_HERO_WITH_SHIELD",
+         parseNumber,
+         0
+      ),
+      ignoreRewardCurrency: askAndParseEnv(
+         "IGNORE_REWARD_CURRENCY",
+         parseArray,
+         []
+      ),
+      ignoreCommands: askAndParseEnv("IGNORE_COMMANDS", parseArray, []),
+   });
 
    let intervalReport: NodeJS.Timer;
 

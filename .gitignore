@@ -11,3 +11,4 @@ database*
 yarn.lock
 src/reverse.ts
 yarn-error.log
+README1.md

@@ -42,12 +42,11 @@ export const sceneConfigServer: any = new Scenes.WizardScene(
                return ctx.scene.leave();
             }
 
-            await bot.db.set("config/server", mode);
             await ctx.replyWithHTML(
                `Account: ${bot.getIdentify()}\n\nConfiguration changed, server will restarted`
             );
-            ctx.scene.leave();
-            throw new Error("exit");
+            await bot.saveConfig(bot.getIdentify(), "SERVER", mode);
+            return ctx.scene.leave();
          }
 
          await sendMessageWithButtonsTelegram(ctx, "Select a server", [
@@ -78,12 +77,15 @@ export const sceneConfigPercentage: any = new Scenes.WizardScene(
                return ctx.scene.leave();
             }
 
-            await bot.db.set("config/minHeroEnergyPercentage", mode);
             await ctx.replyWithHTML(
                `Account: ${bot.getIdentify()}\n\nConfiguration changed, server will restarted`
             );
-            ctx.scene.leave();
-            throw new Error("exit");
+            await bot.saveConfig(
+               bot.getIdentify(),
+               "MIN_HERO_ENERGY_PERCENTAGE",
+               mode
+            );
+            return ctx.scene.leave();
          }
 
          await sendMessageWithButtonsTelegram(

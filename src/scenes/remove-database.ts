@@ -48,8 +48,6 @@ export const sceneRemoveDatabase: any = new Scenes.WizardScene(
             return ctx.scene.leave();
          }
 
-         console.log(files);
-
          await sendMessageWithButtonsTelegram(
             ctx,
             "Select a database",

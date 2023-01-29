@@ -14,6 +14,7 @@ import { logger } from "../logger";
 import { Hero } from "../model";
 import { isFloat } from "../parsers";
 import { sceneActivateHero } from "../scenes/activate-hero";
+import { sceneAddAccount } from "../scenes/add-account";
 import {
    sceneConfig,
    sceneConfigPercentage,
@@ -23,14 +24,17 @@ import { sceneCreateMaterial } from "../scenes/create-material";
 import { sceneDeactivateHero } from "../scenes/deactivate-hero";
 import {
    SCENE_ACTIVATE_HERO,
+   SCENE_ADD_ACCOUNT,
    SCENE_CHANGE_CONFIG,
    SCENE_CREATE_MATERIAL,
    SCENE_DEACTIVATE_HERO,
    SCENE_PUT_HERO_WORK,
+   SCENE_REMOVE_ACCOUNT,
    SCENE_REMOVE_DATABASE,
    SCENE_RESET_SHIELD,
 } from "../scenes/list";
 import { scenePutHeroWork } from "../scenes/put-hero-work";
+import { sceneRemoveAccount } from "../scenes/remove-account";
 import { sceneRemoveDatabase } from "../scenes/remove-database";
 import { sceneResetShield } from "../scenes/reset-shield";
 
@@ -63,78 +67,149 @@ export class Telegram {
             sceneConfig,
             sceneConfigServer,
             sceneConfigPercentage,
+            sceneAddAccount,
+            sceneRemoveAccount,
          ]);
          this.telegraf.use(session());
          this.telegraf.use(stage.middleware());
-
          this.telegraf?.command("stats", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStats(ctx))
+            this.checkChatId(ctx, () => this.telegramStats(ctx), "/stats")
          );
          this.telegraf?.command("rewards_all", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramRewardsAll(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramRewardsAll(ctx),
+               "/rewards_all"
+            )
          );
          this.telegraf?.command("rewards", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramRewards(ctx))
+            this.checkChatId(ctx, () => this.telegramRewards(ctx), "/rewards")
          );
          this.telegraf?.command("exit", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramExit(ctx))
+            this.checkChatId(ctx, () => this.telegramExit(ctx), "/exit")
          );
          this.telegraf?.command("start", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStart(ctx))
+            this.checkChatId(ctx, () => this.telegramStart(ctx), "/start")
          );
          this.telegraf?.command("start_calc_farm", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStartCalcFarm(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramStartCalcFarm(ctx),
+               "/start_calc_farm"
+            )
          );
          this.telegraf?.command("stop_calc_farm", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStopCalcFarm(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramStopCalcFarm(ctx),
+               "/stop_calc_farm"
+            )
          );
          this.telegraf?.command("current_calc_farm", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStopCalcFarm(ctx, false))
+            this.checkChatId(
+               ctx,
+               () => this.telegramStopCalcFarm(ctx, false),
+               "/current_calc_farm"
+            )
          );
          this.telegraf?.command("shield", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramStatsShield(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramStatsShield(ctx),
+               "/shield"
+            )
          );
          this.telegraf?.command("test_msg", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramTestMsg(ctx))
+            this.checkChatId(ctx, () => this.telegramTestMsg(ctx), "/test_msg")
          );
          this.telegraf?.command("config", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramConfig(ctx))
+            this.checkChatId(ctx, () => this.telegramConfig(ctx), "/config")
          );
          this.telegraf?.command("withdraw", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramWithdraw(ctx))
+            this.checkChatId(ctx, () => this.telegramWithdraw(ctx), "/withdraw")
          );
          this.telegraf?.command("gas_polygon", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramAverageGasPolygon(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramAverageGasPolygon(ctx),
+               "/gas_polygon"
+            )
          );
          this.telegraf?.command("wallet", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramWallet(ctx))
+            this.checkChatId(ctx, () => this.telegramWallet(ctx), "/wallet")
          );
          this.telegraf?.command("pool", (ctx) =>
-            this.checkChatId(ctx, () => this.telegramPool(ctx))
+            this.checkChatId(ctx, () => this.telegramPool(ctx), "/pool")
          );
          this.telegraf?.command("reset_shield", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_RESET_SHIELD))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_RESET_SHIELD),
+               "/reset_shield"
+            )
          );
          this.telegraf?.command("deactivate_hero", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_DEACTIVATE_HERO))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_DEACTIVATE_HERO),
+               "/deactivate_hero"
+            )
          );
          this.telegraf?.command("activate_hero", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_ACTIVATE_HERO))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_ACTIVATE_HERO),
+               "/activate_hero"
+            )
          );
          this.telegraf?.command("put_hero_work", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_PUT_HERO_WORK))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_PUT_HERO_WORK),
+               "/put_hero_work"
+            )
          );
          this.telegraf?.command("create_material", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_CREATE_MATERIAL))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_CREATE_MATERIAL),
+               "/create_material"
+            )
          );
          this.telegraf?.command("list_heroes", (ctx: any) =>
-            this.checkChatId(ctx, () => this.telegramListHeroes(ctx))
+            this.checkChatId(
+               ctx,
+               () => this.telegramListHeroes(ctx),
+               "/list_heroes"
+            )
          );
          this.telegraf?.command("remove_database", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_REMOVE_DATABASE))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_REMOVE_DATABASE),
+               "/remove_database"
+            )
          );
          this.telegraf?.command("change_config", (ctx: any) =>
-            this.checkChatId(ctx, () => ctx.scene.enter(SCENE_CHANGE_CONFIG))
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_CHANGE_CONFIG),
+               "/change_config"
+            )
+         );
+         this.telegraf?.command("add_account", (ctx: any) =>
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_ADD_ACCOUNT),
+               "/add_account"
+            )
+         );
+         this.telegraf?.command("remove_account", (ctx: any) =>
+            this.checkChatId(
+               ctx,
+               () => ctx.scene.enter(SCENE_REMOVE_ACCOUNT),
+               "/remove_account"
+            )
          );
 
          const commands = [
@@ -164,6 +239,8 @@ export class Telegram {
             { command: "create_material", description: "create_material" },
             { command: "remove_database", description: "remove_database" },
             { command: "change_config", description: "change_config" },
+            { command: "add_account", description: "add_account" },
+            { command: "remove_account", description: "remove_account" },
          ];
          await this.telegraf.telegram.setMyCommands(commands, {
             language_code: "en",
@@ -198,7 +275,10 @@ export class Telegram {
          console.log(e);
       }
    }
-   checkChatId(context: Context, fn: any) {
+   checkChatId(context: Context, fn: any, command: string) {
+      const { ignoreCommands } = this.bot.params;
+      if (ignoreCommands.includes(command)) return;
+
       const now = Date.now() / 1000;
       const timedelta = now - (context.message?.date || 0);
 
@@ -220,6 +300,46 @@ export class Telegram {
          }
       }
       return fn(context);
+   }
+   async addAccount(context: Context, params: any) {
+      const getParamBoolean = (name: string, nameJson: string) => {
+         if (name in params && params[name] == true) {
+            return { [nameJson]: 1 };
+         }
+
+         return {};
+      };
+
+      let user = "";
+      if (params.login == "wallet") {
+         user = `${params.wallet}:${params.privateKey}`;
+      } else {
+         user = `${params.username}:${params.password}`;
+      }
+
+      const envs = {
+         LOGIN: `${params.login}:${user}`,
+         TELEGRAM_KEY: params.telegramKey,
+         NETWORK: params.network,
+         MIN_HERO_ENERGY_PERCENTAGE: params.percentageWork,
+         HOUSE_HEROES: params.houseHeroes,
+         ALERT_SHIELD: params.alertShield,
+         NUM_HERO_WORK: params.numHeroWork,
+         SERVER: params.server,
+         REPORT_REWARDS: params.reportRewards || 0,
+         TELEGRAM_CHAT_ID: params.telegramChatId,
+         MAX_GAS_REPAIR_SHIELD: params.maxGasRepairShield || 0,
+         ALERT_MATERIAL: params.alertMaterial || 0,
+         IGNORE_COMMANDS: (params?.ignoreCommands || []).join(":"),
+         IDENTIFY: params.identify,
+         ...getParamBoolean("resetShieldAuto", "RESET_SHIELD_AUTO"),
+         ...getParamBoolean("ignoreNumHeroWork", "IGNORE_NUM_HERO_WORK"),
+         ...getParamBoolean("telegramChatIdCheck", "TELEGRAM_CHAT_ID_CHECK"),
+      };
+      await this.bot.pm2AddAccount(envs);
+      await context.replyWithHTML(
+         `Account added, server will restart automatically`
+      );
    }
    async telegramConfig(context: Context) {
       const {
@@ -897,7 +1017,7 @@ ${resultDb
          );
       }
    }
-   async telegramTestMsg(context: Context) {
+   async telegramTestMsg(context: any) {
       await context.replyWithHTML(
          'if you receive message below "ARROMBADO", it means that your TELEGRAM_CHAT_ID is working, TELEGRAM_CHAT_ID: ' +
             this.bot.params.telegramChatId
