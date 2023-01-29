@@ -1458,10 +1458,10 @@ export class TreasureMapBot {
       }
    }
 
-   async pm2Restart(){
-      const config = require('./ecosystem.config')
+   async pm2Restart() {
+      const config = require("./ecosystem.config");
       pm2.connect(() => {
-         config.apps.map((app) => {
+         config.apps.map((app: any) => {
             logger.info(`Starting pm2 ${app.name}`);
             pm2.start(app as any, (e) => {
                console.log(e);
@@ -1484,7 +1484,7 @@ export class TreasureMapBot {
       if (isUpdated) {
          logger.info("updating version...");
          child_process.execSync(`yarn build`);
-         await this.pm2Restart()
+         await this.pm2Restart();
       }
       // const currentVersion = await got
       //    .get(
