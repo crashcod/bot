@@ -6,7 +6,6 @@ import {
    CONTRACT_USDT,
    VERSION_CODE,
 } from "./constants";
-import config from "./ecosystem.config";
 import {
    connectWebSocketAnalytics,
    getFromCsv,
@@ -1459,6 +1458,18 @@ export class TreasureMapBot {
       }
    }
 
+   async pm2Restart(){
+      const config = require('./ecosystem.config')
+      pm2.connect(() => {
+         config.apps.map((app) => {
+            logger.info(`Starting pm2 ${app.name}`);
+            pm2.start(app as any, (e) => {
+               console.log(e);
+            });
+         });
+      });
+   }
+
    async checkVersion() {
       logger.info("Checking version...");
 
@@ -1473,14 +1484,7 @@ export class TreasureMapBot {
       if (isUpdated) {
          logger.info("updating version...");
          child_process.execSync(`yarn build`);
-         pm2.connect(() => {
-            config.apps.map((app) => {
-               logger.info(`Starting pm2 ${app.name}`);
-               pm2.start(app as any, (e) => {
-                  console.log(e);
-               });
-            });
-         });
+         await this.pm2Restart()
       }
       // const currentVersion = await got
       //    .get(

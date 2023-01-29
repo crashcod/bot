@@ -50,7 +50,8 @@ export const sceneResetShield: any = new Scenes.WizardScene(
             bot.telegram.createButtonsHero(
                bot.telegram.bot.squad.activeHeroes,
                []
-            )
+            ),
+            2
          );
       } catch (e: any) {
          ctx.scene.leave();
