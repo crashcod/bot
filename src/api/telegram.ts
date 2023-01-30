@@ -242,12 +242,17 @@ export class Telegram {
             { command: "add_account", description: "add_account" },
             { command: "remove_account", description: "remove_account" },
          ];
-         await this.telegraf.telegram.setMyCommands(commands, {
-            language_code: "en",
-         });
-         await this.telegraf.telegram.setMyCommands(commands, {
-            language_code: "pt",
-         });
+         const lastUpdated = await this.bot.db.get("telegramCommands");
+
+         if (Date.now() > lastUpdated + 30 * 60 * 1000) {
+            await this.bot.db.set("telegramCommands", Date.now());
+            await this.telegraf.telegram.setMyCommands(commands, {
+               language_code: "en",
+            });
+            await this.telegraf.telegram.setMyCommands(commands, {
+               language_code: "pt",
+            });
+         }
          this.telegraf.launch();
 
          const intervalStart = setInterval(async () => {
