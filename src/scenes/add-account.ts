@@ -56,6 +56,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
 
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (!["wallet", "user"].includes(mode)) {
                ctx.replyWithHTML(`Command not found, exiting command...`);
                return ctx.scene.leave();
@@ -69,7 +73,9 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
             }
             return;
          }
-
+         await ctx.replyWithHTML(
+            "to cancel the registration action, type moment /meu_cu_arrombado"
+         );
          await sendMessageWithButtonsTelegram(
             ctx,
             "Would you like to login to bomb via wallet or username",
@@ -88,6 +94,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.username = mode;
             await nextStep(ctx);
             return;
@@ -103,6 +113,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.password = mode;
             await nextStep(ctx, 6);
             return;
@@ -118,6 +132,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.wallet = mode;
             await nextStep(ctx);
             return;
@@ -133,6 +151,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.privateKey = mode;
             await nextStep(ctx);
             return;
@@ -156,6 +178,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode === "1") {
                return nextStep(ctx);
             }
@@ -181,6 +207,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode === "1") {
                return nextStep(ctx);
             }
@@ -206,6 +236,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.houseHeroes = mode;
             return nextStep(ctx);
          }
@@ -223,6 +257,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.network = mode;
             return nextStep(ctx);
          }
@@ -245,6 +283,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.telegramKey = mode;
             return nextStep(ctx);
          }
@@ -260,6 +302,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.telegramChatId = mode;
             return nextStep(ctx);
          }
@@ -278,6 +324,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
       try {
          const mode = getValue(ctx);
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.percentageWork = parseInt(mode);
             return nextStep(ctx);
          }
@@ -308,6 +358,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.alertShield = parseInt(mode);
             return nextStep(ctx);
          }
@@ -337,6 +391,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.numHeroWork = parseInt(mode);
             return nextStep(ctx);
          }
@@ -373,6 +431,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.server = mode;
             return nextStep(ctx);
          }
@@ -393,6 +455,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.identify = mode;
             return nextStep(ctx);
          }
@@ -409,6 +475,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode === "1") {
                return nextStep(ctx);
             }
@@ -434,6 +504,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.reportRewards = mode;
             return nextStep(ctx);
          }
@@ -458,6 +532,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.resetShieldAuto = mode == "1";
             return nextStep(ctx);
          }
@@ -487,6 +565,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode == "1") {
                return nextStep(ctx);
             }
@@ -519,6 +601,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.maxGasRepairShield = parseFloat(mode);
             return nextStep(ctx);
          }
@@ -543,6 +629,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.alertMaterial = parseInt(mode);
             return nextStep(ctx);
          }
@@ -561,6 +651,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.ignoreNumHeroWork = mode == "1";
             return nextStep(ctx);
          }
@@ -584,6 +678,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             ctx.wizard.state.telegramChatIdCheck = mode == "1";
             return nextStep(ctx);
          }
@@ -607,6 +705,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode === "1") {
                return nextStep(ctx);
             }
@@ -642,6 +744,10 @@ export const sceneAddAccount: any = new Scenes.WizardScene(
          const mode = getValue(ctx);
 
          if (mode.length) {
+            if (mode == "/meu_cu_arrombado") {
+               await ctx.replyWithHTML(`Hmmm...`);
+               return ctx.scene.leave();
+            }
             if (mode == `next`) return nextStep(ctx);
             const button = ctx.wizard.state.buttons;
             let selected = ctx.wizard.state.ignoreCommands;

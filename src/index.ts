@@ -1,4 +1,3 @@
-import { Database } from "./api/database";
 import { TreasureMapBot } from "./bot";
 import { VERSION_CODE } from "./constants";
 import {
