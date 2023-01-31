@@ -35,7 +35,6 @@ import {
 } from "../scenes/list";
 import { scenePutHeroWork } from "../scenes/put-hero-work";
 import { sceneRemoveAccount } from "../scenes/remove-account";
-import { sceneRemoveDatabase } from "../scenes/remove-database";
 import { sceneResetShield } from "../scenes/reset-shield";
 
 export class Telegram {
@@ -63,7 +62,6 @@ export class Telegram {
             sceneActivateHero,
             scenePutHeroWork,
             sceneCreateMaterial,
-            sceneRemoveDatabase,
             sceneConfig,
             sceneConfigServer,
             sceneConfigPercentage,
@@ -237,7 +235,6 @@ export class Telegram {
             { command: "put_hero_work", description: "put_hero_work" },
             { command: "pool", description: "pool" },
             { command: "create_material", description: "create_material" },
-            { command: "remove_database", description: "remove_database" },
             { command: "change_config", description: "change_config" },
             { command: "add_account", description: "add_account" },
             { command: "remove_account", description: "remove_account" },

@@ -22,7 +22,7 @@ import { logger } from "./logger";
 import child_process from "child_process";
 import pm2 from "pm2";
 
-import { writeFileSync } from "fs";
+import { existsSync, unlinkSync, writeFileSync } from "fs";
 import path from "path";
 import { EGameAction } from "./api/base";
 import { Database } from "./api/database";
@@ -237,12 +237,7 @@ export class TreasureMapBot {
       this.lastAdventure = 0;
       this.alertShield = alertShield;
 
-      if ("username" in loginParams) {
-         this.db = new Database(loginParams.username || "");
-      } else {
-         this.db = new Database(loginParams.wallet || "");
-      }
-
+      this.db = new Database(this.getIdentify());
       this.notification = new Notification(this.db);
       this.telegram = new Telegram(this);
       this.telegram.init();
@@ -1159,6 +1154,13 @@ export class TreasureMapBot {
          );
          logger.info(`Creating material with heroes: ${heroIds.join(", ")}`);
 
+         heroIds.map(async (id) => {
+            const existsZero = await this.db.get(`heroZeroShield${id}`);
+            if (existsZero) {
+               await this.db.delete(`heroZeroShield${id}`);
+            }
+         });
+
          const transaction = await this.client.web3CreateRock(heroIds);
 
          this.lastTransactionWeb3 = transaction.transactionHash;
@@ -1329,6 +1331,14 @@ export class TreasureMapBot {
    private handleSquadLoad(payload: ISyncBombermanPayload[]) {
       const heroes = payload.map(parseGetActiveBomberPayload).map(buildHero);
 
+      heroes.map(async (hero) => {
+         await this.notification.checkHeroShield(
+            hero.id,
+            this.getSumShield(hero)
+         );
+         return hero;
+      });
+
       heroes
          .filter((h) => h.active)
          .map(async (hero) => {
@@ -1362,10 +1372,6 @@ export class TreasureMapBot {
                   await this.alertShielZerodHero(hero);
                }
             }
-            await this.notification.checkHeroShield(
-               hero.id,
-               this.getSumShield(hero)
-            );
          });
       this.squad.update({ heroes });
    }
@@ -1513,12 +1519,19 @@ export class TreasureMapBot {
       const config = require("./ecosystem.config");
 
       config.apps = config.apps.filter((app: any) => app.name != name);
+      await this.pm2SaveFile(config);
+
+      const file = path.join(__dirname, "..", `database-${name}.json`);
+      console.log("file", file, existsSync(file));
+      if (existsSync(file)) {
+         unlinkSync(file);
+      }
+
       pm2.connect(() => {
          pm2.delete(name as any, (e) => {
             console.log(e);
          });
       });
-      await this.pm2SaveFile(config);
    }
    async checkVersion() {
       logger.info("Checking version...");
